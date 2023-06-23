@@ -65,7 +65,7 @@ abstract class MovesdkPlatform extends PlatformInterface {
     throw UnimplementedError('stopAutomaticDetection() has not been implemented.');
   }
 
-  Future<MoveShutdownResult> shutdown({bool force: true}) {
+  Future<MoveShutdownResult> shutdown({bool force = true}) {
     throw UnimplementedError('shutdown() has not been implemented.');
   }
 
