@@ -37,14 +37,30 @@ abstract class MovesdkPlatform extends PlatformInterface {
     throw UnimplementedError('getPlatformVersion() has not been implemented.');
   }
 
+  /// Get Move SDK Version.
+  /// - returns: version string.
   Future<String> getMoveVersion() {
     throw UnimplementedError('getMoveVersion() has not been implemented.');
   }
 
+  /// Get a unique Device Identifier to distinguish the device
+  /// this changes when a device is cloned
+  /// - returns: A unique device identifier.
   Future<String> getDeviceQualifier() {
     throw UnimplementedError('getDeviceQualifier() has not been implemented.');
   }
 
+  /// Updates the user's provided Auth upon its expiry. Auth expiry triggers
+  /// the SDK Auth State change listener.
+  ///
+  /// - Precondition: SDK shared instance to be intialized.
+  ///
+  /// - warning: Only the user's token is expected to update. Changing any other
+  ///   user's Auth param will fail with MoveAuthError.authInvalid.
+  /// - parameter:
+  ///  - moveAuth: The user's updated Auth object with the new token.
+  /// - returns:
+  ///  - error on fail.
   Future<MoveAuthError?> updateAuth(MoveAuth moveAuth) {
     throw UnimplementedError('platformVersion() has not been implemented.');
   }
@@ -53,82 +69,174 @@ abstract class MovesdkPlatform extends PlatformInterface {
     throw UnimplementedError('setup has not been implemented.');
   }
 
+  /// The SDK will setup and authenticate a user.
+  /// - Parameters:
+  ///  - moveAuth: The user's auth.
+  ///  - moveConfig: The required SDK configurations.
   Future<void> setup(MoveAuth moveAuth, MoveConfig moveConfig) {
     throw UnimplementedError('setup has not been implemented.');
   }
 
+  /// Starts the required detection services stated in the Config that is passed on init.
+  /// Starting the service will set the SDK to running state.
+  /// - Precondition: SDK State to be .ready
   Future<void> startAutomaticDetection() {
-    throw UnimplementedError('startAutomaticDetection() has not been implemented.');
+    throw UnimplementedError(
+        'startAutomaticDetection() has not been implemented.');
   }
 
+  /// Stops the automatic detection service.
+  /// Stoping the service will set the SDK State back to ready.
+  /// - Precondition: SDK State to be .running
   Future<void> stopAutomaticDetection() {
-    throw UnimplementedError('stopAutomaticDetection() has not been implemented.');
+    throw UnimplementedError(
+        'stopAutomaticDetection() has not been implemented.');
   }
 
+  /// Shutdown SDK shared instance.
+  ///
+  /// Stops SDK services, sends the queued user data, and de-intialized the SDK.
+  /// After that is executed, the SDK State.uninitialized is triggered.
+  ///
+  /// - parameters:
+  ///  - force: delete data if necessary, default: true
+  ///  - returns: when shutdown completed. this will return on it's own thread. not main.
   Future<MoveShutdownResult> shutdown({bool force = true}) {
     throw UnimplementedError('shutdown() has not been implemented.');
   }
 
+  /// Deletes all the collected user SDK data stored on the device.
+  ///
+  /// This doesn't affect the SDK State.
   Future<void> deleteLocalData() {
     throw UnimplementedError('shutdown() has not been implemented.');
   }
 
+  /// Temporarily calibrates the SDK to highest detection mode.
+  ///
+  /// In order to optimise battery consumption, the SDK goes through different
+  /// detection modes with different battery consumptions levels, depending on
+  /// the user's current behaviour and activity. In general the SDK is
+  /// responsible for alternating between those different detection modes.
+  ///
+  /// The SDK also provides hosting apps this API to call if they has their own
+  /// reasons (like sensors or beacons) to believe that the user is starting a
+  /// trip. This will make sure the SDK is on the highest detecting state to
+  /// detect the trip faster.
+  ///
+  /// - Precondition: SDK State to be .running
   Future<void> forceTripRecognition() {
-    throw UnimplementedError('forceTripRecognition() has not been implemented.');
+    throw UnimplementedError(
+        'forceTripRecognition() has not been implemented.');
   }
 
+  /// Ignores the current ongoing trip.
+  ///
+  /// This API will set the ongoing TripState to .ignored.
+  /// Ignored trips data are purged and not sent to the server.
+  ///
+  /// - Precondition: SDK should be in an active trip.
   Future<void> ignoreCurrentTrip() {
     throw UnimplementedError('ignoreCurrentTrip() has not been implemented.');
   }
 
+  /// Ends the current ongoing trip.
+  ///
+  /// This API will end the ongoing trip and set TripState back to .idle.
+  /// The SDK is responsible for detecting trip start and end points. The SDK
+  /// also provides hosting apps this API to call if they have their own reasons
+  /// (like sensors or beacons) to believe that the user's trip has ended.
+  ///
+  /// - Precondition: SDK should be in an active trip.
   Future<void> finishCurrentTrip() {
     throw UnimplementedError('finishCurrentTrip() has not been implemented.');
   }
 
+  /// Android only
   Future<void> allowMockLocations(bool allow) async {
     throw UnimplementedError('allowMockLocations() has not been implemented.');
   }
 
+  ///  Force sending all pending user data to server.
+  ///
+  ///  - Precondition: Shouldn't be called more than once per 120 seconds.
+  ///    SDK should not be uninitialized
+  ///  - Parameters:
+  ///  - returns: result indicating wether there are further trips are in queue
+  ///    waiting to be uploaded. true means queue is empty.
   Future<bool> synchronizeUserData() {
     throw UnimplementedError('synchronizeUserData() has not been implemented.');
   }
 
+  /// Force fetching config from server.
   Future<void> fetchUserConfig() {
     throw UnimplementedError('fetchUserConfig() has not been implemented.');
   }
 
+  /// The SDK will attempt to change the client config.
+  ///
+  /// - Parameters:
+  ///  - config: The required SDK configurations.
   Future<void> updateConfig(MoveConfig config) {
-    throw UnimplementedError('updateConfiguration(config) has not been implemented.');
+    throw UnimplementedError(
+        'updateConfiguration(config) has not been implemented.');
   }
 
+  /// Inititate an Assistance Call to emergency services
+  ///
+  /// - returns:
+  ///  - status wether the call succeeded
   Future<MoveAssistanceCallStatus> initiateAssistanceCall() {
-    throw UnimplementedError('initiateAssistanceCall() has not been implemented.');
+    throw UnimplementedError(
+        'initiateAssistanceCall() has not been implemented.');
   }
 
+  /// Set MetaData to be sent with AssistanceCall or Impact Detection.
   Future<void> setAssistanceMetaData(String? assistanceMetadataValue) {
-    throw UnimplementedError('setAssistanceMetaData() has not been implemented.');
+    throw UnimplementedError(
+        'setAssistanceMetaData() has not been implemented.');
   }
 
+  /// Geocode address lookup
+  ///
+  /// - parameters:
+  ///  - latitude: geo cooordinate latitude.
+  ///  - longitude: geo cooordinate longitude.
+  /// -	returns: result returning a Result with String or Error.
   Future<MoveGeocodeResult> geocode(double latitude, double longitude) {
     throw UnimplementedError('geocode() has not been implemented.');
   }
 
+  /// Gets the current SDK state
+  ///
+  /// - returns: The current SDK state
   Future<MoveState> getState() {
     throw UnimplementedError('getState() has not been implemented.');
   }
 
+  /// Gets the current Trip state.
+  ///
+  /// - returns: The current SDK TripState
   Future<MoveTripState> getTripState() {
     throw UnimplementedError('getTripState() has not been implemented.');
   }
 
+  /// Gets the current authorization state
+  ///
+  /// - returns: The current authorization state
   Future<MoveAuthState> getAuthState() {
     throw UnimplementedError('getTripState() has not been implemented.');
   }
 
+  /// Gets the current SDK warniings
+  ///
+  /// - returns: current service state. Empty if all good.
   Future<List<MoveServiceWarning>> getWarnings() {
     throw UnimplementedError('getWarnings() has not been implemented.');
   }
 
+  /// Gets the current SDK failures
+  /// - returns: current service state. Empty if all good.
   Future<List<MoveServiceError>> getErrors() {
     throw UnimplementedError('getErrors() has not been implemented.');
   }
@@ -143,32 +251,73 @@ abstract class MovesdkPlatform extends PlatformInterface {
     throw UnimplementedError('keepActive() has not been implemented.');
   }
 
-  /// Android only
+  /// Resolve standing SDK state error.
+  /// Host app should call this API after resolving the raised errors.
+  /// SDK will reevaluate the error state and update the SDK state accordingly.
   Future<void> resolveError() {
     throw UnimplementedError('resolveError() has not been implemented.');
   }
 
+  /// Set a block to be invoked every time SDK authorization state changes.
+  /// - important: Hosting app must handle cases:
+  ///   expired: By refetch a new token as SDK cannot update the given anymore.
+  /// - returns:
+  ///  - stream: latest MoveAuthState. Invoked every time auth state changes.
   Stream<MoveAuthState> setAuthStateListener() async* {
-    throw UnimplementedError('setAuthStateListener() has not been implemented.');
+    throw UnimplementedError(
+        'setAuthStateListener() has not been implemented.');
   }
 
+  /// Set callback to be invoked every time a new SDK log event occurs.
+  ///
+  /// - returns:
+  ///  - log string. Invoked every time log event occurs.
   Stream<String> setLogListener() async* {
     throw UnimplementedError('setLogListener() has not been implemented.');
   }
 
+  /// Set a block to be invoked every time SDK state changes.
+  ///
+  /// - important: Set this State listener before `initializing` the SDK to
+  ///   anticipate the SDK State changes triggered by `initializing` API.
+  ///
+  /// - returns:
+  ///  - stream: latest SDK State. Invoked every time SDK state changes.
   Stream<MoveState> setSdkStateListener() async* {
     throw UnimplementedError('setSdkStateListener() has not been implemented.');
   }
 
+  /// Set a block to be invoked every time SDK TripState changes.
+  ///
+  /// - returns:
+  ///  - stream: latest SDK TripState. Invoked every time SDK TripState changes.
   Stream<MoveTripState> setTripStateListener() async* {
-    throw UnimplementedError('setTripStateListener() has not been implemented.');
+    throw UnimplementedError(
+        'setTripStateListener() has not been implemented.');
   }
 
+  /// Sets a block to get called when optional permissions for
+  /// the activated services are missing.
+  /// - returns:
+  ///  - stream: List<MoveServiceWarning>. Invoked in case of configuration
+  ///    or permission errors.
   Stream<List<MoveServiceWarning>> setServiceWarningListener() async* {
-    throw UnimplementedError('setServiceWarningListener() has not been implemented.');
+    throw UnimplementedError(
+        'setServiceWarningListener() has not been implemented.');
   }
 
+  /// Set a block to be invoked every time SDK warning status changes.
+  /// When the config passed in `setup(auth:config:)` tries to initialize
+  /// services that are not available in the server config those services will
+  /// stop and are reported in the to the provided listener.
+  /// This is not supposed to happen in a correct setup.
+  /// Additionally missing user permissions are also reported.
+
+  /// - returns:
+  ///  - stream: List<MoveServiceError>. Invoked in case of configuration
+  ///    or permission errors.
   Stream<List<MoveServiceError>> setServiceErrorListener() async* {
-    throw UnimplementedError('setServiceErrorListener() has not been implemented.');
+    throw UnimplementedError(
+        'setServiceErrorListener() has not been implemented.');
   }
 }
