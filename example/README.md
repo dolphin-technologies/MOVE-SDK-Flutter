@@ -1,6 +1,8 @@
 # Dolphin MOVE SDK Flutter Example
 Reference: MOVE SDK [documentation](https://docs.movesdk.com/).
 
+https://github.com/dolphin-technologies/MOVE-SDK-Flutter/tree/master/example
+
 An example for the Dolphin Move SDK Flutter plugin.
 
 ## App cycle goes as follows:
@@ -48,4 +50,4 @@ Contact info@dolph.in
 ## License
 
 The contents of this repository are licensed under the
-[Apache License, version 2.0](http://www.apache.org/licenses/LICENSE-2.0).
+[Apache License, version 2.0](https://www.apache.org/licenses/LICENSE-2.0).
