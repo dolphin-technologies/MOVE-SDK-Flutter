@@ -33,7 +33,8 @@ class MethodChannelMoveSdk extends MovesdkPlatform {
 
   @override
   Future<String> getPlatformVersion() async {
-    final version = await methodChannel.invokeMethod<String>('getPlatformVersion');
+    final version =
+        await methodChannel.invokeMethod<String>('getPlatformVersion');
     return version ?? "";
   }
 
@@ -50,7 +51,8 @@ class MethodChannelMoveSdk extends MovesdkPlatform {
 
   @override
   Future<bool> synchronizeUserData() async {
-    final result = await methodChannel.invokeMethod<bool>('synchronizeUserData');
+    final result =
+        await methodChannel.invokeMethod<bool>('synchronizeUserData');
     return result ?? false;
   }
 
@@ -90,25 +92,30 @@ class MethodChannelMoveSdk extends MovesdkPlatform {
     await methodChannel.invokeMethod(
       'updateConfig',
       <String, List<String>>{
-        'moveDetectionServices': config.moveDetectionServices.map((e) => e.name).toList(),
+        'moveDetectionServices':
+            config.moveDetectionServices.map((e) => e.name).toList(),
       },
     );
   }
 
   @override
   Stream<MoveState> setSdkStateListener() async* {
-    yield* sdkStateChannel.receiveBroadcastStream().asyncMap<MoveState>((sdkState) {
-      MoveState? result = MoveState.values
-          .firstWhereOrNull((element) => element.name.toLowerCase() == sdkState.toLowerCase());
+    yield* sdkStateChannel
+        .receiveBroadcastStream()
+        .asyncMap<MoveState>((sdkState) {
+      MoveState? result = MoveState.values.firstWhereOrNull(
+          (element) => element.name.toLowerCase() == sdkState.toLowerCase());
       return result ?? MoveState.unknown;
     });
   }
 
   @override
   Stream<MoveAuthState> setAuthStateListener() async* {
-    yield* authStateChannel.receiveBroadcastStream().asyncMap<MoveAuthState>((authState) {
-      MoveAuthState? result = MoveAuthState.values
-          .firstWhereOrNull((element) => element.name.toLowerCase() == authState.toLowerCase());
+    yield* authStateChannel
+        .receiveBroadcastStream()
+        .asyncMap<MoveAuthState>((authState) {
+      MoveAuthState? result = MoveAuthState.values.firstWhereOrNull(
+          (element) => element.name.toLowerCase() == authState.toLowerCase());
       return result ?? MoveAuthState.unknown;
     });
   }
@@ -122,9 +129,11 @@ class MethodChannelMoveSdk extends MovesdkPlatform {
 
   @override
   Stream<MoveTripState> setTripStateListener() async* {
-    yield* tripStateChannel.receiveBroadcastStream().asyncMap<MoveTripState>((tripState) {
-      MoveTripState? result = MoveTripState.values
-          .firstWhereOrNull((element) => element.name.toLowerCase() == tripState.toLowerCase());
+    yield* tripStateChannel
+        .receiveBroadcastStream()
+        .asyncMap<MoveTripState>((tripState) {
+      MoveTripState? result = MoveTripState.values.firstWhereOrNull(
+          (element) => element.name.toLowerCase() == tripState.toLowerCase());
       return result ?? MoveTripState.unknown;
     });
   }
@@ -158,7 +167,9 @@ class MethodChannelMoveSdk extends MovesdkPlatform {
         'accessToken': moveAuth.accessToken,
         'userId': moveAuth.userId,
         'refreshToken': moveAuth.refreshToken,
-        'config': moveConfig.moveDetectionServices.map((e) => e.toString().split('.').last).toList()
+        'config': moveConfig.moveDetectionServices
+            .map((e) => e.toString().split('.').last)
+            .toList()
       },
     );
   }
@@ -273,8 +284,8 @@ class MethodChannelMoveSdk extends MovesdkPlatform {
   @override
   Future<MoveGeocodeResult> geocode(double latitude, double longitude) async {
     try {
-      final result = await methodChannel.invokeMethod<String>(
-          'geocode', <String, double>{'latitude': latitude, 'longitude': longitude});
+      final result = await methodChannel.invokeMethod<String>('geocode',
+          <String, double>{'latitude': latitude, 'longitude': longitude});
       return MoveGeocodeResult(result, null);
     } on PlatformException catch (e) {
       switch (e.code) {
@@ -291,37 +302,39 @@ class MethodChannelMoveSdk extends MovesdkPlatform {
   @override
   Future<MoveState> getState() async {
     final sdkState = await methodChannel.invokeMethod<String>('getSdkState');
-    MoveState? result = MoveState.values
-        .firstWhereOrNull((element) => element.name.toLowerCase() == sdkState?.toLowerCase());
+    MoveState? result = MoveState.values.firstWhereOrNull(
+        (element) => element.name.toLowerCase() == sdkState?.toLowerCase());
     return result ?? MoveState.unknown;
   }
 
   @override
   Future<MoveTripState> getTripState() async {
     final tripState = await methodChannel.invokeMethod<String>('getTripState');
-    MoveTripState? result = MoveTripState.values
-        .firstWhereOrNull((element) => element.name.toLowerCase() == tripState?.toLowerCase());
+    MoveTripState? result = MoveTripState.values.firstWhereOrNull(
+        (element) => element.name.toLowerCase() == tripState?.toLowerCase());
     return result ?? MoveTripState.unknown;
   }
 
   @override
   Future<MoveAuthState> getAuthState() async {
     final authState = await methodChannel.invokeMethod<String>('getAuthState');
-    MoveAuthState? result = MoveAuthState.values
-        .firstWhereOrNull((element) => element.name.toLowerCase() == authState?.toLowerCase());
+    MoveAuthState? result = MoveAuthState.values.firstWhereOrNull(
+        (element) => element.name.toLowerCase() == authState?.toLowerCase());
     return result ?? MoveAuthState.unknown;
   }
 
   @override
   Future<List<MoveServiceWarning>> getWarnings() async {
-    final warnings = await methodChannel.invokeMethod<List<dynamic>>('getWarnings') ?? [];
+    final warnings =
+        await methodChannel.invokeMethod<List<dynamic>>('getWarnings') ?? [];
     var result = MoveServiceWarning.fromNative(warnings);
     return result;
   }
 
   @override
   Future<List<MoveServiceError>> getErrors() async {
-    List<dynamic> errors = await methodChannel.invokeMethod<List<dynamic>>('getErrors') ?? [];
+    List<dynamic> errors =
+        await methodChannel.invokeMethod<List<dynamic>>('getErrors') ?? [];
     var result = MoveServiceError.fromNative(errors);
     return result;
   }
@@ -333,7 +346,8 @@ class MethodChannelMoveSdk extends MovesdkPlatform {
 
   @override
   Future<String> getDeviceQualifier() async {
-    final result = await methodChannel.invokeMethod<String>('getDeviceQualifier');
+    final result =
+        await methodChannel.invokeMethod<String>('getDeviceQualifier');
     return result ?? "";
   }
 

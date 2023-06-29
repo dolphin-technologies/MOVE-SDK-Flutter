@@ -104,7 +104,6 @@ abstract class MovesdkPlatform extends PlatformInterface {
   }
 
   /// Deletes all the collected user SDK data stored on the device.
-  ///
   /// This doesn't affect the SDK state.
   Future<void> deleteLocalData() {
     throw UnimplementedError('shutdown() has not been implemented.');
@@ -194,7 +193,8 @@ abstract class MovesdkPlatform extends PlatformInterface {
   }
 
   /// Geocode address lookup at coordinates: ([latitude], [longitude])
-  /// Returns a result with a String at `MoveGeocodeResult.result` or an error with `MoveGeocodeResult.error`.
+  /// Returns a result with a String at `MoveGeocodeResult.result` or
+  /// an error with `MoveGeocodeResult.error`.
   Future<MoveGeocodeResult> geocode(double latitude, double longitude) {
     throw UnimplementedError('geocode() has not been implemented.');
   }
@@ -254,14 +254,12 @@ abstract class MovesdkPlatform extends PlatformInterface {
   }
 
   /// Set callback to be invoked every time a new SDK log event occurs.
-  ///
   /// Returns log string. Invoked every time log event occurs.
   Stream<String> setLogListener() async* {
     throw UnimplementedError('setLogListener() has not been implemented.');
   }
 
   /// Set a block to be invoked every time SDK state changes.
-  ///
   /// Important:
   /// - Set this State listener before `initializing` the SDK to
   ///   anticipate the SDK State changes triggered by `initializing` API.
@@ -272,7 +270,6 @@ abstract class MovesdkPlatform extends PlatformInterface {
   }
 
   /// Set a block to be invoked every time SDK trip state changes.
-  ///
   /// Returns stream: latest SDK trip state. Invoked every time SDK trip state changes.
   Stream<MoveTripState> setTripStateListener() async* {
     throw UnimplementedError(

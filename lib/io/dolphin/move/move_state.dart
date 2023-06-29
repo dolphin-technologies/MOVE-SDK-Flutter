@@ -1,4 +1,5 @@
-// Move SDK state, persisted.
+// Move SDK state, persisted. Updated by SDK state listener:
+// `Stream<MoveState> setSdkStateListener()`.
 enum MoveState {
   /// SDK was setup. User was authenticated.
   ready,
