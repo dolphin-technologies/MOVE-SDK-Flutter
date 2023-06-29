@@ -1,8 +1,14 @@
 import 'package:movesdk/io/dolphin/move/move_detection_service.dart';
 import 'package:collection/collection.dart';
 
+/// Warnings returned by service warnings listener:
+/// `Stream<List<MoveServiceWarning>> setServiceWarningListener()`.
+/// A warning indicates a `MoveDetectionService` is missing permissions for complete data collection.
 class MoveServiceWarning {
+  /// `MoveDetectionService`.
   final MoveDetectionService? service;
+
+  /// Reason indicates a missing permission.
   final List<MoveWarning> reasons;
 
   const MoveServiceWarning({
@@ -17,11 +23,12 @@ class MoveServiceWarning {
       List reasons = warning["reasons"];
 
       MoveDetectionService? targetService = MoveDetectionService.values
-          .firstWhereOrNull((element) => element.name.toLowerCase() == service.toLowerCase());
+          .firstWhereOrNull(
+              (element) => element.name.toLowerCase() == service.toLowerCase());
 
       List<MoveWarning> targetReasons = reasons
-          .map((e) => MoveWarning.values
-              .firstWhere((element) => element.name.toLowerCase() == e.toLowerCase()))
+          .map((e) => MoveWarning.values.firstWhere(
+              (element) => element.name.toLowerCase() == e.toLowerCase()))
           .toList();
 
       moveWarnings.add(MoveServiceWarning(
@@ -33,8 +40,15 @@ class MoveServiceWarning {
   }
 }
 
+/// Warnings returned by service warnings listener:
+/// `Stream<List<MoveServiceError>> setServiceErrorListener()`.
+/// A warning indicates a `MoveDetectionService` is missing permissions to work,
+/// or is not available for this product.
 class MoveServiceError {
+  /// `MoveDetectionService`.
   final MoveDetectionService service;
+
+  /// Reason indicates a missing permission or `unauthorized`.
   final List<MoveError> reasons;
 
   const MoveServiceError({
@@ -49,7 +63,8 @@ class MoveServiceError {
       List reasons = warning["reasons"];
 
       MoveDetectionService? targetService = MoveDetectionService.values
-          .firstWhereOrNull((element) => element.name.toLowerCase() == service.toLowerCase());
+          .firstWhereOrNull(
+              (element) => element.name.toLowerCase() == service.toLowerCase());
 
       if (targetService != null) {
         List<MoveError> targetReasons = reasons
@@ -78,6 +93,7 @@ extension NotNullIterable<E> on Iterable<E?> {
   Iterable<E> whereNotNullable() => whereType<E>();
 }
 
+/// Service warning may impact the quality of a configured service.
 enum MoveWarning {
   activityPermissionMissing,
   backgroundLocationPermissionMissing,
@@ -96,6 +112,7 @@ enum MoveWarning {
   rooted,
 }
 
+/// Error indicating failure of a service.
 enum MoveError {
   accelerometerMissing,
   activityPermissionMissing,
