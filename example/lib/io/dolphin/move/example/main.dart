@@ -484,6 +484,8 @@ class _MovePermissionWidget extends State<MovePermissionWidget> {
           permissionStatusText = "permanentlyDenied";
           statusColor = Colors.red;
           break;
+        default:
+          break;
       }
     });
   }

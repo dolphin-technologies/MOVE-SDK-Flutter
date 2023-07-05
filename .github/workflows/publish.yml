@@ -1,29 +1,30 @@
-# .github/workflows/publish.yml
 name: Publish to pub.dev
 
 on:
   push:
     tags:
-      - 'v[0-9]+.[0-9]+.[0-9]+*' # tag-pattern on pub.dev: 'v'
-# Publish using the reusable workflow from dart-lang.
+      - 'v[0-9]+.[0-9]+.[0-9]+*'
+
 jobs:
   publish:
+    name: 'Publish to pub.dev'
     permissions:
-      id-token: write # Required for authentication using OIDC
+      id-token: write # This is required for requesting the JWT
     runs-on: ubuntu-latest
     steps:
+      # Checkout repository
       - uses: actions/checkout@v3
-      - name: Setup Flutter SDK
-        uses: flutter-actions/setup-flutter@v2
+      # Setup Dart SDK with JWT token
+      - uses: dart-lang/setup-dart@main
+      - uses: flutter-actions/setup-flutter@main
         with:
           channel: stable
-          version: 3.0.2
-      - uses: dart-lang/setup-dart@v1
+          version: 3.10.5
+      # Minimal package setup and dry run checks.
       - name: Install dependencies
-        run: flutter pub get
-      - name: Analyze project source
-        run: dart analyze
-      # Here you can insert custom steps you need
-      # - run: dart tool/generate-code.dart
-      - name: Publish
-        run: dart pub publish --force
+        run: dart pub get
+      - name: Publish - dry run
+        run: dart pub publish --dry-run
+      # Publishing...
+      - name: Publish to pub.dev
+        run: dart pub publish -f

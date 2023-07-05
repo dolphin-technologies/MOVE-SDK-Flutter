@@ -1,3 +1,6 @@
+## 2.3.1+3
+- minor ci changes
+
 ## 2.3.1+2
 - Fixed MOVE config
 
