@@ -88,17 +88,6 @@ class MethodChannelMoveSdk extends MovesdkPlatform {
   }
 
   @override
-  Future<void> updateConfig(MoveConfig config) async {
-    await methodChannel.invokeMethod(
-      'updateConfig',
-      <String, List<String>>{
-        'moveDetectionServices':
-            config.moveDetectionServices.map((e) => e.name).toList(),
-      },
-    );
-  }
-
-  @override
   Stream<MoveState> setSdkStateListener() async* {
     yield* sdkStateChannel
         .receiveBroadcastStream()
@@ -167,9 +156,17 @@ class MethodChannelMoveSdk extends MovesdkPlatform {
         'accessToken': moveAuth.accessToken,
         'userId': moveAuth.userId,
         'refreshToken': moveAuth.refreshToken,
-        'config': moveConfig.moveDetectionServices
-            .map((e) => e.toString().split('.').last)
-            .toList()
+        'config': moveConfig.buildConfigParameter(),
+      },
+    );
+  }
+
+  @override
+  Future<void> updateConfig(MoveConfig config) async {
+    await methodChannel.invokeMethod(
+      'updateConfig',
+      <String, dynamic>{
+        'config': config.buildConfigParameter(),
       },
     );
   }
