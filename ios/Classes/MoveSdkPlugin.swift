@@ -356,9 +356,9 @@ public class MoveSdkPlugin: NSObject {
 
 	private func updateConfig(_ call: FlutterMethodCall, _ result: @escaping FlutterResult) {
 		guard
-			let config: [String] = call[.moveDetectionServices]
+			let config: [String] = call[.config]
 		else {
-			result(MoveSdkError.invalidArguments([.moveDetectionServices]))
+			result(MoveSdkError.invalidArguments([.config]))
 			return
 		}
 

@@ -14,7 +14,12 @@ import 'movesdk_platform_interface.dart';
 /// A list of services passed in `setup(auth, config)` or `updateConfig(config)`.
 class MoveConfig {
   List<MoveDetectionService> moveDetectionServices;
+
   MoveConfig(this.moveDetectionServices);
+
+  Iterable<String> buildConfigParameter() {
+    return moveDetectionServices.map((e) => e.toString().split('.').last).toList();
+  }
 }
 
 /// MOVE SDK API.
@@ -159,8 +164,7 @@ class MoveSdk {
 
   /// Set metadata to be sent with assistance call or impact detection.
   Future<void> setAssistanceMetaData(String? assistanceMetadataValue) {
-    return MovesdkPlatform.instance
-        .setAssistanceMetaData(assistanceMetadataValue);
+    return MovesdkPlatform.instance.setAssistanceMetaData(assistanceMetadataValue);
   }
 
   /// Geocode address lookup at coordinates: ([latitude], [longitude])

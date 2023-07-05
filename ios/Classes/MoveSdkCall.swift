@@ -30,7 +30,6 @@ internal enum MoveSdkArgument: String {
 
 	// config
 	case config
-	case moveDetectionServices
 
 	// auth
 	case accessToken
