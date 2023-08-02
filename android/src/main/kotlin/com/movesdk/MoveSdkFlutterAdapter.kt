@@ -4,6 +4,7 @@ import android.content.Context
 import android.os.Handler
 import android.os.Looper
 import com.google.gson.Gson
+import io.dolphin.move.DeviceDiscovery
 import io.dolphin.move.DrivingService
 import io.dolphin.move.GeocodeResult
 import io.dolphin.move.MoveAssistanceCallStatus
@@ -11,7 +12,9 @@ import io.dolphin.move.MoveAuth
 import io.dolphin.move.MoveAuthError
 import io.dolphin.move.MoveConfig
 import io.dolphin.move.MoveDetectionService
+import io.dolphin.move.MoveDevice
 import io.dolphin.move.MoveGeocodeError
+import io.dolphin.move.MoveOptions
 import io.dolphin.move.MoveSdk
 import io.dolphin.move.MoveServiceFailure
 import io.dolphin.move.MoveServiceWarning
@@ -19,6 +22,10 @@ import io.dolphin.move.MoveShutdownResult
 import io.dolphin.move.WalkingService
 import io.flutter.plugin.common.MethodCall
 import io.flutter.plugin.common.MethodChannel
+import kotlinx.coroutines.CoroutineScope
+import kotlinx.coroutines.Dispatchers
+import kotlinx.coroutines.launch
+import kotlinx.coroutines.withContext
 
 private val gson = Gson()
 
@@ -30,13 +37,16 @@ internal class MoveSdkFlutterAdapter(
 
     private val uiThreadHandler: Handler = Handler(Looper.getMainLooper())
 
-    override fun getServiceWarnings() {
+    private val mainScope = CoroutineScope(Dispatchers.Main)
+    private val ioContext = Dispatchers.IO
+
+    override fun getWarnings() {
         val serviceWarnings: List<MoveServiceWarning>? = MoveSdk.get()?.getServiceWarnings()
         val errors: List<Map<String, Any>> = serviceWarnings?.toWarningObject() ?: emptyList()
         result.success(errors)
     }
 
-    override fun getServiceErrors() {
+    override fun getErrors() {
         val serviceErrors: List<MoveServiceFailure>? = MoveSdk.get()?.getServiceErrors()
         val errors: List<Map<String, Any>> = serviceErrors?.toErrorObject() ?: emptyList()
         result.success(errors)
@@ -59,7 +69,8 @@ internal class MoveSdkFlutterAdapter(
     override fun setup() {
         val moveAuth = extractMoveAuth(call)
         val moveConfig = extractMoveConfig(call)
-        MoveSdk.setup(auth = moveAuth, moveConfig)
+        val moveOptions = extractMoveOptions(call)
+        MoveSdk.setup(auth = moveAuth, moveConfig, options = moveOptions)
         result.success("setup")
     }
 
@@ -177,7 +188,6 @@ internal class MoveSdkFlutterAdapter(
                     MoveShutdownResult.NETWORK_ERROR -> result.error("networkError", null, null)
                 }
             }
-            result.success(shutdownResult.name)
         }
     }
 
@@ -295,6 +305,40 @@ internal class MoveSdkFlutterAdapter(
         result.success("init")
     }
 
+    override fun registerDevices() {
+        val devices = call.argument<Map<String, String>>("devices")?.map {
+            try {
+                gson.fromJson(it.value, MoveDevice::class.java)
+            } catch (e: Exception) {
+                null
+            }
+        }?.filterNotNull().orEmpty()
+        MoveSdk.get()?.registerDevices(devices)
+        result.success(null)
+    }
+
+    override fun unregisterDevices() {
+        val devices = call.argument<Map<String, String>>("devices")?.map {
+            try {
+                gson.fromJson(it.value, MoveDevice::class.java)
+            } catch (e: Exception) {
+                null
+            }
+        }?.filterNotNull().orEmpty()
+        MoveSdk.get()?.unregisterDevices(devices)
+        result.success(null)
+    }
+
+    override fun getRegisteredDevices() {
+        mainScope.launch {
+            val devices = mutableListOf<MoveDevice>()
+            withContext(ioContext) {
+                MoveSdk.get()?.getRegisteredDevices()?.let(devices::addAll)
+            }
+            result.success(devices.toMoveDeviceObjectList())
+        }
+    }
+
     private fun extractMoveConfig(call: MethodCall): MoveConfig {
         val services =
             call.argument<List<Any>>("config")?.map { it.toString() } ?: emptyList()
@@ -308,6 +352,8 @@ internal class MoveSdkFlutterAdapter(
                 drivingServicesToUse.add(DrivingService.DistractionFreeDriving)
             } else if (service.equals(DrivingService.DrivingBehaviour.name, true)) {
                 drivingServicesToUse.add(DrivingService.DrivingBehaviour)
+            } else if (service.equals(DrivingService.DeviceDiscovery.name, true)) {
+                drivingServicesToUse.add(DrivingService.DeviceDiscovery)
             } else if (service.equals("walkingLocation", true)) {
                 walkingServicesToUse.add(WalkingService.Location)
             }
@@ -350,5 +396,18 @@ internal class MoveSdkFlutterAdapter(
             accessToken = accessToken,
             refreshToken = refreshToken
         )
+    }
+
+    private fun extractMoveOptions(call: MethodCall): MoveOptions? {
+        val options = call.argument<Map<String, Any>>("options") ?: return null
+        val motionPermissionMandatory = options["motionPermissionMandatory"] as? Boolean
+        val deviceDiscoveryOptions = (options["deviceDiscovery"] as? Map<String, Any>)?.let {
+            val startDelay = (it["startDelay"] as? Int)?.toLong()
+            val duration = (it["duration"] as? Int)?.toLong()
+            val interval = (it["interval"] as? Int)?.toLong()
+            val stopScanOnFirstDiscovered = it["stopScanOnFirstDiscovered"] as? Boolean
+            DeviceDiscovery(startDelay, duration, interval, stopScanOnFirstDiscovered == true)
+        }
+        return MoveOptions(motionPermissionRequired = motionPermissionMandatory == true, deviceDiscovery = deviceDiscoveryOptions)
     }
 }

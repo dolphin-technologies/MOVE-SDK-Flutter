@@ -11,6 +11,7 @@ public class MoveSdkPlugin: NSObject {
 		case driving
 		case distractionFreeDriving
 		case drivingBehaviour
+		case deviceDiscovery
 		case places
 		case pointsOfInterest
 		case publicTransport
@@ -61,8 +62,9 @@ public class MoveSdkPlugin: NSObject {
 	var sdkStateHandler: MoveSDKStreamHandler?
 	var tripStateHandler: MoveSDKStreamHandler?
 	var warningHandler: MoveSDKStreamHandler?
+	var deviceDiscoveryHandler: MoveSDKStreamHandler?
 
-//	var sdkMetaDataSink: FlutterEventSink?
+	var deviceSannerHandler: MoveSDKDeviceScanner?
 
 	let sdk: MoveSDK = MoveSDK.shared
 
@@ -98,8 +100,12 @@ public class MoveSdkPlugin: NSObject {
 					drivingServices.append(.drivingBehavior)
 				}
 
+				if moveConfig.contains(.deviceDiscovery) {
+					drivingServices.append(.deviceDiscovery)
+				}
+
 				detectionServices.append(.driving(drivingServices))
-			case .distractionFreeDriving, .drivingBehaviour:
+			case .distractionFreeDriving, .drivingBehaviour, .deviceDiscovery:
 				break
 			case .places:
 				detectionServices.append(.places)
@@ -121,6 +127,40 @@ public class MoveSdkPlugin: NSObject {
 		}
 
 		return MoveConfig(detectionService: detectionServices)
+	}
+
+	static internal func convert(scanResults: [MoveScanResult]) -> [[String: Any]] {
+		var deviceList: [[String: Any]] = []
+		for result in scanResults {
+			let encoder = JSONEncoder()
+			do {
+				let data = try encoder.encode(result.device)
+				let str = String(data: data, encoding: .utf8) ?? ""
+				let info: [String: Any] = ["name": result.device.name, "device": str, "isDiscovered": result.isDiscovered]
+				deviceList.append(info)
+			} catch {
+				print(error.localizedDescription)
+			}
+		}
+
+		return deviceList
+	}
+
+	static internal func convert(devices: [MoveDevice]) -> [[String: Any]] {
+		var deviceList: [[String: Any]] = []
+		for device in devices {
+			let encoder = JSONEncoder()
+			do {
+				let data = try encoder.encode(device)
+				let str = String(data: data, encoding: .utf8) ?? ""
+				let info: [String: Any] = ["name":device.name, "data": str]
+				deviceList.append(info)
+			} catch {
+				print(error.localizedDescription)
+			}
+		}
+
+		return deviceList
 	}
 
 	fileprivate func convert(errors: [MoveServiceFailure]) -> [[String: Any]] {
@@ -164,6 +204,31 @@ public class MoveSdkPlugin: NSObject {
 		}
 
 		return warningList
+	}
+
+	private func getDevices(_ call: FlutterMethodCall) -> ([MoveDevice], [MoveSdkArgument])  {
+		guard
+			let deviceMap: [String: String] = call[.devices]
+		else {
+			return ([], [.devices])
+		}
+
+		do {
+			let devices: [MoveDevice] = try deviceMap.map { (name, encoded) in
+				let decoder = JSONDecoder()
+				guard let data = encoded.data(using: .utf8) else {
+					throw MoveSdkError()
+				}
+				let device = try decoder.decode(MoveDevice.self, from: data)
+				/* overwrite device name */
+				device.name = name
+				return device
+			}
+			return (devices, [])
+		} catch {
+			return ([], [.devices])
+		}
+
 	}
 
 	// MARK: Implementation
@@ -230,6 +295,11 @@ public class MoveSdkPlugin: NSObject {
 		result(convert(warnings: warnings))
 	}
 
+	private func getRegisteredDevices(_ call: FlutterMethodCall, _ result: @escaping FlutterResult) {
+		let devices = sdk.getRegisteredDevices()
+		result(MoveSdkPlugin.convert(devices: devices))
+	}
+
 	private func getState(_ call: FlutterMethodCall, _ result: @escaping FlutterResult) {
 		let state = sdk.getSDKState()
 		result("\(state)")
@@ -260,6 +330,17 @@ public class MoveSdkPlugin: NSObject {
 		}
 	}
 
+	private func registerDevices(_ call: FlutterMethodCall, _ result: @escaping FlutterResult) {
+		let (devices, arguments) = getDevices(call)
+
+		if !devices.isEmpty {
+			sdk.register(devices: devices)
+			result(nil)
+		}
+
+		return result(MoveSdkError.invalidArguments(arguments))
+	}
+
 	private func resolveError(_ call: FlutterMethodCall, _ result: @escaping FlutterResult) {
 		sdk.resolveSDKStateError()
 		result(nil)
@@ -287,11 +368,37 @@ public class MoveSdkPlugin: NSObject {
 			return
 		}
 
+		let moveOptions = MoveOptions()
+		if let options: [String: Any] = call[.options] {
+			if let motionPermissionMandatory = options["motionPermissionMandatory"] as? Bool {
+				moveOptions.motionPermissionMandatory = motionPermissionMandatory
+			}
+
+			if let deviceDiscovery = options["deviceDiscovery"] as? [String: Any] {
+
+				if let stopScanOnFirstDiscovered = deviceDiscovery["stopScanOnFirstDiscovered"] as? Bool {
+					moveOptions.deviceDiscovery.stopScanOnFirstDiscovered = stopScanOnFirstDiscovered
+				}
+
+				if let interval = deviceDiscovery["interval"] as? Int {
+					moveOptions.deviceDiscovery.interval = Double(interval)
+				}
+
+				if let duration = deviceDiscovery["duration"] as? Int {
+					moveOptions.deviceDiscovery.duration = Double(duration)
+				}
+
+				if let startDelay = deviceDiscovery["startDelay"] as? Int {
+					moveOptions.deviceDiscovery.startDelay = Double(startDelay)
+				}
+			}
+		}
+
 		let auth = MoveAuth(userToken: accessToken, refreshToken: refreshToken, userID: userId, projectID: projectId)
 
 		let moveConfig = convert(config: config)
 
-		sdk.setup(auth: auth, config: moveConfig)
+		sdk.setup(auth: auth, config: moveConfig, options: moveOptions)
 	}
 
 	private func shutdown(_ call: FlutterMethodCall, _ result: @escaping FlutterResult) {
@@ -322,6 +429,17 @@ public class MoveSdkPlugin: NSObject {
 		sdk.synchronizeUserData { success in
 			result(success)
 		}
+	}
+
+	private func unregisterDevices(_ call: FlutterMethodCall, _ result: @escaping FlutterResult) {
+		let (devices, arguments) = getDevices(call)
+
+		if !devices.isEmpty {
+			sdk.unregister(devices: devices)
+			result(nil)
+		}
+
+		return result(MoveSdkError.invalidArguments(arguments))
 	}
 
 	private func updateAuth(_ call: FlutterMethodCall, _ result: @escaping FlutterResult) {
@@ -399,6 +517,11 @@ extension MoveSdkPlugin: FlutterPlugin {
 		instance.warningHandler = MoveSDKStreamHandler(instance, channel: .serviceWarning, registrar: registrar) { sink in
 			sink(instance.convert(warnings: instance.sdk.getServiceWarnings()))
 		}
+
+		instance.deviceDiscoveryHandler = MoveSDKStreamHandler(instance, channel: .deviceDiscovery, registrar: registrar) { sink in }
+
+		// Device Scanning
+		instance.deviceSannerHandler = MoveSDKDeviceScanner(instance, registrar: registrar)
 	}
 
 	public func application(_ application: UIApplication, didFinishLaunchingWithOptions launchOptions: [AnyHashable : Any] = [:]) -> Bool {
@@ -439,6 +562,11 @@ extension MoveSdkPlugin: FlutterPlugin {
 			self.logHandler?.sink?([event, value])
 		}
 
+		sdk.setDeviceDiscoveryListener { results in
+			let data = MoveSdkPlugin.convert(scanResults: results)
+			self.deviceDiscoveryHandler?.sink?(data)
+		}
+
 		sdk.initialize(launchOptions: launchOptions)
 		return true
 	}
@@ -459,10 +587,12 @@ extension MoveSdkPlugin: FlutterPlugin {
 		case .getDeviceQualifier: getDeviceQualifier(call, result)
 		case .getErrors: getServiceErrors(call, result)
 		case .getWarnings: getServiceWarnings(call, result)
+		case .getRegisteredDevices: getRegisteredDevices(call, result)
 		case .getState: getState(call, result)
 		case .getTripState: getTripState(call, result)
 		case .ignoreCurrentTrip: ignoreCurrentTrip(call, result)
 		case .initiateAssistanceCall: initiateAssistanceCall(call, result)
+		case .registerDevices: registerDevices(call, result)
 		case .resolveError: resolveError(call, result)
 		case .setAssistanceMetaData: setAssistanceMetaData(call, result)
 		case .setup: setup(call, result)
@@ -470,6 +600,7 @@ extension MoveSdkPlugin: FlutterPlugin {
 		case .stopAutomaticDetection: stopAutomaticDetection(call, result)
 		case .shutdown: shutdown(call, result)
 		case .synchronizeUserData: synchronizeUserData(call, result)
+		case .unregisterDevices: unregisterDevices(call, result)
 		case .updateAuth: updateAuth(call, result)
 		case .updateConfig: updateConfig(call, result)
 		}
@@ -485,6 +616,7 @@ class MoveSDKStreamHandler: NSObject, FlutterStreamHandler {
 		case authState
 		case serviceError
 		case serviceWarning
+		case deviceDiscovery
 	}
 
 	weak var plugin: MoveSdkPlugin?

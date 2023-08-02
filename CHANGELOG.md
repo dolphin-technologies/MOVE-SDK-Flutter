@@ -1,3 +1,8 @@
+## 2.4.0
+- Add device discovery functionality.
+- Add auth invalid state.
+- Change options format.
+
 ## 2.3.1+3
 - minor ci changes
 

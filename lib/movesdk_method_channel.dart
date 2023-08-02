@@ -4,7 +4,10 @@ import 'package:movesdk/io/dolphin/move/move_assistance_call_status.dart';
 import 'package:movesdk/io/dolphin/move/move_auth.dart';
 import 'package:movesdk/io/dolphin/move/move_auth_error.dart';
 import 'package:movesdk/io/dolphin/move/move_auth_state.dart';
+import 'package:movesdk/io/dolphin/move/move_device.dart';
 import 'package:movesdk/io/dolphin/move/move_geocode_result.dart';
+import 'package:movesdk/io/dolphin/move/move_options.dart';
+import 'package:movesdk/io/dolphin/move/move_scan_result.dart';
 import 'package:movesdk/io/dolphin/move/move_service_warning.dart';
 import 'package:movesdk/io/dolphin/move/move_shutdown_result.dart';
 import 'package:movesdk/io/dolphin/move/move_state.dart';
@@ -26,6 +29,8 @@ class MethodChannelMoveSdk extends MovesdkPlatform {
   final tripStateChannel = const EventChannel('movesdk-tripState');
   final serviceErrorChannel = const EventChannel('movesdk-serviceError');
   final serviceWarningChannel = const EventChannel('movesdk-serviceWarning');
+  final deviceDiscoveryChannel = const EventChannel('movesdk-deviceDiscovery');
+  final deviceScannerChannel = const EventChannel('movesdk-deviceScanner');
 
   MethodChannelMoveSdk() {
     methodChannel.setMethodCallHandler(callbackHandler);
@@ -33,8 +38,7 @@ class MethodChannelMoveSdk extends MovesdkPlatform {
 
   @override
   Future<String> getPlatformVersion() async {
-    final version =
-        await methodChannel.invokeMethod<String>('getPlatformVersion');
+    final version = await methodChannel.invokeMethod<String>('getPlatformVersion');
     return version ?? "";
   }
 
@@ -51,8 +55,7 @@ class MethodChannelMoveSdk extends MovesdkPlatform {
 
   @override
   Future<bool> synchronizeUserData() async {
-    final result =
-        await methodChannel.invokeMethod<bool>('synchronizeUserData');
+    final result = await methodChannel.invokeMethod<bool>('synchronizeUserData');
     return result ?? false;
   }
 
@@ -89,22 +92,18 @@ class MethodChannelMoveSdk extends MovesdkPlatform {
 
   @override
   Stream<MoveState> setSdkStateListener() async* {
-    yield* sdkStateChannel
-        .receiveBroadcastStream()
-        .asyncMap<MoveState>((sdkState) {
-      MoveState? result = MoveState.values.firstWhereOrNull(
-          (element) => element.name.toLowerCase() == sdkState.toLowerCase());
+    yield* sdkStateChannel.receiveBroadcastStream().asyncMap<MoveState>((sdkState) {
+      MoveState? result = MoveState.values
+          .firstWhereOrNull((element) => element.name.toLowerCase() == sdkState.toLowerCase());
       return result ?? MoveState.unknown;
     });
   }
 
   @override
   Stream<MoveAuthState> setAuthStateListener() async* {
-    yield* authStateChannel
-        .receiveBroadcastStream()
-        .asyncMap<MoveAuthState>((authState) {
-      MoveAuthState? result = MoveAuthState.values.firstWhereOrNull(
-          (element) => element.name.toLowerCase() == authState.toLowerCase());
+    yield* authStateChannel.receiveBroadcastStream().asyncMap<MoveAuthState>((authState) {
+      MoveAuthState? result = MoveAuthState.values
+          .firstWhereOrNull((element) => element.name.toLowerCase() == authState.toLowerCase());
       return result ?? MoveAuthState.unknown;
     });
   }
@@ -118,11 +117,9 @@ class MethodChannelMoveSdk extends MovesdkPlatform {
 
   @override
   Stream<MoveTripState> setTripStateListener() async* {
-    yield* tripStateChannel
-        .receiveBroadcastStream()
-        .asyncMap<MoveTripState>((tripState) {
-      MoveTripState? result = MoveTripState.values.firstWhereOrNull(
-          (element) => element.name.toLowerCase() == tripState.toLowerCase());
+    yield* tripStateChannel.receiveBroadcastStream().asyncMap<MoveTripState>((tripState) {
+      MoveTripState? result = MoveTripState.values
+          .firstWhereOrNull((element) => element.name.toLowerCase() == tripState.toLowerCase());
       return result ?? MoveTripState.unknown;
     });
   }
@@ -138,6 +135,22 @@ class MethodChannelMoveSdk extends MovesdkPlatform {
   }
 
   @override
+  Stream<List<MoveDevice>> startScanningDevices(
+      {List<MoveDeviceFilter> filter = const [MoveDeviceFilter.paired],
+      String? uuid,
+      int? manufacturerId}) async* {
+    var filters = filter.map((e) => e.name).toList();
+    yield* deviceScannerChannel.receiveBroadcastStream(<String, dynamic>{
+      'filter': filters,
+      'uuid': uuid,
+      'manufacturerId': manufacturerId
+    }).asyncMap<List<MoveDevice>>((devices) {
+      var result = MoveDevice.fromNative(devices);
+      return result;
+    });
+  }
+
+  @override
   Stream<List<MoveServiceError>> setServiceErrorListener() async* {
     yield* serviceErrorChannel
         .receiveBroadcastStream()
@@ -148,7 +161,7 @@ class MethodChannelMoveSdk extends MovesdkPlatform {
   }
 
   @override
-  Future<void> setup(MoveAuth moveAuth, MoveConfig moveConfig) async {
+  Future<void> setup(MoveAuth moveAuth, MoveConfig moveConfig, MoveOptions? options) async {
     await methodChannel.invokeMethod(
       'setup',
       <String, dynamic>{
@@ -157,6 +170,15 @@ class MethodChannelMoveSdk extends MovesdkPlatform {
         'userId': moveAuth.userId,
         'refreshToken': moveAuth.refreshToken,
         'config': moveConfig.buildConfigParameter(),
+        'options': <String, dynamic>{
+          'motionPermissionMandatory': options?.motionPermissionMandatory,
+          'deviceDiscovery': <String, dynamic>{
+            'startDelay': options?.deviceDiscovery?.startDelay,
+            'duration': options?.deviceDiscovery?.duration,
+            'interval': options?.deviceDiscovery?.interval,
+            'stopScanOnFirstDiscovered': options?.deviceDiscovery?.stopScanOnFirstDiscovered,
+          },
+        },
       },
     );
   }
@@ -281,8 +303,8 @@ class MethodChannelMoveSdk extends MovesdkPlatform {
   @override
   Future<MoveGeocodeResult> geocode(double latitude, double longitude) async {
     try {
-      final result = await methodChannel.invokeMethod<String>('geocode',
-          <String, double>{'latitude': latitude, 'longitude': longitude});
+      final result = await methodChannel.invokeMethod<String>(
+          'geocode', <String, double>{'latitude': latitude, 'longitude': longitude});
       return MoveGeocodeResult(result, null);
     } on PlatformException catch (e) {
       switch (e.code) {
@@ -299,39 +321,37 @@ class MethodChannelMoveSdk extends MovesdkPlatform {
   @override
   Future<MoveState> getState() async {
     final sdkState = await methodChannel.invokeMethod<String>('getSdkState');
-    MoveState? result = MoveState.values.firstWhereOrNull(
-        (element) => element.name.toLowerCase() == sdkState?.toLowerCase());
+    MoveState? result = MoveState.values
+        .firstWhereOrNull((element) => element.name.toLowerCase() == sdkState?.toLowerCase());
     return result ?? MoveState.unknown;
   }
 
   @override
   Future<MoveTripState> getTripState() async {
     final tripState = await methodChannel.invokeMethod<String>('getTripState');
-    MoveTripState? result = MoveTripState.values.firstWhereOrNull(
-        (element) => element.name.toLowerCase() == tripState?.toLowerCase());
+    MoveTripState? result = MoveTripState.values
+        .firstWhereOrNull((element) => element.name.toLowerCase() == tripState?.toLowerCase());
     return result ?? MoveTripState.unknown;
   }
 
   @override
   Future<MoveAuthState> getAuthState() async {
     final authState = await methodChannel.invokeMethod<String>('getAuthState');
-    MoveAuthState? result = MoveAuthState.values.firstWhereOrNull(
-        (element) => element.name.toLowerCase() == authState?.toLowerCase());
+    MoveAuthState? result = MoveAuthState.values
+        .firstWhereOrNull((element) => element.name.toLowerCase() == authState?.toLowerCase());
     return result ?? MoveAuthState.unknown;
   }
 
   @override
   Future<List<MoveServiceWarning>> getWarnings() async {
-    final warnings =
-        await methodChannel.invokeMethod<List<dynamic>>('getWarnings') ?? [];
+    final warnings = await methodChannel.invokeMethod<List<dynamic>>('getWarnings') ?? [];
     var result = MoveServiceWarning.fromNative(warnings);
     return result;
   }
 
   @override
   Future<List<MoveServiceError>> getErrors() async {
-    List<dynamic> errors =
-        await methodChannel.invokeMethod<List<dynamic>>('getErrors') ?? [];
+    List<dynamic> errors = await methodChannel.invokeMethod<List<dynamic>>('getErrors') ?? [];
     var result = MoveServiceError.fromNative(errors);
     return result;
   }
@@ -343,9 +363,38 @@ class MethodChannelMoveSdk extends MovesdkPlatform {
 
   @override
   Future<String> getDeviceQualifier() async {
-    final result =
-        await methodChannel.invokeMethod<String>('getDeviceQualifier');
+    final result = await methodChannel.invokeMethod<String>('getDeviceQualifier');
     return result ?? "";
+  }
+
+  @override
+  Future<void> registerDevices(List<MoveDevice> devices) async {
+    var deviceMap = {for (var device in devices) device.name: device.data};
+    await methodChannel.invokeMethod('registerDevices', <String, dynamic>{'devices': deviceMap});
+  }
+
+  @override
+  Future<void> unregisterDevices(List<MoveDevice> devices) async {
+    var deviceMap = {for (var device in devices) device.name: device.data};
+    await methodChannel.invokeMethod('unregisterDevices', <String, dynamic>{'devices': deviceMap});
+  }
+
+  @override
+  Future<List<MoveDevice>> getRegisteredDevices() async {
+    List<dynamic> devices =
+        await methodChannel.invokeMethod<List<dynamic>>('getRegisteredDevices') ?? [];
+    var result = MoveDevice.fromNative(devices);
+    return result;
+  }
+
+  @override
+  Stream<List<MoveScanResult>> setDeviceDiscoveryListener() async* {
+    yield* deviceDiscoveryChannel
+        .receiveBroadcastStream()
+        .asyncMap<List<MoveScanResult>>((results) {
+      var moveScanResults = MoveScanResult.fromNative(results);
+      return moveScanResults;
+    });
   }
 
   Future<dynamic> callbackHandler(MethodCall methodCall) async {

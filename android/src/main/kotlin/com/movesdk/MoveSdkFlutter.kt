@@ -1,8 +1,8 @@
 package com.movesdk
 
 internal interface MoveSdkFlutter {
-    fun getServiceWarnings()
-    fun getServiceErrors()
+    fun getWarnings()
+    fun getErrors()
     fun allowMockLocations()
     fun consoleLogging()
     fun notifications()
@@ -35,4 +35,8 @@ internal interface MoveSdkFlutter {
     fun getDeviceQualifier()
     fun getPlatformVersion()
     fun getMoveVersion()
-    fun init()}
+    fun init()
+    fun registerDevices()
+    fun unregisterDevices()
+    fun getRegisteredDevices()
+}
