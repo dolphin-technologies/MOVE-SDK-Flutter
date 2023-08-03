@@ -2,8 +2,6 @@ package com.movesdk
 
 import android.Manifest
 import android.annotation.SuppressLint
-import android.bluetooth.BluetoothClass
-import android.bluetooth.BluetoothDevice
 import android.bluetooth.BluetoothManager
 import android.bluetooth.le.ScanCallback
 import android.bluetooth.le.ScanResult
@@ -14,7 +12,6 @@ import android.os.Handler
 import android.os.Looper
 import androidx.annotation.NonNull
 import androidx.core.content.ContextCompat
-import com.movesdk.movesdk.BuildConfig
 import io.dolphin.move.MoveAuthState
 import io.dolphin.move.MoveDevice
 import io.dolphin.move.MoveScanResult
@@ -297,7 +294,6 @@ class DeviceScanningStreamHandler(
         val bluetoothManager = context.getSystemService(BluetoothManager::class.java)
         if (filters.contains(MoveDeviceFilter.PAIRED.filter)) {
             val bondedDevices = bluetoothManager.adapter.bondedDevices
-                .filter { it.isCarAudioBluetooth() }
                 .mapNotNull { MoveSdk.get()?.convertToMoveDevice(it) }
             discoveredDevices.addAll(bondedDevices)
             uiThreadHandler.post {
@@ -327,22 +323,6 @@ class DeviceScanningStreamHandler(
         val uuidB = resultBuffer.getLong(10)
         val uuid = UUID(uuidA, uuidB)
         return uuid.toString().uppercase(Locale.getDefault())
-    }
-
-    @SuppressLint("MissingPermission")
-    private fun BluetoothDevice.isCarAudioBluetooth(): Boolean {
-        var isCarAudioBluetooth = true
-        val bluetoothClass: BluetoothClass = bluetoothClass
-        val majorDeviceClass: Int = bluetoothClass.majorDeviceClass
-        val deviceClass = bluetoothClass.deviceClass
-        val isRequiredMajor = majorDeviceClass == BluetoothClass.Device.Major.AUDIO_VIDEO
-        val isRequiredDevice = deviceClass == BluetoothClass.Device.AUDIO_VIDEO_HANDSFREE ||
-                deviceClass == BluetoothClass.Device.AUDIO_VIDEO_CAR_AUDIO ||
-                // Allow headsets for Debug
-                BuildConfig.DEBUG &&
-                (deviceClass == BluetoothClass.Device.AUDIO_VIDEO_WEARABLE_HEADSET || deviceClass == BluetoothClass.Device.AUDIO_VIDEO_HEADPHONES)
-        isCarAudioBluetooth = isCarAudioBluetooth && isRequiredMajor && isRequiredDevice
-        return isCarAudioBluetooth
     }
 
     enum class MoveDeviceFilter(val filter: String) {
