@@ -6,6 +6,7 @@ internal enum MoveSdkMethod: String {
 	case geocode
 	case getAuthState
 	case getDeviceQualifier
+	case getRegisteredDevices
 	case getState = "getSdkState"
 	case getErrors
 	case getWarnings
@@ -13,6 +14,7 @@ internal enum MoveSdkMethod: String {
 	case getPlatformVersion
 	case ignoreCurrentTrip
 	case initiateAssistanceCall
+	case registerDevices
 	case resolveError
 	case setAssistanceMetaData
 	case setup
@@ -20,6 +22,7 @@ internal enum MoveSdkMethod: String {
 	case startAutomaticDetection
 	case stopAutomaticDetection
 	case synchronizeUserData
+	case unregisterDevices
 	case updateAuth
 	case updateConfig
 }
@@ -30,6 +33,7 @@ internal enum MoveSdkArgument: String {
 
 	// config
 	case config
+	case options
 
 	// auth
 	case accessToken
@@ -46,6 +50,17 @@ internal enum MoveSdkArgument: String {
 
 	// shutdown
 	case force
+
+	// scanner
+	case devices
+	case uuid
+	case filter
+	case paired
+	case beacon
+
+	func from<T>(_ arguments: Any?) -> T? {
+		(arguments as? [String: Any])?[self.rawValue] as? T
+	}
 }
 
 internal extension FlutterMethodCall {

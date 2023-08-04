@@ -1,5 +1,8 @@
 package com.movesdk
 
+import com.google.gson.Gson
+import io.dolphin.move.MoveDevice
+import io.dolphin.move.MoveScanResult
 import io.dolphin.move.MoveServiceFailure
 import io.dolphin.move.MoveServiceWarning
 
@@ -27,4 +30,31 @@ fun List<MoveServiceFailure>.toErrorObject(): List<Map<String, Any>> {
         )
     }
     return errors
+}
+
+inline fun <reified T> T.toJsonString(): String {
+    return try {
+        Gson().toJson(this)
+    } catch (e: Exception) {
+        ""
+    }
+}
+
+fun List<MoveScanResult>.toScanResultObjectList(): List<Map<String, Any>> {
+    return map { result ->
+        mapOf(
+            "isDiscovered" to result.isDiscovered,
+            "device" to result.device.toJsonString(),
+            "name" to result.device.name,
+        )
+    }
+}
+
+fun List<MoveDevice>.toMoveDeviceObjectList(): List<Map<String, String>> {
+    return map { device ->
+        mapOf(
+            "name" to device.name,
+            "data" to device.toJsonString(),
+        )
+    }
 }

@@ -1,7 +1,7 @@
 import Flutter
 import DolphinMoveSDK
 
-internal struct MoveSdkError {
+internal struct MoveSdkError: Error {
 	static let authInvalid = FlutterError(code: "authInvalid", message: "Auth Invalid.", details: nil)
 	static let locationError = FlutterError(code: "locationError", message: "Location Error.", details: nil)
 	static let networkError = FlutterError(code: "networkError", message: "Network Error.", details: nil)

@@ -11,4 +11,7 @@ enum MoveAuthState {
 
   /// Tokens are valid.
   valid,
+
+  /// Refresh token is invalid and shutdown must be called.
+  invalid,
 }

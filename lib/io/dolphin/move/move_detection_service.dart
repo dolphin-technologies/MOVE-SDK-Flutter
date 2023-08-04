@@ -19,6 +19,9 @@ enum MoveDetectionService {
   /// Driving behavior detection based on sensors requires [driving].
   drivingBehaviour,
 
+  /// Bluetooth Device Detection based on bluetooth scanning requires [driving].
+  deviceDiscovery,
+
   /// Places service, (pending documentation).
   places,
 

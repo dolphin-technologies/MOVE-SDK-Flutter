@@ -110,6 +110,7 @@ enum MoveWarning {
   offline,
   playServicesMissing,
   rooted,
+  bluetoothTurnedOff,
 }
 
 /// Error indicating failure of a service.
@@ -126,4 +127,5 @@ enum MoveError {
   preciseLocationPermissionMissing,
   overlayPermissionMissing,
   unauthorized,
+  bluetoothScanPermissionMissing,
 }
