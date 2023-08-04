@@ -1,5 +1,3 @@
-import 'dart:ffi';
-
 import 'package:movesdk/io/dolphin/move/move_assistance_call_status.dart';
 import 'package:movesdk/io/dolphin/move/move_auth.dart';
 import 'package:movesdk/io/dolphin/move/move_auth_error.dart';
