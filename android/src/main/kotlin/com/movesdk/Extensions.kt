@@ -1,10 +1,13 @@
 package com.movesdk
 
 import com.google.gson.Gson
+import io.dolphin.move.MoveConfig
+import io.dolphin.move.MoveDetectionService
 import io.dolphin.move.MoveDevice
 import io.dolphin.move.MoveScanResult
 import io.dolphin.move.MoveServiceFailure
 import io.dolphin.move.MoveServiceWarning
+import io.dolphin.move.WalkingService
 
 fun List<MoveServiceWarning>.toWarningObject(): List<Map<String, Any>> {
     val errors = mutableListOf<Map<String, Any>>()
@@ -57,4 +60,36 @@ fun List<MoveDevice>.toMoveDeviceObjectList(): List<Map<String, String>> {
             "data" to device.toJsonString(),
         )
     }
+}
+
+fun MoveConfig.toMoveConfigList(): List<String> {
+    val config = mutableListOf<String>()
+    for (service in this.moveDetectionServices) {
+        when (service) {
+            is MoveDetectionService.Driving -> {
+                config.add(service.javaClass.simpleName.firstCharToLowerCase())
+                service.drivingServices?.forEach {
+                    config.add(it.name.firstCharToLowerCase())
+                }
+            }
+
+            is MoveDetectionService.Walking -> {
+                config.add(service.javaClass.simpleName.firstCharToLowerCase())
+                service.walkingServices?.forEach {
+                    if (it == WalkingService.Location) {
+                        config.add("walkingLocation")
+                    } else {
+                        config.add(it.name.firstCharToLowerCase())
+                    }
+                }
+            }
+
+            else -> config.add(service.name().firstCharToLowerCase())
+        }
+    }
+    return config
+}
+
+private fun String.firstCharToLowerCase(): String {
+    return this.replaceFirstChar { it.lowercaseChar() }
 }

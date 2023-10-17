@@ -4,6 +4,7 @@ import 'package:movesdk/io/dolphin/move/move_auth_error.dart';
 import 'package:movesdk/io/dolphin/move/move_auth_state.dart';
 import 'package:movesdk/io/dolphin/move/move_device.dart';
 import 'package:movesdk/io/dolphin/move/move_geocode_result.dart';
+import 'package:movesdk/io/dolphin/move/move_notification.dart';
 import 'package:movesdk/io/dolphin/move/move_scan_result.dart';
 import 'package:movesdk/io/dolphin/move/move_service_warning.dart';
 import 'package:movesdk/io/dolphin/move/move_shutdown_result.dart';
@@ -271,6 +272,12 @@ abstract class MovesdkPlatform extends PlatformInterface {
     throw UnimplementedError('setTripStateListener() has not been implemented.');
   }
 
+  /// Set a block to be invoked when a trip starts.
+  /// Returns stream with the trip start date. The listener is sent delayed after confirming a trip is valid, around 30s to 130s.
+  Stream<DateTime> setTripStartListener() async* {
+    throw UnimplementedError('setTripStartListener() has not been implemented.');
+  }
+
   /// Sets a block to get called when optional permissions for
   /// the activated services are missing.
   /// Returns stream: `List<MoveServiceWarning>`. Invoked in case of configuration
@@ -291,9 +298,14 @@ abstract class MovesdkPlatform extends PlatformInterface {
     throw UnimplementedError('setServiceErrorListener() has not been implemented.');
   }
 
+  /// Set a listener when the config changed in response to the useBackendConfig option.
+  Stream<MoveConfig> setRemoteConfigChangeListener() async* {
+    throw UnimplementedError('setRemoteConfigChangeListener() has not been implemented.');
+  }
+
   /// Starts scanning for devices that can be registered with the sdk
   /// Scan can be filtered with [filter], default includes only paired devices
-  /// for scanning beaons [uuid] and [manufacturerId] must be specified
+  /// for scanning beacons [uuid] and [manufacturerId] must be specified
   Stream<List<MoveDevice>> startScanningDevices(
       {List<MoveDeviceFilter> filter = const [MoveDeviceFilter.paired],
       String? uuid,
@@ -320,5 +332,20 @@ abstract class MovesdkPlatform extends PlatformInterface {
   /// Device listener fired on device scans during trips.
   Stream<List<MoveScanResult>> setDeviceDiscoveryListener() async* {
     throw UnimplementedError('setDeviceDiscoveryListener() has not been implemented.');
+  }
+
+  /// Setup notification for Move SDK recognition
+  Future<void> recognitionNotification(MoveNotification notification) {
+    throw UnimplementedError('recognitionNotification() has not been implemented.');
+  }
+
+  /// Setup trip notification
+  Future<void> tripNotification(MoveNotification notification) {
+    throw UnimplementedError('tripNotification() has not been implemented.');
+  }
+
+  /// Setup walking location notification
+  Future<void> walkingLocationNotification(MoveNotification notification) {
+    throw UnimplementedError('walkingLocationNotification() has not been implemented.');
   }
 }

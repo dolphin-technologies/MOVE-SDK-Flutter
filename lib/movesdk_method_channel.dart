@@ -15,6 +15,7 @@ import 'package:movesdk/io/dolphin/move/move_trip_state.dart';
 import 'package:collection/collection.dart';
 import 'package:movesdk/movesdk.dart';
 
+import 'io/dolphin/move/move_notification.dart';
 import 'movesdk_platform_interface.dart';
 
 /// An implementation of [MovesdkPlatform] that uses method channels.
@@ -27,10 +28,12 @@ class MethodChannelMoveSdk extends MovesdkPlatform {
   final logChannel = const EventChannel('movesdk-log');
   final sdkStateChannel = const EventChannel('movesdk-sdkState');
   final tripStateChannel = const EventChannel('movesdk-tripState');
+  final tripStartChannel = const EventChannel('movesdk-tripStart');
   final serviceErrorChannel = const EventChannel('movesdk-serviceError');
   final serviceWarningChannel = const EventChannel('movesdk-serviceWarning');
   final deviceDiscoveryChannel = const EventChannel('movesdk-deviceDiscovery');
   final deviceScannerChannel = const EventChannel('movesdk-deviceScanner');
+  final configChangeChannel = const EventChannel('movesdk-configChange');
 
   MethodChannelMoveSdk() {
     methodChannel.setMethodCallHandler(callbackHandler);
@@ -125,6 +128,13 @@ class MethodChannelMoveSdk extends MovesdkPlatform {
   }
 
   @override
+  Stream<DateTime> setTripStartListener() async* {
+    yield* tripStartChannel.receiveBroadcastStream().asyncMap<DateTime>((tripStart) {
+      return DateTime.fromMillisecondsSinceEpoch(tripStart);
+    });
+  }
+
+  @override
   Stream<List<MoveServiceWarning>> setServiceWarningListener() async* {
     yield* serviceWarningChannel
         .receiveBroadcastStream()
@@ -161,6 +171,13 @@ class MethodChannelMoveSdk extends MovesdkPlatform {
   }
 
   @override
+  Stream<MoveConfig> setRemoteConfigChangeListener() async* {
+    yield* configChangeChannel.receiveBroadcastStream().asyncMap<MoveConfig>((result) {
+      return MoveConfig.fromNative(result);
+    });
+  }
+
+  @override
   Future<void> setup(MoveAuth moveAuth, MoveConfig moveConfig, MoveOptions? options) async {
     await methodChannel.invokeMethod(
       'setup',
@@ -172,12 +189,14 @@ class MethodChannelMoveSdk extends MovesdkPlatform {
         'config': moveConfig.buildConfigParameter(),
         'options': <String, dynamic>{
           'motionPermissionMandatory': options?.motionPermissionMandatory,
+          'backgroundLocationPermissionMandatory': options?.backgroundLocationPermissionMandatory,
           'deviceDiscovery': <String, dynamic>{
             'startDelay': options?.deviceDiscovery?.startDelay,
             'duration': options?.deviceDiscovery?.duration,
             'interval': options?.deviceDiscovery?.interval,
             'stopScanOnFirstDiscovered': options?.deviceDiscovery?.stopScanOnFirstDiscovered,
           },
+          'useBackendConfig': options?.useBackendConfig,
         },
       },
     );
@@ -403,5 +422,44 @@ class MethodChannelMoveSdk extends MovesdkPlatform {
       default:
         throw MissingPluginException('notImplemented');
     }
+  }
+
+  @override
+  Future<void> recognitionNotification(MoveNotification notification) async {
+    var map = {
+      "channelId": notification.channelId,
+      "channelName": notification.channelName,
+      "channelDescription": notification.channelDescription,
+      "contentTitle": notification.contentTitle,
+      "contentText": notification.contentText,
+      "imageName": notification.imageName,
+    };
+    await methodChannel.invokeMethod('recognitionNotification', <String, dynamic>{'notification': map});
+  }
+
+  @override
+  Future<void> tripNotification(MoveNotification notification) async {
+    var map = {
+      "channelId": notification.channelId,
+      "channelName": notification.channelName,
+      "channelDescription": notification.channelDescription,
+      "contentTitle": notification.contentTitle,
+      "contentText": notification.contentText,
+      "imageName": notification.imageName,
+    };
+    await methodChannel.invokeMethod('tripNotification', <String, dynamic>{'notification': map});
+  }
+
+  @override
+  Future<void> walkingLocationNotification(MoveNotification notification) async {
+    var map = {
+      "channelId": notification.channelId,
+      "channelName": notification.channelName,
+      "channelDescription": notification.channelDescription,
+      "contentTitle": notification.contentTitle,
+      "contentText": notification.contentText,
+      "imageName": notification.imageName,
+    };
+    await methodChannel.invokeMethod('walkingLocationNotification', <String, dynamic>{'notification': map});
   }
 }

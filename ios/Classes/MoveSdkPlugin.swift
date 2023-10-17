@@ -18,28 +18,34 @@ public class MoveSdkPlugin: NSObject {
 		case walking
 		case walkingLocation
 
-		static func convert(service: MoveConfig.DetectionService) -> [Config] {
+		static func convert(service: MoveConfig.DetectionService, base: Bool = false) -> [Config] {
 			switch service {
 			case let .driving(services):
 				var config: [Config] = []
 				if services.contains(.distractionFreeDriving) {
 					config.append(.distractionFreeDriving)
 				}
-				if services.contains(.distractionFreeDriving) {
-					config.append(.distractionFreeDriving)
+				if services.contains(.drivingBehavior) {
+					config.append(.drivingBehaviour)
 				}
-				if services.isEmpty {
+				if services.contains(.deviceDiscovery) {
+					config.append(.deviceDiscovery)
+				}
+				if services.isEmpty || base {
 					config.append(.driving)
 				}
 				return config
 			case .cycling:
 				return [.cycling]
 			case let .walking(services):
-				if services.isEmpty {
-					return [.walking]
-				} else {
-					return [.walkingLocation]
+				var config: [Config] = []
+				if services.contains(.location) {
+					config.append(.walkingLocation)
 				}
+				if services.isEmpty || base {
+					config.append(.walking)
+				}
+				return config
 			case .places:
 				return [.places]
 			case .publicTransport:
@@ -60,9 +66,11 @@ public class MoveSdkPlugin: NSObject {
 	var failureHandler: MoveSDKStreamHandler?
 	var logHandler: MoveSDKStreamHandler?
 	var sdkStateHandler: MoveSDKStreamHandler?
+	var tripStartHandler: MoveSDKStreamHandler?
 	var tripStateHandler: MoveSDKStreamHandler?
 	var warningHandler: MoveSDKStreamHandler?
 	var deviceDiscoveryHandler: MoveSDKStreamHandler?
+	var configUpdateListener: MoveSDKStreamHandler?
 
 	var deviceSannerHandler: MoveSDKDeviceScanner?
 
@@ -144,6 +152,14 @@ public class MoveSdkPlugin: NSObject {
 		}
 
 		return deviceList
+	}
+
+	static internal func convert(config: MoveConfig) -> [String] {
+		var services: [String] = []
+		for service in config.services {
+			services += Config.convert(service: service, base: true).map { $0.rawValue }
+		}
+		return services
 	}
 
 	static internal func convert(devices: [MoveDevice]) -> [[String: Any]] {
@@ -370,26 +386,34 @@ public class MoveSdkPlugin: NSObject {
 
 		let moveOptions = MoveOptions()
 		if let options: [String: Any] = call[.options] {
-			if let motionPermissionMandatory = options["motionPermissionMandatory"] as? Bool {
-				moveOptions.motionPermissionMandatory = motionPermissionMandatory
+			if let value = options["motionPermissionMandatory"] as? Bool {
+				moveOptions.motionPermissionMandatory = value
+			}
+
+			if let value = options["backgroundLocationPermissionMandatory"] as? Bool {
+				moveOptions.backgroundLocationPermissionMandatory = value
+			}
+			
+			if let value = options["useBackendConfig"] as? Bool {
+				moveOptions.useBackendConfig = value
 			}
 
 			if let deviceDiscovery = options["deviceDiscovery"] as? [String: Any] {
 
-				if let stopScanOnFirstDiscovered = deviceDiscovery["stopScanOnFirstDiscovered"] as? Bool {
-					moveOptions.deviceDiscovery.stopScanOnFirstDiscovered = stopScanOnFirstDiscovered
+				if let value = deviceDiscovery["stopScanOnFirstDiscovered"] as? Bool {
+					moveOptions.deviceDiscovery.stopScanOnFirstDiscovered = value
 				}
 
-				if let interval = deviceDiscovery["interval"] as? Int {
-					moveOptions.deviceDiscovery.interval = Double(interval)
+				if let value = deviceDiscovery["interval"] as? Int {
+					moveOptions.deviceDiscovery.interval = Double(value)
 				}
 
-				if let duration = deviceDiscovery["duration"] as? Int {
-					moveOptions.deviceDiscovery.duration = Double(duration)
+				if let value = deviceDiscovery["duration"] as? Int {
+					moveOptions.deviceDiscovery.duration = Double(value)
 				}
 
-				if let startDelay = deviceDiscovery["startDelay"] as? Int {
-					moveOptions.deviceDiscovery.startDelay = Double(startDelay)
+				if let value = deviceDiscovery["startDelay"] as? Int {
+					moveOptions.deviceDiscovery.startDelay = Double(value)
 				}
 			}
 		}
@@ -508,6 +532,8 @@ extension MoveSdkPlugin: FlutterPlugin {
 			sink("\(instance.sdk.getTripState())")
 		}
 
+		instance.tripStartHandler = MoveSDKStreamHandler(instance, channel: .tripStart, registrar: registrar) { sink in }
+
 		instance.failureHandler = MoveSDKStreamHandler(instance, channel: .serviceError, registrar: registrar) { sink in
 			sink(instance.convert(errors: instance.sdk.getServiceFailures()))
 		}
@@ -519,6 +545,8 @@ extension MoveSdkPlugin: FlutterPlugin {
 		}
 
 		instance.deviceDiscoveryHandler = MoveSDKStreamHandler(instance, channel: .deviceDiscovery, registrar: registrar) { sink in }
+
+		instance.configUpdateListener = MoveSDKStreamHandler(instance, channel: .configChange, registrar: registrar) { sink in }
 
 		// Device Scanning
 		instance.deviceSannerHandler = MoveSDKDeviceScanner(instance, registrar: registrar)
@@ -549,6 +577,10 @@ extension MoveSdkPlugin: FlutterPlugin {
 			self.tripStateHandler?.sink?("\(state)")
 		}
 
+		sdk.setTripStartListener { startDate in
+			self.tripStartHandler?.sink?(Int64(startDate.timeIntervalSince1970 * 1000.0))
+		}
+
 		sdk.setServiceWarningListener { warnings in
 			self.warningHandler?.sink?(self.convert(warnings: warnings))
 		}
@@ -565,6 +597,11 @@ extension MoveSdkPlugin: FlutterPlugin {
 		sdk.setDeviceDiscoveryListener { results in
 			let data = MoveSdkPlugin.convert(scanResults: results)
 			self.deviceDiscoveryHandler?.sink?(data)
+		}
+
+		sdk.setRemoteConfigChangeListener { result in
+			let data = MoveSdkPlugin.convert(config: result)
+			self.configUpdateListener?.sink?(data)
 		}
 
 		sdk.initialize(launchOptions: launchOptions)
@@ -612,11 +649,13 @@ class MoveSDKStreamHandler: NSObject, FlutterStreamHandler {
 		case prefix = "movesdk-"
 		case log
 		case sdkState
+		case tripStart
 		case tripState
 		case authState
 		case serviceError
 		case serviceWarning
 		case deviceDiscovery
+		case configChange
 	}
 
 	weak var plugin: MoveSdkPlugin?

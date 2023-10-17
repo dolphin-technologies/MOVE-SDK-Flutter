@@ -1,5 +1,8 @@
 package com.movesdk
 
+import android.app.Application
+import android.app.NotificationChannel
+import android.app.NotificationManager
 import android.content.Context
 import android.os.Handler
 import android.os.Looper
@@ -14,6 +17,7 @@ import io.dolphin.move.MoveConfig
 import io.dolphin.move.MoveDetectionService
 import io.dolphin.move.MoveDevice
 import io.dolphin.move.MoveGeocodeError
+import io.dolphin.move.MoveNotification
 import io.dolphin.move.MoveOptions
 import io.dolphin.move.MoveSdk
 import io.dolphin.move.MoveServiceFailure
@@ -140,8 +144,17 @@ internal class MoveSdkFlutterAdapter(
                 uiThreadHandler.post {
                     when (assistanceState) {
                         MoveAssistanceCallStatus.SUCCESS -> result.success("success")
-                        MoveAssistanceCallStatus.INITIALIZATION_ERROR -> result.error("initializationError", null, null)
-                        MoveAssistanceCallStatus.NETWORK_ERROR -> result.error("networkError", null, null)
+                        MoveAssistanceCallStatus.INITIALIZATION_ERROR -> result.error(
+                            "initializationError",
+                            null,
+                            null
+                        )
+
+                        MoveAssistanceCallStatus.NETWORK_ERROR -> result.error(
+                            "networkError",
+                            null,
+                            null
+                        )
                     }
                 }
             }
@@ -306,27 +319,44 @@ internal class MoveSdkFlutterAdapter(
     }
 
     override fun registerDevices() {
-        val devices = call.argument<Map<String, String>>("devices")?.map {
-            try {
-                gson.fromJson(it.value, MoveDevice::class.java)
-            } catch (e: Exception) {
-                null
-            }
-        }?.filterNotNull().orEmpty()
-        MoveSdk.get()?.registerDevices(devices)
         result.success(null)
+        mainScope.launch {
+            val registerResult = withContext(ioContext) {
+                val devices = call.argument<Map<String, String>>("devices")?.map {
+                    try {
+                        gson.fromJson(it.value, MoveDevice::class.java)
+                    } catch (e: Exception) {
+                        null
+                    }
+                }?.filterNotNull().orEmpty()
+                MoveSdk.get()?.registerDevices(devices)
+            }
+            if (registerResult == true) {
+                result.success(null)
+            } else {
+                result.error("ERROR_REGISTER_DEVICES", null, null)
+            }
+        }
     }
 
     override fun unregisterDevices() {
-        val devices = call.argument<Map<String, String>>("devices")?.map {
-            try {
-                gson.fromJson(it.value, MoveDevice::class.java)
-            } catch (e: Exception) {
-                null
+        mainScope.launch {
+            val unregisterResult = withContext(ioContext) {
+                val devices = call.argument<Map<String, String>>("devices")?.map {
+                    try {
+                        gson.fromJson(it.value, MoveDevice::class.java)
+                    } catch (e: Exception) {
+                        null
+                    }
+                }?.filterNotNull().orEmpty()
+                MoveSdk.get()?.unregisterDevices(devices)
             }
-        }?.filterNotNull().orEmpty()
-        MoveSdk.get()?.unregisterDevices(devices)
-        result.success(null)
+            if (unregisterResult == true) {
+                result.success(null)
+            } else {
+                result.error("ERROR_UNREGISTER_DEVICES", null, null)
+            }
+        }
     }
 
     override fun getRegisteredDevices() {
@@ -337,6 +367,21 @@ internal class MoveSdkFlutterAdapter(
             }
             result.success(devices.toMoveDeviceObjectList())
         }
+    }
+
+    override fun recognitionNotification() {
+        val notification = createChannelGetNotification() ?: return
+        MoveSdk.get()?.recognitionNotification(notification)
+    }
+
+    override fun tripNotification() {
+        val notification = createChannelGetNotification() ?: return
+        MoveSdk.get()?.tripNotification(notification)
+    }
+
+    override fun walkingLocationNotification() {
+        val notification = createChannelGetNotification() ?: return
+        MoveSdk.get()?.walkingLocationNotification(notification)
     }
 
     private fun extractMoveConfig(call: MethodCall): MoveConfig {
@@ -401,6 +446,9 @@ internal class MoveSdkFlutterAdapter(
     private fun extractMoveOptions(call: MethodCall): MoveOptions? {
         val options = call.argument<Map<String, Any>>("options") ?: return null
         val motionPermissionMandatory = options["motionPermissionMandatory"] as? Boolean
+        val backgroundLocationPermissionMandatory =
+            options["backgroundLocationPermissionMandatory"] as? Boolean
+        val useBackendConfig = options["useBackendConfig"] as? Boolean
         val deviceDiscoveryOptions = (options["deviceDiscovery"] as? Map<String, Any>)?.let {
             val startDelay = (it["startDelay"] as? Int)?.toLong()
             val duration = (it["duration"] as? Int)?.toLong()
@@ -408,6 +456,38 @@ internal class MoveSdkFlutterAdapter(
             val stopScanOnFirstDiscovered = it["stopScanOnFirstDiscovered"] as? Boolean
             DeviceDiscovery(startDelay, duration, interval, stopScanOnFirstDiscovered == true)
         }
-        return MoveOptions(motionPermissionRequired = motionPermissionMandatory == true, deviceDiscovery = deviceDiscoveryOptions)
+        return MoveOptions(
+            motionPermissionRequired = motionPermissionMandatory == true,
+            backgroundLocationPermissionMandatory = backgroundLocationPermissionMandatory == true,
+            useBackendConfig = useBackendConfig == true,
+            deviceDiscovery = deviceDiscoveryOptions,
+        )
+    }
+
+    private fun createChannelGetNotification(): MoveNotification? {
+        return call.argument<Map<String, String>>("notification")?.let {
+            val channelId = it["channelId"].orEmpty()
+            val channelName = it["channelName"].orEmpty()
+            val channelDescription = it["channelDescription"].orEmpty()
+            val contentTitle = it["contentTitle"].orEmpty()
+            val contentText = it["contentText"].orEmpty()
+            val imageName = it["imageName"].orEmpty()
+            val iconId = context.resources.getIdentifier(imageName, "drawable", context.packageName)
+
+            val importance = NotificationManager.IMPORTANCE_DEFAULT
+            val channel = NotificationChannel(channelId, channelName, importance)
+            channel.description = channelDescription
+            val notificationManager =
+                context.getSystemService(Application.NOTIFICATION_SERVICE) as NotificationManager
+            notificationManager.createNotificationChannel(channel)
+
+            MoveNotification(
+                channelId = channelId,
+                drawableId = iconId,
+                contentTitle = contentTitle,
+                contentText = contentText,
+                showWhen = true,
+            )
+        }
     }
 }

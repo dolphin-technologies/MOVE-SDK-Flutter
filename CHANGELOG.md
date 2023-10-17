@@ -1,3 +1,10 @@
+## 2.6.0
+- Added TripStartListener.
+- Added backgroundLocationPermissionRequired to MoveOptions.
+
+## 2.5.0
+- Added optional useBackendConfig to MoveConfig.
+
 ## 2.4.0
 - Add device discovery functionality.
 - Add auth invalid state.
