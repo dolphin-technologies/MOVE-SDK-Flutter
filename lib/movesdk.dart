@@ -298,14 +298,14 @@ class MoveSdk {
     yield* MovesdkPlatform.instance.setServiceErrorListener();
   }
 
-  /// Set a listener when the config changed in resonse to the useBackendConfig option.
+  /// Set a listener when the config changed in response to the useBackendConfig option.
   Stream<MoveConfig> setRemoteConfigChangeListener() async* {
     yield* MovesdkPlatform.instance.setRemoteConfigChangeListener();
   }
 
   /// Starts scanning for devices that can be registered with the sdk
   /// Scan can be filtered with [filter], default includes only paired devices.
-  /// For scanning beaons [uuid] and [manufacturerId] must be specified.
+  /// For scanning beacons [uuid] and [manufacturerId] must be specified.
   /// Will stop when stream is closed.
   Stream<List<MoveDevice>> startScanningDevices(
       {List<MoveDeviceFilter> filter = const [MoveDeviceFilter.paired],

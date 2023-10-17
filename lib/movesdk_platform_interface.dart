@@ -298,14 +298,14 @@ abstract class MovesdkPlatform extends PlatformInterface {
     throw UnimplementedError('setServiceErrorListener() has not been implemented.');
   }
 
-  /// Set a listener when the config changed in resonse to the useBackendConfig option.
+  /// Set a listener when the config changed in response to the useBackendConfig option.
   Stream<MoveConfig> setRemoteConfigChangeListener() async* {
     throw UnimplementedError('setRemoteConfigChangeListener() has not been implemented.');
   }
 
   /// Starts scanning for devices that can be registered with the sdk
   /// Scan can be filtered with [filter], default includes only paired devices
-  /// for scanning beaons [uuid] and [manufacturerId] must be specified
+  /// for scanning beacons [uuid] and [manufacturerId] must be specified
   Stream<List<MoveDevice>> startScanningDevices(
       {List<MoveDeviceFilter> filter = const [MoveDeviceFilter.paired],
       String? uuid,
