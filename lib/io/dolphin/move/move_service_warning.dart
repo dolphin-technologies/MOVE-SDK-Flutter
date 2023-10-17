@@ -116,6 +116,7 @@ enum MoveWarning {
 /// Error indicating failure of a service.
 enum MoveError {
   accelerometerMissing,
+  backgroundLocationPermissionMissing,
   activityPermissionMissing,
   motionPermissionMissing,
   batteryPermissionMissing,

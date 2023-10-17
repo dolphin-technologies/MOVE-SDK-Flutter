@@ -11,6 +11,7 @@ import 'package:movesdk/io/dolphin/move/move_shutdown_result.dart';
 import 'package:movesdk/io/dolphin/move/move_state.dart';
 import 'package:movesdk/io/dolphin/move/move_trip_state.dart';
 
+import 'io/dolphin/move/move_notification.dart';
 import 'io/dolphin/move/move_options.dart';
 import 'movesdk_platform_interface.dart';
 
@@ -22,6 +23,16 @@ class MoveConfig {
 
   Iterable<String> buildConfigParameter() {
     return moveDetectionServices.map((e) => e.toString().split('.').last).toList();
+  }
+
+  static MoveConfig fromNative(values) {
+    List<MoveDetectionService> services = [];
+    for (var str in values) {
+      var service =
+          MoveDetectionService.values.firstWhere((e) => e.toString().split('.').last == str);
+      services.add(service);
+    }
+    return MoveConfig(services);
   }
 }
 
@@ -261,6 +272,12 @@ class MoveSdk {
     yield* MovesdkPlatform.instance.setTripStateListener();
   }
 
+  /// Set a block to be invoked when a trip starts.
+  /// Returns stream with the trip start date. The listener is sent delayed after confirming a trip is valid, around 30s to 130s.
+  Stream<DateTime> setTripStartListener() async* {
+    yield* MovesdkPlatform.instance.setTripStartListener();
+  }
+
   /// Sets a block to get called when optional permissions for
   /// the activated services are missing.
   /// Returns stream: `List<MoveServiceWarning>`. Invoked in case of configuration
@@ -279,6 +296,11 @@ class MoveSdk {
   /// or permission errors.
   Stream<List<MoveServiceError>> setServiceErrorListener() async* {
     yield* MovesdkPlatform.instance.setServiceErrorListener();
+  }
+
+  /// Set a listener when the config changed in resonse to the useBackendConfig option.
+  Stream<MoveConfig> setRemoteConfigChangeListener() async* {
+    yield* MovesdkPlatform.instance.setRemoteConfigChangeListener();
   }
 
   /// Starts scanning for devices that can be registered with the sdk
@@ -312,5 +334,20 @@ class MoveSdk {
   /// Device listener fired on device scans during trips.
   Stream<List<MoveScanResult>> setDeviceDiscoveryListener() async* {
     yield* MovesdkPlatform.instance.setDeviceDiscoveryListener();
+  }
+
+  /// Setup notification for Move SDK recognition
+  Future<void> recognitionNotification(MoveNotification notification) {
+    return MovesdkPlatform.instance.recognitionNotification(notification);
+  }
+
+  /// Setup trip notification
+  Future<void> tripNotification(MoveNotification notification) {
+    return MovesdkPlatform.instance.tripNotification(notification);
+  }
+
+  /// Setup walking location notification
+  Future<void> walkingLocationNotification(MoveNotification notification) {
+    return MovesdkPlatform.instance.walkingLocationNotification(notification);
   }
 }

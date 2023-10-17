@@ -13,6 +13,7 @@ import android.os.Looper
 import androidx.annotation.NonNull
 import androidx.core.content.ContextCompat
 import io.dolphin.move.MoveAuthState
+import io.dolphin.move.MoveConfig
 import io.dolphin.move.MoveDevice
 import io.dolphin.move.MoveScanResult
 import io.dolphin.move.MoveSdk
@@ -43,6 +44,8 @@ class MoveSdkPlugin : FlutterPlugin, MethodCallHandler {
     private lateinit var sdkLogChannel: EventChannel
     private lateinit var deviceDiscoveryChannel: EventChannel
     private lateinit var deviceScanChannel: EventChannel
+    private lateinit var configChangeChannel: EventChannel
+    private lateinit var tripStartChannel: EventChannel
     private var context: Context? = null // Instance variable for context
 
     override fun onAttachedToEngine(flutterPluginBinding: FlutterPlugin.FlutterPluginBinding) {
@@ -85,6 +88,14 @@ class MoveSdkPlugin : FlutterPlugin, MethodCallHandler {
         deviceScanChannel =
             EventChannel(flutterPluginBinding.binaryMessenger, "movesdk-deviceScanner").also {
                 it.setStreamHandler(DeviceScanningStreamHandler(flutterPluginBinding.applicationContext))
+            }
+        configChangeChannel =
+            EventChannel(flutterPluginBinding.binaryMessenger, "movesdk-configChange").also {
+                it.setStreamHandler(ConfigChangeStreamHandler())
+            }
+        tripStartChannel =
+            EventChannel(flutterPluginBinding.binaryMessenger, "movesdk-tripStart").also {
+                it.setStreamHandler(TripStartStreamHandler())
             }
     }
 
@@ -242,6 +253,10 @@ class DeviceScanningStreamHandler(
     private val context: Context,
 ) : EventChannel.StreamHandler {
 
+    companion object {
+        private const val ERROR_SCAN_DEVICES: String = "SCAN_DEVICES"
+    }
+
     private val uiThreadHandler: Handler = Handler(Looper.getMainLooper())
     private var events: EventChannel.EventSink? = null
     private val discoveredDevices = mutableSetOf<MoveDevice>()
@@ -291,17 +306,12 @@ class DeviceScanningStreamHandler(
         }
         discoveredDevices.clear()
         this.events = events
-        val bluetoothManager = context.getSystemService(BluetoothManager::class.java)
+
         if (filters.contains(MoveDeviceFilter.PAIRED.filter)) {
-            val bondedDevices = bluetoothManager.adapter.bondedDevices
-                .mapNotNull { MoveSdk.get()?.convertToMoveDevice(it) }
-            discoveredDevices.addAll(bondedDevices)
-            uiThreadHandler.post {
-                events?.success(bondedDevices.toMoveDeviceObjectList())
-            }
+            proceedWithPairedDevices()
         }
         if (filters.contains(MoveDeviceFilter.BEACON.filter)) {
-            bluetoothManager.adapter.bluetoothLeScanner.startScan(leCallback)
+            proceedWithBleDevices()
         }
     }
 
@@ -325,6 +335,89 @@ class DeviceScanningStreamHandler(
         return uuid.toString().uppercase(Locale.getDefault())
     }
 
+    @SuppressLint("MissingPermission")
+    private fun proceedWithPairedDevices() {
+        val hasFeature =
+            context.packageManager.hasSystemFeature(PackageManager.FEATURE_BLUETOOTH_LE)
+        if (!hasFeature) {
+            events?.error(ERROR_SCAN_DEVICES, "Missing FEATURE_BLUETOOTH_LE", null)
+            return
+        }
+        val bluetoothManager: BluetoothManager? =
+            context.getSystemService(BluetoothManager::class.java)
+        if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.S) {
+            if (!isPermissionGranted(Manifest.permission.BLUETOOTH_CONNECT)) {
+                events?.error(ERROR_SCAN_DEVICES, "Missing BLUETOOTH_CONNECT permission", null)
+                return
+            }
+        }
+        val bondedDevices = bluetoothManager?.adapter?.bondedDevices
+            ?.mapNotNull { MoveSdk.get()?.convertToMoveDevice(it) }.orEmpty()
+        discoveredDevices.addAll(bondedDevices)
+        uiThreadHandler.post {
+            events?.success(bondedDevices.toMoveDeviceObjectList())
+        }
+    }
+
+    @SuppressLint("MissingPermission") // covered with isPermissionGranted
+    private fun proceedWithBleDevices() {
+        val bluetoothManager: BluetoothManager? =
+            context.getSystemService(BluetoothManager::class.java)
+
+        if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.S) {
+            if (!isPermissionGranted(Manifest.permission.BLUETOOTH_SCAN)) {
+                events?.error(ERROR_SCAN_DEVICES, "Missing BLUETOOTH_SCAN permission", null)
+                return
+            }
+            if (!isPermissionGranted(Manifest.permission.BLUETOOTH_CONNECT)) {
+                events?.error(ERROR_SCAN_DEVICES, "Missing BLUETOOTH_CONNECT permission", null)
+                return
+            }
+        }
+        if (Build.VERSION.SDK_INT <= Build.VERSION_CODES.R) {
+            if (!isPermissionGranted(Manifest.permission.ACCESS_FINE_LOCATION)) {
+                events?.error(ERROR_SCAN_DEVICES, "Missing ACCESS_FINE_LOCATION permission", null)
+                return
+            }
+            if (!isPermissionGranted(Manifest.permission.BLUETOOTH_ADMIN)) {
+                events?.error(ERROR_SCAN_DEVICES, "Missing BLUETOOTH_ADMIN permission", null)
+                return
+            }
+        }
+        if (Build.VERSION.SDK_INT == Build.VERSION_CODES.R || Build.VERSION.SDK_INT == Build.VERSION_CODES.Q) {
+            if (!isPermissionGranted(Manifest.permission.ACCESS_BACKGROUND_LOCATION)) {
+                events?.error(
+                    ERROR_SCAN_DEVICES,
+                    "Missing ACCESS_BACKGROUND_LOCATION permission",
+                    null
+                )
+                return
+            }
+        }
+        if (bluetoothManager?.adapter?.isEnabled == false) {
+            events?.error(ERROR_SCAN_DEVICES, "Please turn on bluetooth", null)
+            return
+        }
+        val hasFeature =
+            context.packageManager.hasSystemFeature(PackageManager.FEATURE_BLUETOOTH_LE)
+        if (!hasFeature) {
+            events?.error(ERROR_SCAN_DEVICES, "Missing FEATURE_BLUETOOTH_LE", null)
+            return
+        }
+        bluetoothManager?.adapter?.bluetoothLeScanner?.startScan(leCallback)
+    }
+
+    private fun isPermissionGranted(permission: String): Boolean {
+        return try {
+            ContextCompat.checkSelfPermission(
+                context,
+                permission
+            ) == PackageManager.PERMISSION_GRANTED
+        } catch (e: Exception) {
+            false
+        }
+    }
+
     enum class MoveDeviceFilter(val filter: String) {
         BEACON("beacon"),
         PAIRED("paired");
@@ -332,5 +425,40 @@ class DeviceScanningStreamHandler(
 }
 
 
+class ConfigChangeStreamHandler() : EventChannel.StreamHandler {
+    private val uiThreadHandler: Handler = Handler(Looper.getMainLooper())
 
+    override fun onListen(arguments: Any?, events: EventChannel.EventSink?) {
+        MoveSdk.get()?.setRemoteConfigChangeListener(
+            object : MoveSdk.RemoteConfigChangeListener {
+                override fun onConfigChanged(config: MoveConfig) {
+                    uiThreadHandler.post {
+                        events?.success(config.toMoveConfigList())
+                    }
+                }
+            }
+        )
+    }
 
+    override fun onCancel(arguments: Any?) {
+    }
+}
+
+class TripStartStreamHandler() : EventChannel.StreamHandler {
+    private val uiThreadHandler: Handler = Handler(Looper.getMainLooper())
+
+    override fun onListen(arguments: Any?, events: EventChannel.EventSink?) {
+        MoveSdk.get()?.setTripStartListener(
+            object : MoveSdk.TripStartListener {
+                override fun onTripStarted(startDate: Date) {
+                    uiThreadHandler.post {
+                        events?.success(startDate.time)
+                    }
+                }
+            }
+        )
+    }
+
+    override fun onCancel(arguments: Any?) {
+    }
+}

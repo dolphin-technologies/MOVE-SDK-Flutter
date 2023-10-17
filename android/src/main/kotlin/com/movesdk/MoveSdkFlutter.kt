@@ -39,4 +39,7 @@ internal interface MoveSdkFlutter {
     fun registerDevices()
     fun unregisterDevices()
     fun getRegisteredDevices()
+    fun recognitionNotification()
+    fun tripNotification()
+    fun walkingLocationNotification()
 }

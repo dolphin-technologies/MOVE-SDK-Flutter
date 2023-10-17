@@ -26,7 +26,6 @@ apply plugin: 'com.android.library'
 apply plugin: 'kotlin-android'
 
 android {
-    compileSdkVersion 32
 
     compileOptions {
         sourceCompatibility JavaVersion.VERSION_1_8
@@ -43,9 +42,10 @@ android {
 
     defaultConfig {
         minSdkVersion 26
+        compileSdk 34
     }
 
     dependencies {
-        api "io.dolphin.move:move-sdk:2.4.1.70"
+        api "io.dolphin.move:move-sdk:2.6.0.74"
     }
 }
