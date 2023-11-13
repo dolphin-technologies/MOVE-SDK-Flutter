@@ -1,3 +1,8 @@
+## 2.6.2
+- Bugfixes & Improvements
+- Added iOS Bluetooth permission check.
+- Fix Android permission warnings. 
+
 ## 2.6.0
 - Added TripStartListener.
 - Added backgroundLocationPermissionRequired to MoveOptions.

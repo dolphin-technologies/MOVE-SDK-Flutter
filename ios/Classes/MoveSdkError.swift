@@ -21,6 +21,7 @@ internal enum MoveSdkReason: String {
 	case backgroundLocationPermissionMissing
 	case batteryOptimization
 	case bluetoothPermissionMissing
+	case bluetoothTurnedOff
 	case energySaver
 	case goEdition
 	case gpsOff
@@ -59,6 +60,10 @@ internal enum MoveSdkReason: String {
 			self = .gyroscopePermissionMissing
 		case .accelerometer:
 			self = .accelerometerMissing
+		case .bluetooth:
+			self = .bluetoothTurnedOff
+		case .bluetoothScan:
+			self = .bluetoothPermissionMissing
 		@unknown default:
 			return nil
 		}

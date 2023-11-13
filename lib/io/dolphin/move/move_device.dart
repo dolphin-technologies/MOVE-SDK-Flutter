@@ -20,7 +20,6 @@ class MoveDevice {
   static List<MoveDevice> fromNative(devices) {
     List<MoveDevice> deviceList = [];
     for (var device in devices) {
-      print("CONVERT: $device");
       String name = device["name"];
       String data = device["data"];
 
