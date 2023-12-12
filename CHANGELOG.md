@@ -1,3 +1,8 @@
+## 2.6.4
+- Fix a bug with iOS device detection / CarPlay.
+- Fix a bug with Android shtudown force: false.
+- Internal API changes.
+
 ## 2.6.2
 - Bugfixes & Improvements
 - Added iOS Bluetooth permission check.
