@@ -6,7 +6,8 @@ enum MoveAuthState {
   /// Initial state, not verified on the backend.
   unknown,
 
-  /// Refresh token is expired and mus be renewed.
+  /// Deprecated, state will never be [expired].
+  @Deprecated('obsolete')
   expired,
 
   /// Tokens are valid.

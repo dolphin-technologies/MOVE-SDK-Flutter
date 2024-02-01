@@ -22,14 +22,16 @@ class MoveConfig {
   MoveConfig(this.moveDetectionServices);
 
   Iterable<String> buildConfigParameter() {
-    return moveDetectionServices.map((e) => e.toString().split('.').last).toList();
+    return moveDetectionServices
+        .map((e) => e.toString().split('.').last)
+        .toList();
   }
 
   static MoveConfig fromNative(values) {
     List<MoveDetectionService> services = [];
     for (var str in values) {
-      var service =
-          MoveDetectionService.values.firstWhere((e) => e.toString().split('.').last == str);
+      var service = MoveDetectionService.values
+          .firstWhere((e) => e.toString().split('.').last == str);
       services.add(service);
     }
     return MoveConfig(services);
@@ -56,7 +58,8 @@ class MoveSdk {
   /// [moveAuth] contains authentication data and tokens prepared by the app backend..
   /// [moveConfig] indicates the configuration of the services which will be running.
   /// Services in [moveConfig] must be enabled in the MOVE dashboard.
-  Future<void> setup(MoveAuth auth, MoveConfig moveConfig, {MoveOptions? options}) {
+  Future<void> setup(MoveAuth auth, MoveConfig moveConfig,
+      {MoveOptions? options}) {
     return MovesdkPlatform.instance.setup(auth, moveConfig, options);
   }
 
@@ -67,14 +70,15 @@ class MoveSdk {
     return MovesdkPlatform.instance.getDeviceQualifier();
   }
 
-  /// Updates the user's provided Auth upon its expiry. Auth expiry triggers
-  /// the SDK Auth State change listener.
+  /// Deprecated. Token expiry is never delegated to the app.
+  /// When a token is invalidated the app must shutdown the SDK instead.
   ///
   /// Warning:
   /// - Only the user's token is expected to update. Changing any other
   ///   user's auth param will fail with `MoveAuthError.authInvalid`.
   /// [moveAuth] must contain new valid authentication data.
   /// Returns an errror if failed.
+  @Deprecated('obsolete')
   Future<MoveAuthError?> updateAuth(MoveAuth auth) {
     return MovesdkPlatform.instance.updateAuth(auth);
   }
@@ -178,7 +182,8 @@ class MoveSdk {
 
   /// Set metadata to be sent with assistance call or impact detection.
   Future<void> setAssistanceMetaData(String? assistanceMetadataValue) {
-    return MovesdkPlatform.instance.setAssistanceMetaData(assistanceMetadataValue);
+    return MovesdkPlatform.instance
+        .setAssistanceMetaData(assistanceMetadataValue);
   }
 
   /// Geocode address lookup at coordinates: ([latitude], [longitude])
@@ -311,8 +316,8 @@ class MoveSdk {
       {List<MoveDeviceFilter> filter = const [MoveDeviceFilter.paired],
       String? uuid,
       int? manufacturerId}) async* {
-    yield* MovesdkPlatform.instance
-        .startScanningDevices(filter: filter, uuid: uuid, manufacturerId: manufacturerId);
+    yield* MovesdkPlatform.instance.startScanningDevices(
+        filter: filter, uuid: uuid, manufacturerId: manufacturerId);
   }
 
   /// Get a list of devices registered with the sdk to be scanned for during trip.

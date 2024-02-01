@@ -4,18 +4,39 @@ import Flutter
 import Foundation
 import DolphinMoveSDK
 
+/// MoveSDK device scanner.
+///
+/// Set's up scanning for iBeacon/audio devices currently accessible.
+/// Used to setup `MoveDevice` objects for registering with `deviceDiscovery` service.
 class MoveSDKDeviceScanner: NSObject {
+	/// Move SDK Flutter plugin.
 	weak var plugin: MoveSdkPlugin?
+
+	/// Device scanning listener sink.
 	var sink: FlutterEventSink?
 
+	/// Allowed audio ports to scan for.
 	private let allowedPorts: [AVAudioSession.Port] = [.bluetoothA2DP, .bluetoothHFP, .bluetoothLE, .carAudio]
 
+	/// Audio session instance.
 	private let session = AVAudioSession.sharedInstance()
+
+	/// Location manager instance.
 	private let locationManager = CLLocationManager()
+
+	/// Devices list to keep track.
 	private var devices: [MoveDevice] = []
+
+	/// Scanning update timer.
 	private var timer: Timer?
+
+	/// Beacon region for scanning iBeacons.
 	private var beaconRegion: CLBeaconRegion?
 
+	/// Initialize scanner.
+	/// - Parameters:
+	///   - plugin: Move SDK Flutter plugin to handle callbacks.
+	///   - registrar: Flutter plugin registrar to register on.
 	init(_ plugin: MoveSdkPlugin, registrar: FlutterPluginRegistrar) {
 		let channel = FlutterEventChannel(name: "movesdk-deviceScanner", binaryMessenger: registrar.messenger())
 		self.plugin = plugin
@@ -29,7 +50,8 @@ class MoveSDKDeviceScanner: NSObject {
 		}
 	}
 
-	func scanAudioPorts() {
+	/// Scans for audio input ports from audio session.
+	private func scanAudioPorts() {
 		let devices: [MoveDevice] = (session.availableInputs ?? []).compactMap {
 			if !allowedPorts.contains($0.portType) { return nil }
 			return MoveDevice(name: "\($0.portName)[\($0.uid)]", id: $0.uid)
@@ -38,14 +60,22 @@ class MoveSDKDeviceScanner: NSObject {
 		add(devices: devices)
 	}
 
-	func scanBeacons(uuid: UUID) {
+	/// Scans beacons on location manager with proximity UUID.
+	/// - Parameters:
+	///   - uuid: Proximity UUID to scan beacons in.
+	private func scanBeacons(uuid: UUID) {
 		let beaconRegion = CLBeaconRegion(proximityUUID: uuid, identifier: "beacons [\(uuid)]")
 		locationManager.startRangingBeacons(in: beaconRegion)
 		locationManager.requestState(for: beaconRegion)
 		self.beaconRegion = beaconRegion
 	}
 
-	func add(devices: [MoveDevice]) {
+	/// Add new found devices to device list.
+	/// - Parameters:
+	///   - devices: New `MoveDevice` objects to convert.
+	///
+	/// Will report devices on the scanning channel sink.
+	private func add(devices: [MoveDevice]) {
 		let devices = devices.filter { device in
 			!self.devices.contains { $0 == device }
 		}

@@ -2,22 +2,46 @@ import Flutter
 import UIKit
 import DolphinMoveSDK
 
+/// MoveSDK Flutter native plugin.
+///
+/// Responsible for setting up the plugin.
+///
+/// The SDK is initialized automatically in `application(_:, didFinishLaunchingWithOptions:)`, and sets up the SDK listener handlers.
+///
 public class MoveSdkPlugin: NSObject {
 
+	/// Move configuration keys.
 	internal enum Config: String {
+		/// Assistance call service.
 		case assistanceCall
+		/// Impact detection service.
 		case automaticImpactDetection
+		/// Cycling detection service.
 		case cycling
+		/// Driving detection service.
 		case driving
+		/// Distraction free driving subservice.
 		case distractionFreeDriving
+		/// Driving behavior subservice.
 		case drivingBehaviour
+		/// Driving device detection subservice.
 		case deviceDiscovery
+		/// Places service.
 		case places
+		/// Geofencing service.
 		case pointsOfInterest
+		/// Public transport service.
 		case publicTransport
+		/// Walking timeline service.
 		case walking
+		/// Walking location service.
 		case walkingLocation
 
+		/// Convert a `MoveConfig` service to a list of configuration keys.
+		/// - Parameters:
+		///   - service: The service to convert.
+		///
+		/// - Returns: Returns a list of one or more keys representing the service and subservices.
 		static func convert(service: MoveConfig.DetectionService, base: Bool = false) -> [Config] {
 			switch service {
 			case let .driving(services):
@@ -62,28 +86,61 @@ public class MoveSdkPlugin: NSObject {
 		}
 	}
 
+	/// Authentication state handler.
 	var authStateHandler: MoveSDKStreamHandler?
+
+	/// Service failure handler.
 	var failureHandler: MoveSDKStreamHandler?
+
+	/// Logging handler.
 	var logHandler: MoveSDKStreamHandler?
+
+	/// SDK state handler.
 	var sdkStateHandler: MoveSDKStreamHandler?
+
+	/// Trip start handler.
 	var tripStartHandler: MoveSDKStreamHandler?
+
+	/// Trip state handler.
 	var tripStateHandler: MoveSDKStreamHandler?
+
+	/// Service warnings handler.
 	var warningHandler: MoveSDKStreamHandler?
+
+	/// Device discovery handler.
 	var deviceDiscoveryHandler: MoveSDKStreamHandler?
+
+	/// Configuration update handler.
 	var configUpdateListener: MoveSDKStreamHandler?
 
+	/// Device scanner handler.
+	///
+	/// Device scanning needs to be triggered manually.
 	var deviceSannerHandler: MoveSDKDeviceScanner?
 
+	/// Retained `MoveSDK` singleton.
 	let sdk: MoveSDK = MoveSDK.shared
 
+	/// Flutter method channel.
 	var channel: FlutterMethodChannel? = nil
 
+	/// Invoke a dart method block.
+	/// - Parameters:
+	///   - method: The method to call given a predefined identifier.
+	///   - arguments: A flutter arguments object.
 	private func callDart(method: MoveSdkDartMethod, _ arguments: Any?...) {
 		DispatchQueue.main.async {
 			self.channel?.invokeMethod(method.rawValue, arguments: arguments)
 		}
 	}
 
+	/// Convert a list of config strings to a `MoveConfig` object.
+	/// - Parameters:
+	///   - config: A list of config services.
+	///
+	/// - Returns: Creates a `MoveConfig` object.
+	///
+	/// See `setup`.
 	fileprivate func convert(config: [String]) -> MoveConfig {
 		let moveConfig = config.compactMap { Config(rawValue: $0) }
 
@@ -137,6 +194,13 @@ public class MoveSdkPlugin: NSObject {
 		return MoveConfig(detectionService: detectionServices)
 	}
 
+	/// Convert device scan results to flutter argument dictionaries.
+	/// - Parameters:
+	///   - scanResults: A list of device scan results.
+	///
+	/// - Returns: Returns a list of flutter argument dictionaries.
+	///
+	/// See `deviceDiscoveryHandler`.
 	static internal func convert(scanResults: [MoveScanResult]) -> [[String: Any]] {
 		var deviceList: [[String: Any]] = []
 		for result in scanResults {
@@ -154,6 +218,13 @@ public class MoveSdkPlugin: NSObject {
 		return deviceList
 	}
 
+	/// Convert a `MoveConfig` to a list of flutter argument strings.
+	/// - Parameters:
+	///   - config: The `MoveConfig` to convert.
+	///
+	/// - Returns: Returns a list of strings passed to a flutter method or callback.
+	///
+	/// See `configUpdateListener`.
 	static internal func convert(config: MoveConfig) -> [String] {
 		var services: [String] = []
 		for service in config.services {
@@ -162,6 +233,16 @@ public class MoveSdkPlugin: NSObject {
 		return services
 	}
 
+	/// Convert device objects to flutter argument dictionaries.
+	/// - Parameters:
+	///   - devices: A list of `MoveDevice` objects.
+	///
+	/// - Returns: Returns a list of flutter argument dictionaries.
+	///
+	/// Used for `deviceDetection` service scanning.
+	/// Objects are serializable back and forth between flutter and swift.
+	///
+	/// See `getRegisteredDevices`.
 	static internal func convert(devices: [MoveDevice]) -> [[String: Any]] {
 		var deviceList: [[String: Any]] = []
 		for device in devices {
@@ -179,6 +260,13 @@ public class MoveSdkPlugin: NSObject {
 		return deviceList
 	}
 
+	/// Convert errors to flutter argument dictionaries.
+	/// - Parameters:
+	///   - errors: A list of `MoveServiceFailure` objects.
+	///
+	/// - Returns: Returns a list of flutter argument dictionaries.
+	///
+	/// See `getServiceErrors` and `failureHandler`.
 	fileprivate func convert(errors: [MoveServiceFailure]) -> [[String: Any]] {
 		var errorList: [[String: Any]] = []
 
@@ -202,6 +290,13 @@ public class MoveSdkPlugin: NSObject {
 		return errorList
 	}
 
+	/// Convert warnings to flutter argument dictionaries.
+	/// - Parameters:
+	///   - warnings: A list of `MoveServiceWarning` objects.
+	///
+	/// - Returns: Returns a list of flutter argument dictionaries.
+	///
+	/// See `getServiceWarnings` and `warningHandler`.
 	fileprivate func convert(warnings: [MoveServiceWarning]) -> [[String: Any]] {
 		var warningList: [[String: Any]] = []
 		for warning in warnings {
@@ -222,6 +317,11 @@ public class MoveSdkPlugin: NSObject {
 		return warningList
 	}
 
+	/// Parse device objects from a `FlutterMethodCall`.
+	/// - Parameters:
+	///   - call: The `FlutterMethodCall` to parse arguments from.
+	///
+	/// - Returns: Returns a list of `MoveDevice` or a parser error identifier.
 	private func getDevices(_ call: FlutterMethodCall) -> ([MoveDevice], [MoveSdkArgument])  {
 		guard
 			let deviceMap: [String: String] = call[.devices]
@@ -249,16 +349,28 @@ public class MoveSdkPlugin: NSObject {
 
 	// MARK: Implementation
 
+	/// Wrapper for SDK Method.
+	/// - Parameters:
+	///   - call: The `FlutterMethodCall` to parse arguments from.
+	///   - result: A Flutter result callback.
 	private func forceTripRecognition(_ call: FlutterMethodCall, _ result: @escaping FlutterResult) {
 		sdk.forceTripRecognition()
 		result(nil)
 	}
 
+	/// Wrapper for SDK Method.
+	/// - Parameters:
+	///   - call: The `FlutterMethodCall` to parse arguments from.
+	///   - result: A Flutter result callback.
 	private func finishCurrentTrip(_ call: FlutterMethodCall, _ result: @escaping FlutterResult) {
 		sdk.finishCurrentTrip()
 		result(nil)
 	}
 
+	/// Wrapper for SDK Method.
+	/// - Parameters:
+	///   - call: The `FlutterMethodCall` to parse arguments from.
+	///   - result: A Flutter result callback.
 	private func geocode(_ call: FlutterMethodCall, _ result: @escaping FlutterResult) {
 		guard
 			let latitude: Double = call[.latitude],
@@ -287,50 +399,90 @@ public class MoveSdkPlugin: NSObject {
 		}
 	}
 
+	/// Wrapper for SDK Method.
+	/// - Parameters:
+	///   - call: The `FlutterMethodCall` to parse arguments from.
+	///   - result: A Flutter result callback.
 	private func getAuthState(_ call: FlutterMethodCall, _ result: @escaping FlutterResult) {
 		let state = sdk.getAuthState()
 		result("\(state)")
 	}
 
+	/// Wrapper for SDK Method.
+	/// - Parameters:
+	///   - call: The `FlutterMethodCall` to parse arguments from.
+	///   - result: A Flutter result callback.
 	private func getDeviceQualifier(_ call: FlutterMethodCall, _ result: @escaping FlutterResult) {
 		let qualifier = sdk.getDeviceQualifier()
 		result("\(qualifier)")
 	}
 
+	/// Wrapper for SDK Method.
+	/// - Parameters:
+	///   - call: The `FlutterMethodCall` to parse arguments from.
+	///   - result: A Flutter result callback.
 	private func getPlatformVersion(_ call: FlutterMethodCall, _ result: @escaping FlutterResult) {
 		result("iOS " + UIDevice.current.systemVersion)
 	}
 
+	/// Wrapper for SDK Method.
+	/// - Parameters:
+	///   - call: The `FlutterMethodCall` to parse arguments from.
+	///   - result: A Flutter result callback.
 	private func getServiceErrors(_ call: FlutterMethodCall, _ result: @escaping FlutterResult) {
 		let errors = sdk.getServiceFailures()
 		result(convert(errors: errors))
 	}
 
+	/// Wrapper for SDK Method.
+	/// - Parameters:
+	///   - call: The `FlutterMethodCall` to parse arguments from.
+	///   - result: A Flutter result callback.
 	private func getServiceWarnings(_ call: FlutterMethodCall, _ result: @escaping FlutterResult) {
 		let warnings = sdk.getServiceWarnings()
 		result(convert(warnings: warnings))
 	}
 
+	/// Wrapper for SDK Method.
+	/// - Parameters:
+	///   - call: The `FlutterMethodCall` to parse arguments from.
+	///   - result: A Flutter result callback.
 	private func getRegisteredDevices(_ call: FlutterMethodCall, _ result: @escaping FlutterResult) {
 		let devices = sdk.getRegisteredDevices()
 		result(MoveSdkPlugin.convert(devices: devices))
 	}
 
+	/// Wrapper for SDK Method.
+	/// - Parameters:
+	///   - call: The `FlutterMethodCall` to parse arguments from.
+	///   - result: A Flutter result callback.
 	private func getState(_ call: FlutterMethodCall, _ result: @escaping FlutterResult) {
 		let state = sdk.getSDKState()
 		result("\(state)")
 	}
 
+	/// Wrapper for SDK Method.
+	/// - Parameters:
+	///   - call: The `FlutterMethodCall` to parse arguments from.
+	///   - result: A Flutter result callback.
 	private func getTripState(_ call: FlutterMethodCall, _ result: @escaping FlutterResult) {
 		let state = sdk.getTripState()
 		result("\(state)")
 	}
 
+	/// Wrapper for SDK Method.
+	/// - Parameters:
+	///   - call: The `FlutterMethodCall` to parse arguments from.
+	///   - result: A Flutter result callback.
 	private func ignoreCurrentTrip(_ call: FlutterMethodCall, _ result: @escaping FlutterResult) {
 		sdk.ignoreCurrentTrip()
 		result(nil)
 	}
 
+	/// Wrapper for SDK Method.
+	/// - Parameters:
+	///   - call: The `FlutterMethodCall` to parse arguments from.
+	///   - result: A Flutter result callback.
 	private func initiateAssistanceCall(_ call: FlutterMethodCall, _ result: @escaping FlutterResult) {
 		sdk.initiateAssistanceCall { error in
 			DispatchQueue.main.async {
@@ -346,6 +498,10 @@ public class MoveSdkPlugin: NSObject {
 		}
 	}
 
+	/// Wrapper for SDK Method.
+	/// - Parameters:
+	///   - call: The `FlutterMethodCall` to parse arguments from.
+	///   - result: A Flutter result callback.
 	private func registerDevices(_ call: FlutterMethodCall, _ result: @escaping FlutterResult) {
 		let (devices, arguments) = getDevices(call)
 
@@ -357,11 +513,19 @@ public class MoveSdkPlugin: NSObject {
 		return result(MoveSdkError.invalidArguments(arguments))
 	}
 
+	/// Wrapper for SDK Method.
+	/// - Parameters:
+	///   - call: The `FlutterMethodCall` to parse arguments from.
+	///   - result: A Flutter result callback.
 	private func resolveError(_ call: FlutterMethodCall, _ result: @escaping FlutterResult) {
 		sdk.resolveSDKStateError()
 		result(nil)
 	}
 
+	/// Wrapper for SDK Method.
+	/// - Parameters:
+	///   - call: The `FlutterMethodCall` to parse arguments from.
+	///   - result: A Flutter result callback.
 	private func setAssistanceMetaData(_ call: FlutterMethodCall, _ result: @escaping FlutterResult) {
 		guard let metadata: String = call[.metadata] else {
 			result(MoveSdkError.invalidArguments([.metadata]))
@@ -371,6 +535,10 @@ public class MoveSdkPlugin: NSObject {
 		sdk.setAssistanceMetaData(metadata)
 	}
 
+	/// Wrapper for SDK Method.
+	/// - Parameters:
+	///   - call: The `FlutterMethodCall` to parse arguments from.
+	///   - result: A Flutter result callback.
 	private func setup(_ call: FlutterMethodCall, _ result: @escaping FlutterResult) {
 		guard
 			let refreshToken: String = call[.refreshToken],
@@ -425,6 +593,10 @@ public class MoveSdkPlugin: NSObject {
 		sdk.setup(auth: auth, config: moveConfig, options: moveOptions)
 	}
 
+	/// Wrapper for SDK Method.
+	/// - Parameters:
+	///   - call: The `FlutterMethodCall` to parse arguments from.
+	///   - result: A Flutter result callback.
 	private func shutdown(_ call: FlutterMethodCall, _ result: @escaping FlutterResult) {
 		let force: Bool = call[.force] ?? true
 		sdk.shutDown(force: force) { error in
@@ -439,22 +611,38 @@ public class MoveSdkPlugin: NSObject {
 		}
 	}
 
+	/// Wrapper for SDK Method.
+	/// - Parameters:
+	///   - call: The `FlutterMethodCall` to parse arguments from.
+	///   - result: A Flutter result callback.
 	private func startAutomaticDetection(_ call: FlutterMethodCall, _ result: @escaping FlutterResult) {
 		sdk.startAutomaticDetection()
 		result(nil)
 	}
 
+	/// Wrapper for SDK Method.
+	/// - Parameters:
+	///   - call: The `FlutterMethodCall` to parse arguments from.
+	///   - result: A Flutter result callback.
 	private func stopAutomaticDetection(_ call: FlutterMethodCall, _ result: @escaping FlutterResult) {
 		sdk.stopAutomaticDetection()
 		result(nil)
 	}
 
+	/// Wrapper for SDK Method.
+	/// - Parameters:
+	///   - call: The `FlutterMethodCall` to parse arguments from.
+	///   - result: A Flutter result callback.
 	private func synchronizeUserData(_ call: FlutterMethodCall, _ result: @escaping FlutterResult) {
 		sdk.synchronizeUserData { success in
 			result(success)
 		}
 	}
 
+	/// Wrapper for SDK Method.
+	/// - Parameters:
+	///   - call: The `FlutterMethodCall` to parse arguments from.
+	///   - result: A Flutter result callback.
 	private func unregisterDevices(_ call: FlutterMethodCall, _ result: @escaping FlutterResult) {
 		let (devices, arguments) = getDevices(call)
 
@@ -466,6 +654,11 @@ public class MoveSdkPlugin: NSObject {
 		return result(MoveSdkError.invalidArguments(arguments))
 	}
 
+	/// Wrapper for SDK Method.
+	/// - Parameters:
+	///   - call: The `FlutterMethodCall` to parse arguments from.
+	///   - result: A Flutter result callback.
+	@available(*, deprecated, message: "Update auth is obsolete.")
 	private func updateAuth(_ call: FlutterMethodCall, _ result: @escaping FlutterResult) {
 		guard
 			let refreshToken: String = call[.refreshToken],
@@ -496,6 +689,10 @@ public class MoveSdkPlugin: NSObject {
 		}
 	}
 
+	/// Wrapper for SDK Method.
+	/// - Parameters:
+	///   - call: The `FlutterMethodCall` to parse arguments from.
+	///   - result: A Flutter result callback.
 	private func updateConfig(_ call: FlutterMethodCall, _ result: @escaping FlutterResult) {
 		guard
 			let config: [String] = call[.config]
@@ -608,7 +805,6 @@ extension MoveSdkPlugin: FlutterPlugin {
 		return true
 	}
 
-
 	public func handle(_ call: FlutterMethodCall, result: @escaping FlutterResult) {
 		guard let method = MoveSdkMethod(rawValue: call.method) else {
 			result(FlutterMethodNotImplemented)
@@ -644,24 +840,51 @@ extension MoveSdkPlugin: FlutterPlugin {
 	}
 }
 
+/// Move SDK Flutter channel handler.
+///
+/// Handles registration of an individual method channel handler.
 class MoveSDKStreamHandler: NSObject, FlutterStreamHandler {
+	/// Flutter stream channel identifier.
 	enum Identifier: String {
+		/// Channel prefix.
+		///
+		/// For all channels.
 		case prefix = "movesdk-"
+		/// Logging channel.
 		case log
+		/// SDK State channel.
 		case sdkState
+		/// Trip start channel.
 		case tripStart
+		/// Trip state channel.
 		case tripState
+		/// Auth state channel.
 		case authState
+		/// Service error channel.
 		case serviceError
+		/// Service warning channel.
 		case serviceWarning
+		/// Device discovery channel.
 		case deviceDiscovery
+		/// Configuration change channel.
 		case configChange
 	}
 
+	/// A reference to the MoveSDK flutter plugin.
 	weak var plugin: MoveSdkPlugin?
+
+	/// Flutter sink where to sink channel updates to.
 	var sink: FlutterEventSink?
+
+	/// Callback when a channel is registered for.
 	var onSink: (FlutterEventSink)-> Void
 
+	/// Initialize the stream handler.
+	/// - Parameters:
+	///   - plugin: The MoveSDK Flutter plugin.
+	///   - channel: The channel to register the handler for.
+	///   - registrar: Flutter plugin registrar.
+	///   - onSink: Method to call on with `FlutterEventSink` translating method arguments.
 	init(_ plugin: MoveSdkPlugin, channel: Identifier, registrar: FlutterPluginRegistrar, onSink: @escaping(FlutterEventSink)-> Void) {
 		let channel = FlutterEventChannel(name: Identifier.prefix.rawValue + channel.rawValue, binaryMessenger: registrar.messenger())
 		self.plugin = plugin
