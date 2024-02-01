@@ -1,4 +1,4 @@
-## 2.6.7
+## 2.6.5
 - Bugfixes & Improvements
 - Code documentation.
 - Deprecated auth state expired and updateAuth API. 
