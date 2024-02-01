@@ -1,3 +1,8 @@
+## 2.6.7
+- Bugfixes & Improvements
+- Code documentation.
+- Deprecated auth state expired and updateAuth API. 
+
 ## 2.6.4
 - Fix a bug with iOS device detection / CarPlay.
 - Fix a bug with Android shtudown force: false.

@@ -41,7 +41,8 @@ class MethodChannelMoveSdk extends MovesdkPlatform {
 
   @override
   Future<String> getPlatformVersion() async {
-    final version = await methodChannel.invokeMethod<String>('getPlatformVersion');
+    final version =
+        await methodChannel.invokeMethod<String>('getPlatformVersion');
     return version ?? "";
   }
 
@@ -58,7 +59,8 @@ class MethodChannelMoveSdk extends MovesdkPlatform {
 
   @override
   Future<bool> synchronizeUserData() async {
-    final result = await methodChannel.invokeMethod<bool>('synchronizeUserData');
+    final result =
+        await methodChannel.invokeMethod<bool>('synchronizeUserData');
     return result ?? false;
   }
 
@@ -95,18 +97,22 @@ class MethodChannelMoveSdk extends MovesdkPlatform {
 
   @override
   Stream<MoveState> setSdkStateListener() async* {
-    yield* sdkStateChannel.receiveBroadcastStream().asyncMap<MoveState>((sdkState) {
-      MoveState? result = MoveState.values
-          .firstWhereOrNull((element) => element.name.toLowerCase() == sdkState.toLowerCase());
+    yield* sdkStateChannel
+        .receiveBroadcastStream()
+        .asyncMap<MoveState>((sdkState) {
+      MoveState? result = MoveState.values.firstWhereOrNull(
+          (element) => element.name.toLowerCase() == sdkState.toLowerCase());
       return result ?? MoveState.unknown;
     });
   }
 
   @override
   Stream<MoveAuthState> setAuthStateListener() async* {
-    yield* authStateChannel.receiveBroadcastStream().asyncMap<MoveAuthState>((authState) {
-      MoveAuthState? result = MoveAuthState.values
-          .firstWhereOrNull((element) => element.name.toLowerCase() == authState.toLowerCase());
+    yield* authStateChannel
+        .receiveBroadcastStream()
+        .asyncMap<MoveAuthState>((authState) {
+      MoveAuthState? result = MoveAuthState.values.firstWhereOrNull(
+          (element) => element.name.toLowerCase() == authState.toLowerCase());
       return result ?? MoveAuthState.unknown;
     });
   }
@@ -120,16 +126,20 @@ class MethodChannelMoveSdk extends MovesdkPlatform {
 
   @override
   Stream<MoveTripState> setTripStateListener() async* {
-    yield* tripStateChannel.receiveBroadcastStream().asyncMap<MoveTripState>((tripState) {
-      MoveTripState? result = MoveTripState.values
-          .firstWhereOrNull((element) => element.name.toLowerCase() == tripState.toLowerCase());
+    yield* tripStateChannel
+        .receiveBroadcastStream()
+        .asyncMap<MoveTripState>((tripState) {
+      MoveTripState? result = MoveTripState.values.firstWhereOrNull(
+          (element) => element.name.toLowerCase() == tripState.toLowerCase());
       return result ?? MoveTripState.unknown;
     });
   }
 
   @override
   Stream<DateTime> setTripStartListener() async* {
-    yield* tripStartChannel.receiveBroadcastStream().asyncMap<DateTime>((tripStart) {
+    yield* tripStartChannel
+        .receiveBroadcastStream()
+        .asyncMap<DateTime>((tripStart) {
       return DateTime.fromMillisecondsSinceEpoch(tripStart);
     });
   }
@@ -172,13 +182,16 @@ class MethodChannelMoveSdk extends MovesdkPlatform {
 
   @override
   Stream<MoveConfig> setRemoteConfigChangeListener() async* {
-    yield* configChangeChannel.receiveBroadcastStream().asyncMap<MoveConfig>((result) {
+    yield* configChangeChannel
+        .receiveBroadcastStream()
+        .asyncMap<MoveConfig>((result) {
       return MoveConfig.fromNative(result);
     });
   }
 
   @override
-  Future<void> setup(MoveAuth moveAuth, MoveConfig moveConfig, MoveOptions? options) async {
+  Future<void> setup(
+      MoveAuth moveAuth, MoveConfig moveConfig, MoveOptions? options) async {
     await methodChannel.invokeMethod(
       'setup',
       <String, dynamic>{
@@ -189,12 +202,14 @@ class MethodChannelMoveSdk extends MovesdkPlatform {
         'config': moveConfig.buildConfigParameter(),
         'options': <String, dynamic>{
           'motionPermissionMandatory': options?.motionPermissionMandatory,
-          'backgroundLocationPermissionMandatory': options?.backgroundLocationPermissionMandatory,
+          'backgroundLocationPermissionMandatory':
+              options?.backgroundLocationPermissionMandatory,
           'deviceDiscovery': <String, dynamic>{
             'startDelay': options?.deviceDiscovery?.startDelay,
             'duration': options?.deviceDiscovery?.duration,
             'interval': options?.deviceDiscovery?.interval,
-            'stopScanOnFirstDiscovered': options?.deviceDiscovery?.stopScanOnFirstDiscovered,
+            'stopScanOnFirstDiscovered':
+                options?.deviceDiscovery?.stopScanOnFirstDiscovered,
           },
           'useBackendConfig': options?.useBackendConfig,
         },
@@ -322,8 +337,8 @@ class MethodChannelMoveSdk extends MovesdkPlatform {
   @override
   Future<MoveGeocodeResult> geocode(double latitude, double longitude) async {
     try {
-      final result = await methodChannel.invokeMethod<String>(
-          'geocode', <String, double>{'latitude': latitude, 'longitude': longitude});
+      final result = await methodChannel.invokeMethod<String>('geocode',
+          <String, double>{'latitude': latitude, 'longitude': longitude});
       return MoveGeocodeResult(result, null);
     } on PlatformException catch (e) {
       switch (e.code) {
@@ -340,37 +355,39 @@ class MethodChannelMoveSdk extends MovesdkPlatform {
   @override
   Future<MoveState> getState() async {
     final sdkState = await methodChannel.invokeMethod<String>('getSdkState');
-    MoveState? result = MoveState.values
-        .firstWhereOrNull((element) => element.name.toLowerCase() == sdkState?.toLowerCase());
+    MoveState? result = MoveState.values.firstWhereOrNull(
+        (element) => element.name.toLowerCase() == sdkState?.toLowerCase());
     return result ?? MoveState.unknown;
   }
 
   @override
   Future<MoveTripState> getTripState() async {
     final tripState = await methodChannel.invokeMethod<String>('getTripState');
-    MoveTripState? result = MoveTripState.values
-        .firstWhereOrNull((element) => element.name.toLowerCase() == tripState?.toLowerCase());
+    MoveTripState? result = MoveTripState.values.firstWhereOrNull(
+        (element) => element.name.toLowerCase() == tripState?.toLowerCase());
     return result ?? MoveTripState.unknown;
   }
 
   @override
   Future<MoveAuthState> getAuthState() async {
     final authState = await methodChannel.invokeMethod<String>('getAuthState');
-    MoveAuthState? result = MoveAuthState.values
-        .firstWhereOrNull((element) => element.name.toLowerCase() == authState?.toLowerCase());
+    MoveAuthState? result = MoveAuthState.values.firstWhereOrNull(
+        (element) => element.name.toLowerCase() == authState?.toLowerCase());
     return result ?? MoveAuthState.unknown;
   }
 
   @override
   Future<List<MoveServiceWarning>> getWarnings() async {
-    final warnings = await methodChannel.invokeMethod<List<dynamic>>('getWarnings') ?? [];
+    final warnings =
+        await methodChannel.invokeMethod<List<dynamic>>('getWarnings') ?? [];
     var result = MoveServiceWarning.fromNative(warnings);
     return result;
   }
 
   @override
   Future<List<MoveServiceError>> getErrors() async {
-    List<dynamic> errors = await methodChannel.invokeMethod<List<dynamic>>('getErrors') ?? [];
+    List<dynamic> errors =
+        await methodChannel.invokeMethod<List<dynamic>>('getErrors') ?? [];
     var result = MoveServiceError.fromNative(errors);
     return result;
   }
@@ -382,26 +399,30 @@ class MethodChannelMoveSdk extends MovesdkPlatform {
 
   @override
   Future<String> getDeviceQualifier() async {
-    final result = await methodChannel.invokeMethod<String>('getDeviceQualifier');
+    final result =
+        await methodChannel.invokeMethod<String>('getDeviceQualifier');
     return result ?? "";
   }
 
   @override
   Future<void> registerDevices(List<MoveDevice> devices) async {
     var deviceMap = {for (var device in devices) device.name: device.data};
-    await methodChannel.invokeMethod('registerDevices', <String, dynamic>{'devices': deviceMap});
+    await methodChannel.invokeMethod(
+        'registerDevices', <String, dynamic>{'devices': deviceMap});
   }
 
   @override
   Future<void> unregisterDevices(List<MoveDevice> devices) async {
     var deviceMap = {for (var device in devices) device.name: device.data};
-    await methodChannel.invokeMethod('unregisterDevices', <String, dynamic>{'devices': deviceMap});
+    await methodChannel.invokeMethod(
+        'unregisterDevices', <String, dynamic>{'devices': deviceMap});
   }
 
   @override
   Future<List<MoveDevice>> getRegisteredDevices() async {
-    List<dynamic> devices =
-        await methodChannel.invokeMethod<List<dynamic>>('getRegisteredDevices') ?? [];
+    List<dynamic> devices = await methodChannel
+            .invokeMethod<List<dynamic>>('getRegisteredDevices') ??
+        [];
     var result = MoveDevice.fromNative(devices);
     return result;
   }
@@ -434,7 +455,8 @@ class MethodChannelMoveSdk extends MovesdkPlatform {
       "contentText": notification.contentText,
       "imageName": notification.imageName,
     };
-    await methodChannel.invokeMethod('recognitionNotification', <String, dynamic>{'notification': map});
+    await methodChannel.invokeMethod(
+        'recognitionNotification', <String, dynamic>{'notification': map});
   }
 
   @override
@@ -447,11 +469,13 @@ class MethodChannelMoveSdk extends MovesdkPlatform {
       "contentText": notification.contentText,
       "imageName": notification.imageName,
     };
-    await methodChannel.invokeMethod('tripNotification', <String, dynamic>{'notification': map});
+    await methodChannel.invokeMethod(
+        'tripNotification', <String, dynamic>{'notification': map});
   }
 
   @override
-  Future<void> walkingLocationNotification(MoveNotification notification) async {
+  Future<void> walkingLocationNotification(
+      MoveNotification notification) async {
     var map = {
       "channelId": notification.channelId,
       "channelName": notification.channelName,
@@ -460,6 +484,7 @@ class MethodChannelMoveSdk extends MovesdkPlatform {
       "contentText": notification.contentText,
       "imageName": notification.imageName,
     };
-    await methodChannel.invokeMethod('walkingLocationNotification', <String, dynamic>{'notification': map});
+    await methodChannel.invokeMethod(
+        'walkingLocationNotification', <String, dynamic>{'notification': map});
   }
 }

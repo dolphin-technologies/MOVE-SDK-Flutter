@@ -12,9 +12,7 @@ class MoveScanResult {
       String name = result["name"];
       String data = result["device"];
       bool isDiscovered = result["isDiscovered"];
-      moveResults.add(
-        MoveScanResult(isDiscovered, MoveDevice(name, data))
-      );
+      moveResults.add(MoveScanResult(isDiscovered, MoveDevice(name, data)));
     }
     return moveResults;
   }

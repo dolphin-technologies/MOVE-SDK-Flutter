@@ -48,6 +48,9 @@ class MoveSdkPlugin : FlutterPlugin, MethodCallHandler {
     private lateinit var tripStartChannel: EventChannel
     private var context: Context? = null // Instance variable for context
 
+    /// Plugin registration.
+    /// - Parameters:
+    ///   - flutterPluginBinding: Flutter plugin binding.
     override fun onAttachedToEngine(flutterPluginBinding: FlutterPlugin.FlutterPluginBinding) {
         context = flutterPluginBinding.applicationContext
         channel = MethodChannel(flutterPluginBinding.binaryMessenger, "movesdk")
@@ -99,6 +102,10 @@ class MoveSdkPlugin : FlutterPlugin, MethodCallHandler {
             }
     }
 
+    /// Method call handler.
+    /// - Parameters:
+    ///   - call: [MethodCall].
+    ///   - result: A [MethodChannel.Result] used for submitting the result of the call.
     override fun onMethodCall(call: MethodCall, result: MethodChannel.Result) {
         context?.let {
             val flutterAdapter = MoveSdkFlutterAdapter(it, call, result)
@@ -112,15 +119,24 @@ class MoveSdkPlugin : FlutterPlugin, MethodCallHandler {
         }
     }
 
+    /// On detached from engine.
+    /// - Parameters:
+    ///   - binding: Flutter plugin binding.
     override fun onDetachedFromEngine(@NonNull binding: FlutterPlugin.FlutterPluginBinding) {
         channel.setMethodCallHandler(null)
     }
 }
 
+/// SDK state handler.
 class SdkStateStreamHandler : EventChannel.StreamHandler {
 
+    /// Handler for UI thread.
     private val uiThreadHandler: Handler = Handler(Looper.getMainLooper())
 
+    /// Listen for SDK state.
+    /// - Parameters:
+    ///   - arguments: stream configuration arguments, possibly null.
+    ///   - events: an EventChannel.EventSink for emitting events to the Flutter receiver.
     override fun onListen(arguments: Any?, events: EventChannel.EventSink?) {
         // trigger immediately time with current state
         events?.success(MoveSdk.get()?.getSdkState()?.name)
@@ -133,14 +149,21 @@ class SdkStateStreamHandler : EventChannel.StreamHandler {
         })
     }
 
+    /// Cancel listening for SDK state.
+    /// - Parameters:
+    ///   - arguments: stream configuration arguments, possibly null.
     override fun onCancel(arguments: Any?) {
     }
 }
 
+/// Trip state handler.
 class TripStateStreamHandler : EventChannel.StreamHandler {
-
     private val uiThreadHandler: Handler = Handler(Looper.getMainLooper())
 
+    /// Listen for trip state.
+    /// - Parameters:
+    ///   - arguments: stream configuration arguments, possibly null.
+    ///   - events: an EventChannel.EventSink for emitting events to the Flutter receiver.
     override fun onListen(arguments: Any?, events: EventChannel.EventSink?) {
         // trigger immediately time with current state
         events?.success(MoveSdk.get()?.getTripState()?.name)
@@ -153,14 +176,21 @@ class TripStateStreamHandler : EventChannel.StreamHandler {
         })
     }
 
+    /// Cancel listening for trip state.
+    /// - Parameters:
+    ///   - arguments: stream configuration arguments, possibly null.
     override fun onCancel(arguments: Any?) {
     }
 }
 
+/// Auth state handler.
 class AuthStateStreamHandler : EventChannel.StreamHandler {
-
     private val uiThreadHandler: Handler = Handler(Looper.getMainLooper())
 
+    /// Listen for auth state.
+    /// - Parameters:
+    ///   - arguments: stream configuration arguments, possibly null.
+    ///   - events: an EventChannel.EventSink for emitting events to the Flutter receiver.
     override fun onListen(arguments: Any?, events: EventChannel.EventSink?) {
         // trigger immediately time with current state
         events?.success(MoveSdk.get()?.getAuthState()?.name)
@@ -173,14 +203,21 @@ class AuthStateStreamHandler : EventChannel.StreamHandler {
         })
     }
 
+    /// Cancel listening for auth state.
+    /// - Parameters:
+    ///   - arguments: stream configuration arguments, possibly null.
     override fun onCancel(arguments: Any?) {
     }
 }
 
+/// Service error handler.
 class ServiceErrorStreamHandler : EventChannel.StreamHandler {
-
     private val uiThreadHandler: Handler = Handler(Looper.getMainLooper())
 
+    /// Listen for service errors.
+    /// - Parameters:
+    ///   - arguments: stream configuration arguments, possibly null.
+    ///   - events: an EventChannel.EventSink for emitting events to the Flutter receiver.
     override fun onListen(arguments: Any?, events: EventChannel.EventSink?) {
         // trigger immediately time with current state
         MoveSdk.get()?.setServiceErrorListener(object : MoveSdk.MoveErrorListener {
@@ -192,13 +229,21 @@ class ServiceErrorStreamHandler : EventChannel.StreamHandler {
         })
     }
 
+    /// Cancel listening for service errors.
+    /// - Parameters:
+    ///   - arguments: stream configuration arguments, possibly null.
     override fun onCancel(arguments: Any?) {
     }
 }
 
+/// Service warning handler.
 class ServiceWarningStreamHandler : EventChannel.StreamHandler {
     private val uiThreadHandler: Handler = Handler(Looper.getMainLooper())
 
+    /// Listen for service warnings.
+    /// - Parameters:
+    ///   - arguments: stream configuration arguments, possibly null.
+    ///   - events: an EventChannel.EventSink for emitting events to the Flutter receiver.
     override fun onListen(arguments: Any?, events: EventChannel.EventSink?) {
         MoveSdk.get()?.setServiceWarningListener(object : MoveSdk.MoveWarningListener {
             override fun onMoveWarning(serviceWarnings: List<MoveServiceWarning>) {
@@ -209,13 +254,21 @@ class ServiceWarningStreamHandler : EventChannel.StreamHandler {
         })
     }
 
+    /// Cancel listening for service warnings.
+    /// - Parameters:
+    ///   - arguments: stream configuration arguments, possibly null.
     override fun onCancel(arguments: Any?) {
     }
 }
 
+/// Log handler.
 class LogStreamHandler : EventChannel.StreamHandler {
     private val uiThreadHandler: Handler = Handler(Looper.getMainLooper())
 
+    /// Listen for log events.
+    /// - Parameters:
+    ///   - arguments: stream configuration arguments, possibly null.
+    ///   - events: an EventChannel.EventSink for emitting events to the Flutter receiver.
     override fun onListen(arguments: Any?, events: EventChannel.EventSink?) {
         MoveSdk.get()?.setLogListener(object : MoveSdk.MoveLogCallback {
             override fun onLogReceived(eventName: String, value: String?) {
@@ -226,13 +279,21 @@ class LogStreamHandler : EventChannel.StreamHandler {
         })
     }
 
+    /// Cancel listening for log events.
+    /// - Parameters:
+    ///   - arguments: stream configuration arguments, possibly null.
     override fun onCancel(arguments: Any?) {
     }
 }
 
+/// Device discovery handler.
 class DeviceDiscoveryStreamHandler : EventChannel.StreamHandler {
     private val uiThreadHandler: Handler = Handler(Looper.getMainLooper())
 
+    /// Listen for device discovery.
+    /// - Parameters:
+    ///   - arguments: stream configuration arguments, possibly null.
+    ///   - events: an EventChannel.EventSink for emitting events to the Flutter receiver.
     override fun onListen(arguments: Any?, events: EventChannel.EventSink?) {
         MoveSdk.get()?.deviceDiscoveryListener(
             object : MoveSdk.DeviceDiscoveryListener {
@@ -245,10 +306,17 @@ class DeviceDiscoveryStreamHandler : EventChannel.StreamHandler {
         )
     }
 
+    /// Cancel listening for device discovery.
+    /// - Parameters:
+    ///   - arguments: stream configuration arguments, possibly null.
     override fun onCancel(arguments: Any?) {
     }
 }
 
+/// BLE Device scanning handler.
+/// - Parameters:
+///   - context: Application context.
+/// - Returns: Handler of stream setup and teardown requests.
 class DeviceScanningStreamHandler(
     private val context: Context,
 ) : EventChannel.StreamHandler {
@@ -263,6 +331,7 @@ class DeviceScanningStreamHandler(
     private var proximityId: String? = null
     private var manufacturerId: Int? = null
 
+    /// Callback for BLE scanning.
     private val leCallback = object : ScanCallback() {
         @SuppressLint("MissingPermission")
         override fun onScanResult(callbackType: Int, result: ScanResult) {
@@ -282,6 +351,10 @@ class DeviceScanningStreamHandler(
         }
     }
 
+    /// Handler for BLE device scanning.
+    /// - Parameters:
+    ///   - arguments: stream configuration arguments, possibly null.
+    ///   - events: an EventChannel.EventSink for emitting events to the Flutter receiver.
     @SuppressLint("MissingPermission")
     override fun onListen(arguments: Any?, events: EventChannel.EventSink?) {
         if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.S) {
@@ -315,6 +388,9 @@ class DeviceScanningStreamHandler(
         }
     }
 
+    /// Stop BLE scanning.
+    /// - Parameters:
+    ///   - arguments: stream configuration arguments, possibly null.
     @SuppressLint("MissingPermission")
     override fun onCancel(arguments: Any?) {
         events = null
@@ -324,6 +400,10 @@ class DeviceScanningStreamHandler(
         bluetoothManager.adapter.bluetoothLeScanner.stopScan(leCallback)
     }
 
+    /// Get proximity UUID from manufacturer specific data.
+    /// - Parameters:
+    ///   - manufacturerSpecificData: Manufacturer specific data.
+    /// - Returns: Proximity UUID.
     private fun getProximityUUID(manufacturerSpecificData: ByteArray?): String? {
         if (manufacturerSpecificData == null || manufacturerSpecificData.size < 23) {
             return null
@@ -335,6 +415,7 @@ class DeviceScanningStreamHandler(
         return uuid.toString().uppercase(Locale.getDefault())
     }
 
+    /// Proceed with paired devices.
     @SuppressLint("MissingPermission")
     private fun proceedWithPairedDevices() {
         val hasFeature =
@@ -359,6 +440,7 @@ class DeviceScanningStreamHandler(
         }
     }
 
+    /// Proceed with BLE devices.
     @SuppressLint("MissingPermission") // covered with isPermissionGranted
     private fun proceedWithBleDevices() {
         val bluetoothManager: BluetoothManager? =
@@ -407,6 +489,9 @@ class DeviceScanningStreamHandler(
         bluetoothManager?.adapter?.bluetoothLeScanner?.startScan(leCallback)
     }
 
+    /// Check if permission is granted.
+    /// - Parameters:
+    ///   - permission: Manifest permission name to check.
     private fun isPermissionGranted(permission: String): Boolean {
         return try {
             ContextCompat.checkSelfPermission(
@@ -418,16 +503,20 @@ class DeviceScanningStreamHandler(
         }
     }
 
+    /// BT Device filter.
+    /// - Parameters:
+    ///   - filter: Filter name.
     enum class MoveDeviceFilter(val filter: String) {
         BEACON("beacon"),
         PAIRED("paired");
     }
 }
 
-
+/// Config change handler.
 class ConfigChangeStreamHandler() : EventChannel.StreamHandler {
     private val uiThreadHandler: Handler = Handler(Looper.getMainLooper())
 
+    /// Listen for config changes.
     override fun onListen(arguments: Any?, events: EventChannel.EventSink?) {
         MoveSdk.get()?.setRemoteConfigChangeListener(
             object : MoveSdk.RemoteConfigChangeListener {
@@ -440,13 +529,19 @@ class ConfigChangeStreamHandler() : EventChannel.StreamHandler {
         )
     }
 
+    /// Cancel listening for config changes.
     override fun onCancel(arguments: Any?) {
     }
 }
 
+/// Trip start handler.
 class TripStartStreamHandler() : EventChannel.StreamHandler {
     private val uiThreadHandler: Handler = Handler(Looper.getMainLooper())
 
+    /// Listen for trip start.
+    /// - Parameters:
+    ///   - arguments: stream configuration arguments, possibly null.
+    ///   - events: an EventChannel.EventSink for emitting events to the Flutter receiver.
     override fun onListen(arguments: Any?, events: EventChannel.EventSink?) {
         MoveSdk.get()?.setTripStartListener(
             object : MoveSdk.TripStartListener {
@@ -459,6 +554,9 @@ class TripStartStreamHandler() : EventChannel.StreamHandler {
         )
     }
 
+    /// Cancel listening for trip start.
+    /// - Parameters:
+    ///   - arguments: stream configuration arguments, possibly null.
     override fun onCancel(arguments: Any?) {
     }
 }

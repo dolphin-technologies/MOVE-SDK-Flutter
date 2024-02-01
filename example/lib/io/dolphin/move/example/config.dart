@@ -39,7 +39,8 @@ class MoveAppConfiguration {
     if (services != null) {
       for (var service in services) {
         var detectionService = MoveDetectionService.values
-            .where((element) => element.name.toLowerCase() == service.toLowerCase())
+            .where((element) =>
+                element.name.toLowerCase() == service.toLowerCase())
             .first;
         storedMoveDetectionServices.add(detectionService);
       }
@@ -56,7 +57,7 @@ class MoveAppConfiguration {
     prefs.setBool("keepActive", keepActive == true);
     prefs.setBool("keepInForeground", keepInForeground == true);
 
-    prefs.setStringList(
-        "moveDetectionServices", moveDetectionServices?.map((e) => e.name).toList() ?? []);
+    prefs.setStringList("moveDetectionServices",
+        moveDetectionServices?.map((e) => e.name).toList() ?? []);
   }
 }

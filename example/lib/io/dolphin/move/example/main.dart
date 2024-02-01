@@ -18,7 +18,8 @@ import 'package:permission_handler/permission_handler.dart';
 import 'package:shared_preferences/shared_preferences.dart';
 
 extension ListSpaceBetweenExtension on List<Widget> {
-  List<Widget> withSpaceBetween({final double? width, final double? height}) => [
+  List<Widget> withSpaceBetween({final double? width, final double? height}) =>
+      [
         for (int i = 0; i < length; i++) ...[
           if (i > 0) SizedBox(width: width, height: height),
           this[i],
@@ -106,7 +107,8 @@ class AppModel extends ChangeNotifier {
   toggleAutomaticDetection(bool value) async {
     if (value) {
       if (userID == null) {
-        var userID = "${DateTime.now().toUtc().millisecondsSinceEpoch}".substring(0, 10);
+        var userID =
+            "${DateTime.now().toUtc().millisecondsSinceEpoch}".substring(0, 10);
         this.userID = userID;
 
         MoveAuth moveAuth = await AuthClient.registerUser(userID);
@@ -138,16 +140,26 @@ class _MyAppState extends State<MyApp> {
             primarySwatch: Colors.blue,
             textTheme: const TextTheme(
                 bodyMedium: TextStyle(color: textColor),
-                headlineMedium:
-                    TextStyle(color: headlineColor, fontWeight: FontWeight.w900, fontSize: 17.0),
-                headlineSmall:
-                    TextStyle(color: headlineColor, fontWeight: FontWeight.bold, fontSize: 14.0),
-                titleLarge:
-                    TextStyle(color: Colors.white, fontWeight: FontWeight.w900, fontSize: 20.0),
-                titleMedium:
-                    TextStyle(color: Colors.white, fontWeight: FontWeight.w900, fontSize: 17.0),
-                titleSmall:
-                    TextStyle(color: headlineColor, fontWeight: FontWeight.bold, fontSize: 12.0),
+                headlineMedium: TextStyle(
+                    color: headlineColor,
+                    fontWeight: FontWeight.w900,
+                    fontSize: 17.0),
+                headlineSmall: TextStyle(
+                    color: headlineColor,
+                    fontWeight: FontWeight.bold,
+                    fontSize: 14.0),
+                titleLarge: TextStyle(
+                    color: Colors.white,
+                    fontWeight: FontWeight.w900,
+                    fontSize: 20.0),
+                titleMedium: TextStyle(
+                    color: Colors.white,
+                    fontWeight: FontWeight.w900,
+                    fontSize: 17.0),
+                titleSmall: TextStyle(
+                    color: headlineColor,
+                    fontWeight: FontWeight.bold,
+                    fontSize: 12.0),
                 labelSmall: TextStyle(color: textColor, fontSize: 12.0)),
             appBarTheme: const AppBarTheme(
               color: Color(0xFF071230),
@@ -161,38 +173,49 @@ class _MyAppState extends State<MyApp> {
             appBar: AppBar(
               title: const Text(
                 'MOVE',
-                style: TextStyle(color: Colors.white, fontWeight: FontWeight.w900, fontSize: 20.0),
+                style: TextStyle(
+                    color: Colors.white,
+                    fontWeight: FontWeight.w900,
+                    fontSize: 20.0),
               ),
             ),
             body: Column(children: [
               const MoveStateHeader(),
               Expanded(
                 child: SingleChildScrollView(
-                  child: Column(crossAxisAlignment: CrossAxisAlignment.start, children: [
-                    Padding(
-                      padding: const EdgeInsets.all(16.0),
-                      child: Column(
-                          crossAxisAlignment: CrossAxisAlignment.start,
-                          children: [
-                            Text("Errors", style: Theme.of(context).textTheme.titleSmall),
-                            ...(app.errors ?? [])
-                                .map((e) => Text(
-                                    "${e.service.name} - ${e.reasons.map((e) => e.name)}",
-                                    style: const TextStyle(
-                                        color: Colors.red, fontWeight: FontWeight.bold)))
-                                .toList(),
-                            Text("Warnings", style: Theme.of(context).textTheme.titleSmall),
-                            ...(app.warnings ?? [])
-                                .map((e) => Text(
-                                    "${e.service?.name ?? ""} - ${e.reasons.map((e) => e.name)}",
-                                    style: const TextStyle(
-                                        color: Colors.amber, fontWeight: FontWeight.bold)))
-                                .toList(),
-                          ].withSpaceBetween(height: 5.0)),
-                    ),
-                    const MovePermissionsWidget(),
-                    const MoveStateFooter(),
-                  ]),
+                  child: Column(
+                      crossAxisAlignment: CrossAxisAlignment.start,
+                      children: [
+                        Padding(
+                          padding: const EdgeInsets.all(16.0),
+                          child: Column(
+                              crossAxisAlignment: CrossAxisAlignment.start,
+                              children: [
+                                Text("Errors",
+                                    style:
+                                        Theme.of(context).textTheme.titleSmall),
+                                ...(app.errors ?? [])
+                                    .map((e) => Text(
+                                        "${e.service.name} - ${e.reasons.map((e) => e.name)}",
+                                        style: const TextStyle(
+                                            color: Colors.red,
+                                            fontWeight: FontWeight.bold)))
+                                    .toList(),
+                                Text("Warnings",
+                                    style:
+                                        Theme.of(context).textTheme.titleSmall),
+                                ...(app.warnings ?? [])
+                                    .map((e) => Text(
+                                        "${e.service?.name ?? ""} - ${e.reasons.map((e) => e.name)}",
+                                        style: const TextStyle(
+                                            color: Colors.amber,
+                                            fontWeight: FontWeight.bold)))
+                                    .toList(),
+                              ].withSpaceBetween(height: 5.0)),
+                        ),
+                        const MovePermissionsWidget(),
+                        const MoveStateFooter(),
+                      ]),
                 ),
               ),
             ]),
@@ -289,40 +312,50 @@ class _MoveStateHeader extends State<MoveStateHeader> {
           const Padding(
             padding: EdgeInsets.symmetric(horizontal: 16.0, vertical: 16.0),
             child: Text("CURRENT STATE",
-                style: TextStyle(color: Colors.white, fontWeight: FontWeight.w900, fontSize: 17)),
+                style: TextStyle(
+                    color: Colors.white,
+                    fontWeight: FontWeight.w900,
+                    fontSize: 17)),
           ),
           Padding(
-            padding: const EdgeInsets.symmetric(horizontal: 16.0, vertical: 0.0),
+            padding:
+                const EdgeInsets.symmetric(horizontal: 16.0, vertical: 0.0),
             child: Container(
               height: 100.0,
               width: double.infinity,
               decoration: const BoxDecoration(
-                  color: Color(0xFFF3F3F3), borderRadius: BorderRadius.all(Radius.circular(15.0))),
-              child: Column(crossAxisAlignment: CrossAxisAlignment.start, children: [
-                Padding(
-                    padding: const EdgeInsets.fromLTRB(16.0, 10.0, 10.0, 0.0),
-                    child: Row(children: [
-                      Text(recordingState, style: Theme.of(context).textTheme.headlineSmall),
-                      const Spacer(),
-                      Switch(
-                        value: switchState,
-                        activeColor: Colors.green,
-                        onChanged: (bool value) {
-                          appModel?.toggleAutomaticDetection(value);
-                        },
-                      )
-                    ])),
-                const Divider(
-                  height: 1,
-                  thickness: 1,
-                  indent: 0,
-                  endIndent: 0,
-                  color: Colors.white,
-                ),
-                Padding(
-                    padding: const EdgeInsets.fromLTRB(16.0, 10.0, 16.0, 10.0),
-                    child: Text("Your contract id: $userID"))
-              ]),
+                  color: Color(0xFFF3F3F3),
+                  borderRadius: BorderRadius.all(Radius.circular(15.0))),
+              child: Column(
+                  crossAxisAlignment: CrossAxisAlignment.start,
+                  children: [
+                    Padding(
+                        padding:
+                            const EdgeInsets.fromLTRB(16.0, 10.0, 10.0, 0.0),
+                        child: Row(children: [
+                          Text(recordingState,
+                              style: Theme.of(context).textTheme.headlineSmall),
+                          const Spacer(),
+                          Switch(
+                            value: switchState,
+                            activeColor: Colors.green,
+                            onChanged: (bool value) {
+                              appModel?.toggleAutomaticDetection(value);
+                            },
+                          )
+                        ])),
+                    const Divider(
+                      height: 1,
+                      thickness: 1,
+                      indent: 0,
+                      endIndent: 0,
+                      color: Colors.white,
+                    ),
+                    Padding(
+                        padding:
+                            const EdgeInsets.fromLTRB(16.0, 10.0, 16.0, 10.0),
+                        child: Text("Your contract id: $userID"))
+                  ]),
             ),
           ),
         ]),
@@ -352,15 +385,20 @@ class _MoveStateFooter extends State<MoveStateFooter> {
             children: [
           Row(mainAxisAlignment: MainAxisAlignment.center, children: [
             Text("SDK STATE: ", style: Theme.of(context).textTheme.titleSmall),
-            Text("${app.sdkState}", style: Theme.of(context).textTheme.labelSmall)
+            Text("${app.sdkState}",
+                style: Theme.of(context).textTheme.labelSmall)
           ]),
           Row(mainAxisAlignment: MainAxisAlignment.center, children: [
-            Text("SDK TRIP STATE: ", style: Theme.of(context).textTheme.titleSmall),
-            Text("${app.tripState}", style: Theme.of(context).textTheme.labelSmall)
+            Text("SDK TRIP STATE: ",
+                style: Theme.of(context).textTheme.titleSmall),
+            Text("${app.tripState}",
+                style: Theme.of(context).textTheme.labelSmall)
           ]),
           Row(mainAxisAlignment: MainAxisAlignment.center, children: [
-            Text("SDK AUTH STATE: ", style: Theme.of(context).textTheme.titleSmall),
-            Text("${app.authState}", style: Theme.of(context).textTheme.labelSmall)
+            Text("SDK AUTH STATE: ",
+                style: Theme.of(context).textTheme.titleSmall),
+            Text("${app.authState}",
+                style: Theme.of(context).textTheme.labelSmall)
           ]),
         ].withSpaceBetween(height: 5.0)),
       );
@@ -383,7 +421,8 @@ class _MovePermissionsWidget extends State<MovePermissionsWidget> {
       child: Column(
           crossAxisAlignment: CrossAxisAlignment.start,
           children: [
-            Text("PERMISSIONS", style: Theme.of(context).textTheme.headlineMedium),
+            Text("PERMISSIONS",
+                style: Theme.of(context).textTheme.headlineMedium),
             const Text(
                 "MOVE needs the following permissions to record your activities. Please check each one and grant them."),
             const MovePermissionWidget(
@@ -401,7 +440,7 @@ class _MovePermissionsWidget extends State<MovePermissionsWidget> {
               const MovePermissionWidget(
                   title: "BACKGROUND LOCATION",
                   description:
-                  "MOVE should be abble to access the location in the background.",
+                      "MOVE should be abble to access the location in the background.",
                   permission: Permission.locationAlways),
               const MovePermissionWidget(
                   title: "MOTION",
@@ -420,7 +459,8 @@ class _MovePermissionsWidget extends State<MovePermissionsWidget> {
                   permission: Permission.systemAlertWindow),
               const MovePermissionWidget(
                   title: "BATTERY",
-                  description: "We use this to detect driving also in the background.",
+                  description:
+                      "We use this to detect driving also in the background.",
                   permission: Permission.ignoreBatteryOptimizations),
             ],
           ].withSpaceBetween(height: 10.0)),
@@ -496,13 +536,15 @@ class _MovePermissionWidget extends State<MovePermissionWidget> {
       height: 135.0,
       width: double.infinity,
       decoration: const BoxDecoration(
-          color: Color(0xFFF3F3F3), borderRadius: BorderRadius.all(Radius.circular(15.0))),
+          color: Color(0xFFF3F3F3),
+          borderRadius: BorderRadius.all(Radius.circular(15.0))),
       child: Column(crossAxisAlignment: CrossAxisAlignment.start, children: [
         Padding(
           padding: const EdgeInsets.fromLTRB(16.0, 10.0, 10.0, 0.0),
           child: Row(
             children: [
-              Text(widget.title, style: Theme.of(context).textTheme.headlineSmall),
+              Text(widget.title,
+                  style: Theme.of(context).textTheme.headlineSmall),
               const Spacer(),
               ElevatedButton(
                 onPressed: () async {

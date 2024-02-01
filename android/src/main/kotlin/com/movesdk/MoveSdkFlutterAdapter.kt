@@ -33,29 +33,39 @@ import kotlinx.coroutines.withContext
 
 private val gson = Gson()
 
+/// This class is responsible for handling all the method calls
+/// from the Flutter side.
+/// - Parameters:
+///   - context: a context.
+///   - call: [MethodCall].
+///   - result: A [MethodChannel.Result] used for submitting the result of the call.
 internal class MoveSdkFlutterAdapter(
     private val context: Context,
     private val call: MethodCall,
     private val result: MethodChannel.Result,
 ) : MoveSdkFlutter {
-
+    /// This handler is used to post the result back to the main thread.
     private val uiThreadHandler: Handler = Handler(Looper.getMainLooper())
-
+    /// This scope is used to launch coroutines on the main thread.
     private val mainScope = CoroutineScope(Dispatchers.Main)
+    /// This scope is used to launch coroutines on the IO thread.
     private val ioContext = Dispatchers.IO
 
+    /// Get the warnings.
     override fun getWarnings() {
         val serviceWarnings: List<MoveServiceWarning>? = MoveSdk.get()?.getServiceWarnings()
         val errors: List<Map<String, Any>> = serviceWarnings?.toWarningObject() ?: emptyList()
         result.success(errors)
     }
 
+    /// Get the errors.
     override fun getErrors() {
         val serviceErrors: List<MoveServiceFailure>? = MoveSdk.get()?.getServiceErrors()
         val errors: List<Map<String, Any>> = serviceErrors?.toErrorObject() ?: emptyList()
         result.success(errors)
     }
 
+    /// Allow mock locations.
     override fun allowMockLocations() {
         val allow = call.argument<Boolean>("allow")
         MoveSdk.get()?.allowMockLocations(allow == true)
@@ -70,6 +80,7 @@ internal class MoveSdkFlutterAdapter(
         // No implementation
     }
 
+    /// Setup the MOVE SDK.
     override fun setup() {
         val moveAuth = extractMoveAuth(call)
         val moveConfig = extractMoveConfig(call)
@@ -78,11 +89,13 @@ internal class MoveSdkFlutterAdapter(
         result.success("setup")
     }
 
+    /// Update the MOVE SDK config.
     override fun updateConfig() {
         val moveConfig = extractMoveConfig(call)
         MoveSdk.get()?.updateConfig(moveConfig)
     }
 
+    @Deprecated("Update auth is obsolete.")
     override fun updateAuth() {
         val moveAuth = extractMoveAuth(call)
         MoveSdk.get()?.updateAuth(moveAuth) { configurationError: MoveAuthError ->
@@ -113,31 +126,37 @@ internal class MoveSdkFlutterAdapter(
         }
     }
 
+    /// Start the MOVE SDK trip detection.
     override fun startAutomaticDetection() {
         MoveSdk.get()?.startAutomaticDetection()
         result.success(null)
     }
 
+    /// Stop the MOVE SDK trip detection.
     override fun stopAutomaticDetection() {
         MoveSdk.get()?.stopAutomaticDetection()
         result.success(null)
     }
 
+    /// Trigger the MOVE SDK trip detection.
     override fun forceTripRecognition() {
         MoveSdk.get()?.forceTripRecognition()
         result.success(null)
     }
 
+    /// Finish a trip manually.
     override fun finishCurrentTrip() {
         MoveSdk.get()?.finishCurrentTrip()
         result.success(null)
     }
 
+    /// Ignore the current trip.
     override fun ignoreCurrentTrip() {
         MoveSdk.get()?.ignoreCurrentTrip()
         result.success("ignoreCurrentTrip")
     }
 
+    /// Initiate an assistance call.
     override fun initiateAssistanceCall() {
         MoveSdk.get()?.initiateAssistanceCall(object : MoveSdk.AssistanceStateListener {
             override fun onAssistanceStateChanged(assistanceState: MoveAssistanceCallStatus) {
@@ -161,36 +180,43 @@ internal class MoveSdkFlutterAdapter(
         })
     }
 
+    /// Get the MOVE SDK state.
     override fun getSdkState() {
         val sdkState = MoveSdk.get()?.getSdkState()?.name
         result.success(sdkState)
     }
 
+    /// Get the MOVE SDK trip state.
     override fun getTripState() {
         val tripState = MoveSdk.get()?.getTripState()?.name
         result.success(tripState)
     }
 
+    /// Get the MOVE SDK authentication state.
     override fun getAuthState() {
         val authState = MoveSdk.get()?.getAuthState()?.name
         result.success(authState)
     }
 
+    /// Get the status of the device.
     override fun getDeviceStatus() {
         val deviceStatus = MoveSdk.get()?.getDeviceStatus()
         val deviceStatusJson = gson.toJson(deviceStatus)
         result.success(deviceStatusJson)
     }
 
+    /// Get the MOVE SDK configuration.
     override fun getMoveConfig() {
         result.success(MoveSdk.get()?.getMoveConfig())
     }
 
+    /// Delete all local data.
     override fun deleteLocalData() {
         MoveSdk.get()?.deleteLocalData()
         result.success("deleteLocalData")
     }
 
+    /// Shutdown the MOVE SDK.
     override fun shutdown() {
         val force = call.argument<Boolean>("force") == true
         MoveSdk.get()?.shutdown(force) { shutdownResult ->
@@ -204,6 +230,7 @@ internal class MoveSdkFlutterAdapter(
         }
     }
 
+    /// Synchronize the user data.
     override fun synchronizeUserData() {
         MoveSdk.get()?.synchronizeUserData(object : (Boolean) -> Unit {
             override fun invoke(success: Boolean) {
@@ -214,38 +241,45 @@ internal class MoveSdkFlutterAdapter(
         })
     }
 
+    /// Fetch the user config.
     override fun fetchUserConfig() {
         MoveSdk.get()?.fetchUserConfig()
         result.success("fetchUserConfig")
     }
 
+    /// Keep the MOVE SDK in the foreground.
     override fun keepInForeground() {
         val enabled = call.argument<Boolean>("enabled")
         MoveSdk.get()?.keepInForeground(enabled == true)
         result.success(null)
     }
 
+    /// Check if the MOVE SDK is kept in the foreground.
     override fun isKeepInForegroundOn() {
         val isKeepInForegroundOn = MoveSdk.get()?.isKeepInForegroundOn() == true
         result.success(isKeepInForegroundOn)
     }
 
+    /// Keep the MOVE SDK active.
     override fun keepActive() {
         val enabled = call.argument<Boolean>("enabled")
         MoveSdk.get()?.keepActive(enabled == true)
         result.success(null)
     }
 
+    /// Check if the MOVE SDK is kept active.
     override fun isKeepActiveOn() {
         val isKeepActiveOn = MoveSdk.get()?.isKeepActiveOn() == true
         result.success(isKeepActiveOn)
     }
 
+    /// Resolve an occured error.
     override fun resolveError() {
         MoveSdk.get()?.resolveError()
         result.success(null)
     }
 
+    /// Get the address from coordinates.
     override fun geocode() {
         val latitude = call.argument<Double>("latitude") ?: 0.0
         val longitude = call.argument<Double>("longitude") ?: 0.0
@@ -283,6 +317,7 @@ internal class MoveSdkFlutterAdapter(
             })
     }
 
+    // Use PowerManager to keep some parts alive.
     override fun useWakelocks() {
         val recognition = call.argument<Boolean>("recognition")
         val sensors = call.argument<Boolean>("sensors")
@@ -295,29 +330,35 @@ internal class MoveSdkFlutterAdapter(
         result.success(null)
     }
 
+    /// Set the assistance metadata.
     override fun setAssistanceMetaData() {
         val assistanceMetadataValue = call.argument<String>("assistanceMetadataValue")
         MoveSdk.get()?.setAssistanceMetaData(assistanceMetadataValue)
         result.success(null)
     }
 
+    /// Get the device qualifier.
     override fun getDeviceQualifier() {
         result.success("Android ${android.os.Build.VERSION.RELEASE}")
     }
 
+    /// Get the platform version.
     override fun getPlatformVersion() {
         result.success("Android ${android.os.Build.VERSION.RELEASE}")
     }
 
+    /// Get the MOVE SDK version.
     override fun getMoveVersion() {
         result.success(MoveSdk.version)
     }
 
+    /// Init the MOVE SDK.
     override fun init() {
         MoveSdk.init(context)
         result.success("init")
     }
 
+    /// Register BT devices for scanning.
     override fun registerDevices() {
         result.success(null)
         mainScope.launch {
@@ -339,6 +380,7 @@ internal class MoveSdkFlutterAdapter(
         }
     }
 
+    /// Unregister BT devices for scanning.
     override fun unregisterDevices() {
         mainScope.launch {
             val unregisterResult = withContext(ioContext) {
@@ -359,6 +401,7 @@ internal class MoveSdkFlutterAdapter(
         }
     }
 
+    /// Get the registered BT devices.
     override fun getRegisteredDevices() {
         mainScope.launch {
             val devices = mutableListOf<MoveDevice>()
@@ -369,21 +412,28 @@ internal class MoveSdkFlutterAdapter(
         }
     }
 
+    /// Creates the recognition notification.
     override fun recognitionNotification() {
         val notification = createChannelGetNotification() ?: return
         MoveSdk.get()?.recognitionNotification(notification)
     }
 
+    /// Creates the trip notification.
     override fun tripNotification() {
         val notification = createChannelGetNotification() ?: return
         MoveSdk.get()?.tripNotification(notification)
     }
 
+    /// Creates the walking notification.
     override fun walkingLocationNotification() {
         val notification = createChannelGetNotification() ?: return
         MoveSdk.get()?.walkingLocationNotification(notification)
     }
 
+    /// Get the MOVE SDK config.
+    /// - Parameters:
+    ///   - call: [MethodCall].
+    /// - Returns: [MoveConfig].
     private fun extractMoveConfig(call: MethodCall): MoveConfig {
         val services =
             call.argument<List<Any>>("config")?.map { it.toString() } ?: emptyList()
@@ -426,6 +476,10 @@ internal class MoveSdkFlutterAdapter(
         return MoveConfig(timelineDetectionServicesToUse)
     }
 
+    /// Get the MOVE SDK authentication
+    /// - Parameters:
+    ///   - call: [MethodCall].
+    /// - Returns: [MoveAuth].
     private fun extractMoveAuth(call: MethodCall): MoveAuth {
         val projectId = call.argument<String>("projectId")
             ?: throw IllegalArgumentException("projectId must not be null")
@@ -443,6 +497,10 @@ internal class MoveSdkFlutterAdapter(
         )
     }
 
+    /// Get the MOVE SDK options.
+    /// - Parameters:
+    ///   - call: [MethodCall].
+    /// - Returns: [MoveOptions].
     private fun extractMoveOptions(call: MethodCall): MoveOptions? {
         val options = call.argument<Map<String, Any>>("options") ?: return null
         val motionPermissionMandatory = options["motionPermissionMandatory"] as? Boolean
@@ -464,6 +522,8 @@ internal class MoveSdkFlutterAdapter(
         )
     }
 
+    /// Create a notification channel and get the notification.
+    /// - Returns: [MoveNotification].
     private fun createChannelGetNotification(): MoveNotification? {
         return call.argument<Map<String, String>>("notification")?.let {
             val channelId = it["channelId"].orEmpty()

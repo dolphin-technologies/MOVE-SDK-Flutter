@@ -74,7 +74,8 @@ abstract class MovesdkPlatform extends PlatformInterface {
   /// [moveAuth] contains authentication data and tokens prepared by the app backend..
   /// [moveConfig] indicates the configuration of the services which will be running.
   /// Services in [moveConfig] must be enabled in the MOVE dashboard.
-  Future<void> setup(MoveAuth moveAuth, MoveConfig moveConfig, MoveOptions? options) {
+  Future<void> setup(
+      MoveAuth moveAuth, MoveConfig moveConfig, MoveOptions? options) {
     throw UnimplementedError('setup has not been implemented.');
   }
 
@@ -83,7 +84,8 @@ abstract class MovesdkPlatform extends PlatformInterface {
   /// Precondition:
   /// - SDK State to be `.ready`.
   Future<void> startAutomaticDetection() {
-    throw UnimplementedError('startAutomaticDetection() has not been implemented.');
+    throw UnimplementedError(
+        'startAutomaticDetection() has not been implemented.');
   }
 
   /// Stops the automatic detection service.
@@ -91,7 +93,8 @@ abstract class MovesdkPlatform extends PlatformInterface {
   /// Precondition:
   /// - SDK State to be `.running`.
   Future<void> stopAutomaticDetection() {
-    throw UnimplementedError('stopAutomaticDetection() has not been implemented.');
+    throw UnimplementedError(
+        'stopAutomaticDetection() has not been implemented.');
   }
 
   /// Shutdown SDK shared instance.
@@ -126,7 +129,8 @@ abstract class MovesdkPlatform extends PlatformInterface {
   /// Precondition:
   /// - SDK State to be `.running`.
   Future<void> forceTripRecognition() {
-    throw UnimplementedError('forceTripRecognition() has not been implemented.');
+    throw UnimplementedError(
+        'forceTripRecognition() has not been implemented.');
   }
 
   /// Ignores the current ongoing trip.
@@ -176,18 +180,21 @@ abstract class MovesdkPlatform extends PlatformInterface {
   /// The SDK will attempt to change the client [config],
   /// will call warning/error listener respectively.
   Future<void> updateConfig(MoveConfig config) {
-    throw UnimplementedError('updateConfiguration(config) has not been implemented.');
+    throw UnimplementedError(
+        'updateConfiguration(config) has not been implemented.');
   }
 
   /// Inititate an Assistance Call to emergency services.
   /// Returns a status wether the call succeeded.
   Future<MoveAssistanceCallStatus> initiateAssistanceCall() {
-    throw UnimplementedError('initiateAssistanceCall() has not been implemented.');
+    throw UnimplementedError(
+        'initiateAssistanceCall() has not been implemented.');
   }
 
   /// Set metadata to be sent with assistance call or impact detection.
   Future<void> setAssistanceMetaData(String? assistanceMetadataValue) {
-    throw UnimplementedError('setAssistanceMetaData() has not been implemented.');
+    throw UnimplementedError(
+        'setAssistanceMetaData() has not been implemented.');
   }
 
   /// Geocode address lookup at coordinates: ([latitude], [longitude])
@@ -243,11 +250,12 @@ abstract class MovesdkPlatform extends PlatformInterface {
 
   /// Set a block to be invoked every time SDK authorization state changes.
   /// Important:
-  /// - Hosting app must handle case `expired` by refetching a new token as
-  ///   SDK cannot update the given anymore.
+  /// - Hosting app must handle case [invalid] by shutting down SDK as
+  ///   SDK cannot refresh the token anymore.
   /// Returns stream: latest MoveAuthState. Invoked every time auth state changes.
   Stream<MoveAuthState> setAuthStateListener() async* {
-    throw UnimplementedError('setAuthStateListener() has not been implemented.');
+    throw UnimplementedError(
+        'setAuthStateListener() has not been implemented.');
   }
 
   /// Set callback to be invoked every time a new SDK log event occurs.
@@ -269,13 +277,15 @@ abstract class MovesdkPlatform extends PlatformInterface {
   /// Set a block to be invoked every time SDK trip state changes.
   /// Returns stream: latest SDK trip state. Invoked every time SDK trip state changes.
   Stream<MoveTripState> setTripStateListener() async* {
-    throw UnimplementedError('setTripStateListener() has not been implemented.');
+    throw UnimplementedError(
+        'setTripStateListener() has not been implemented.');
   }
 
   /// Set a block to be invoked when a trip starts.
   /// Returns stream with the trip start date. The listener is sent delayed after confirming a trip is valid, around 30s to 130s.
   Stream<DateTime> setTripStartListener() async* {
-    throw UnimplementedError('setTripStartListener() has not been implemented.');
+    throw UnimplementedError(
+        'setTripStartListener() has not been implemented.');
   }
 
   /// Sets a block to get called when optional permissions for
@@ -283,7 +293,8 @@ abstract class MovesdkPlatform extends PlatformInterface {
   /// Returns stream: `List<MoveServiceWarning>`. Invoked in case of configuration
   /// or permission errors.
   Stream<List<MoveServiceWarning>> setServiceWarningListener() async* {
-    throw UnimplementedError('setServiceWarningListener() has not been implemented.');
+    throw UnimplementedError(
+        'setServiceWarningListener() has not been implemented.');
   }
 
   /// Set a block to be invoked every time SDK warning status changes.
@@ -295,12 +306,14 @@ abstract class MovesdkPlatform extends PlatformInterface {
   /// Returns stream: `List<MoveServiceError>`. Invoked in case of configuration
   /// or permission errors.
   Stream<List<MoveServiceError>> setServiceErrorListener() async* {
-    throw UnimplementedError('setServiceErrorListener() has not been implemented.');
+    throw UnimplementedError(
+        'setServiceErrorListener() has not been implemented.');
   }
 
   /// Set a listener when the config changed in response to the useBackendConfig option.
   Stream<MoveConfig> setRemoteConfigChangeListener() async* {
-    throw UnimplementedError('setRemoteConfigChangeListener() has not been implemented.');
+    throw UnimplementedError(
+        'setRemoteConfigChangeListener() has not been implemented.');
   }
 
   /// Starts scanning for devices that can be registered with the sdk
@@ -315,7 +328,8 @@ abstract class MovesdkPlatform extends PlatformInterface {
 
   /// Get a list of devices registered with the sdk to be scanned for during trip.
   Future<List<MoveDevice>> getRegisteredDevices() async {
-    throw UnimplementedError('getRegisteredDevices() has not been implemented.');
+    throw UnimplementedError(
+        'getRegisteredDevices() has not been implemented.');
   }
 
   /// Register devices with the sdk to be scanned for during trip.
@@ -331,12 +345,14 @@ abstract class MovesdkPlatform extends PlatformInterface {
 
   /// Device listener fired on device scans during trips.
   Stream<List<MoveScanResult>> setDeviceDiscoveryListener() async* {
-    throw UnimplementedError('setDeviceDiscoveryListener() has not been implemented.');
+    throw UnimplementedError(
+        'setDeviceDiscoveryListener() has not been implemented.');
   }
 
   /// Setup notification for Move SDK recognition
   Future<void> recognitionNotification(MoveNotification notification) {
-    throw UnimplementedError('recognitionNotification() has not been implemented.');
+    throw UnimplementedError(
+        'recognitionNotification() has not been implemented.');
   }
 
   /// Setup trip notification
@@ -346,6 +362,7 @@ abstract class MovesdkPlatform extends PlatformInterface {
 
   /// Setup walking location notification
   Future<void> walkingLocationNotification(MoveNotification notification) {
-    throw UnimplementedError('walkingLocationNotification() has not been implemented.');
+    throw UnimplementedError(
+        'walkingLocationNotification() has not been implemented.');
   }
 }

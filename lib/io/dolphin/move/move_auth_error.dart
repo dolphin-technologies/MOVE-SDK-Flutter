@@ -1,4 +1,5 @@
 /// An error returned by `updateAuth(MoveAuth auth)`
+@Deprecated('obsolete')
 enum MoveAuthError {
   /// The userId does not match the one passed in setup.
   authInvalid,
