@@ -62,6 +62,7 @@ abstract class MovesdkPlatform extends PlatformInterface {
   ///   user's auth param will fail with `MoveAuthError.authInvalid`.
   /// [moveAuth] must contain new valid authentication data.
   /// Returns an errror if failed.
+  @Deprecated("Shutdown SDK instead.")
   Future<MoveAuthError?> updateAuth(MoveAuth moveAuth) {
     throw UnimplementedError('platformVersion() has not been implemented.');
   }

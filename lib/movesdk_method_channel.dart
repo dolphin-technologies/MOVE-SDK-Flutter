@@ -253,6 +253,7 @@ class MethodChannelMoveSdk extends MovesdkPlatform {
     await methodChannel.invokeMethod('deleteLocalData');
   }
 
+  @Deprecated("Shutdown SDK instead.")
   @override
   Future<MoveAuthError?> updateAuth(MoveAuth moveAuth) async {
     try {
