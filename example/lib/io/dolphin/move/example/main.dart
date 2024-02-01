@@ -82,6 +82,13 @@ class AppModel extends ChangeNotifier {
     _moveSdkPlugin.setAuthStateListener().listen((moveAuthState) {
       authState = moveAuthState;
       notifyListeners();
+      switch (authState) {
+        case MoveAuthState.invalid:
+          _moveSdkPlugin.shutdown();
+          break;
+        default:
+          break;
+      }
     });
 
     _moveSdkPlugin.setTripStateListener().listen((moveTripState) {
@@ -440,7 +447,7 @@ class _MovePermissionsWidget extends State<MovePermissionsWidget> {
               const MovePermissionWidget(
                   title: "BACKGROUND LOCATION",
                   description:
-                      "MOVE should be abble to access the location in the background.",
+                      "MOVE should be able to access the location in the background.",
                   permission: Permission.locationAlways),
               const MovePermissionWidget(
                   title: "MOTION",
@@ -462,6 +469,15 @@ class _MovePermissionsWidget extends State<MovePermissionsWidget> {
                   description:
                       "We use this to detect driving also in the background.",
                   permission: Permission.ignoreBatteryOptimizations),
+              const MovePermissionWidget(
+                  title: "BLUETOOTH SCAN",
+                  description: "We use this to look for Bluetooth devices",
+                  permission: Permission.bluetoothScan),
+              const MovePermissionWidget(
+                  title: "BLUETOOTH CONNECT",
+                  description:
+                      "We use this to connect with already paired Bluetooth devices",
+                  permission: Permission.bluetoothConnect),
             ],
           ].withSpaceBetween(height: 10.0)),
     );
@@ -523,8 +539,6 @@ class _MovePermissionWidget extends State<MovePermissionWidget> {
         case PermissionStatus.permanentlyDenied:
           permissionStatusText = "permanentlyDenied";
           statusColor = Colors.red;
-          break;
-        default:
           break;
       }
     });
