@@ -50,6 +50,7 @@ android {
         //minSdkVersion flutter.minSdkVersion
         minSdkVersion 26
         targetSdkVersion flutter.targetSdkVersion
+        compileSdkVersion 34
 
         def appVersionCode = Integer.valueOf(flutterVersionCode)
         versionCode appVersionCode
