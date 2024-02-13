@@ -1,14 +1,19 @@
 import 'dart:convert';
+import 'package:flutter/material.dart';
 import 'package:http/http.dart' as http;
 import 'package:movesdk/io/dolphin/move/move_auth.dart';
 import 'package:movesdk/movesdk.dart';
 
 class AuthClient {
-  static Future<MoveAuth> registerUser(String userId) async {
+  static Future<MoveAuth> registerUser(
+    BuildContext context, {
+    required String userId,
+    String? apiKey,
+  }) async {
     final movesdkPlugin = MoveSdk();
 
     // See https://docs.movesdk.com/move-platform/backend/example-requests
-    var apiKey = "<insert API key>";
+
     var response = await http.post(
       Uri.parse('https://sdk.dolph.in/v20/auth/register'),
       headers: <String, String>{
