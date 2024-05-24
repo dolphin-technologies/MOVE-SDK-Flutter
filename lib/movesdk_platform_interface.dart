@@ -372,7 +372,6 @@ abstract class MovesdkPlatform extends PlatformInterface {
         'startTrip(Map<String, String> metadata) has not been implemented.');
   }
 
-  @override
   Future<bool> setLiveLocationTag(String? tag) async {
     throw UnimplementedError(
         'setLiveLocationTag(String? tag) has not been implemented.');

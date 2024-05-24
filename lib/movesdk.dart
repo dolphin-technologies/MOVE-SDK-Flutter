@@ -361,7 +361,6 @@ class MoveSdk {
     return MovesdkPlatform.instance.startTrip(metadata);
   }
 
-  @override
   Future<bool> setLiveLocationTag(String? tag) async {
     return MovesdkPlatform.instance.setLiveLocationTag(tag);
   }
