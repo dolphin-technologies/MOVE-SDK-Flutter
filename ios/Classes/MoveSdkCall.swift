@@ -34,12 +34,16 @@ internal enum MoveSdkMethod: String {
 	case resolveError
 	/// `setAssistanceMetaData(:)`.
 	case setAssistanceMetaData
+	/// `setLiveLocationTag(:)`
+	case setLiveLocationTag
 	/// `setup(auth:config:options:)`.
 	case setup
 	/// `shutdown(force:)`.
 	case shutdown
 	/// `startAutomaticDetection()`.
 	case startAutomaticDetection
+	/// `startTrip(metadata:)`.
+	case startTrip
 	/// `stopAutomaticDetection()`.
 	case stopAutomaticDetection
 	/// `synchronizeUserData()`.
@@ -83,6 +87,8 @@ internal enum MoveSdkArgument: String {
 	// metadata
 	/// Metadata.
 	case metadata
+	/// Tag.
+	case tag
 
 	// shutdown
 	/// Shutdown force.

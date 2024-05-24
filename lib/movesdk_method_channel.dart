@@ -253,7 +253,6 @@ class MethodChannelMoveSdk extends MovesdkPlatform {
     await methodChannel.invokeMethod('deleteLocalData');
   }
 
-  @Deprecated("Shutdown SDK instead.")
   @override
   Future<MoveAuthError?> updateAuth(MoveAuth moveAuth) async {
     try {
@@ -316,8 +315,9 @@ class MethodChannelMoveSdk extends MovesdkPlatform {
   }
 
   @override
-  Future<void> startAutomaticDetection() async {
-    await methodChannel.invokeMethod('startAutomaticDetection');
+  Future<bool> startAutomaticDetection() async {
+    var result = await methodChannel.invokeMethod('startAutomaticDetection');
+    return result;
   }
 
   @override
@@ -394,8 +394,9 @@ class MethodChannelMoveSdk extends MovesdkPlatform {
   }
 
   @override
-  Future<void> stopAutomaticDetection() async {
-    await methodChannel.invokeMethod('stopAutomaticDetection');
+  Future<bool> stopAutomaticDetection() async {
+    var result = await methodChannel.invokeMethod('stopAutomaticDetection');
+    return result;
   }
 
   @override
@@ -487,5 +488,19 @@ class MethodChannelMoveSdk extends MovesdkPlatform {
     };
     await methodChannel.invokeMethod(
         'walkingLocationNotification', <String, dynamic>{'notification': map});
+  }
+
+  @override
+  Future<bool> startTrip(Map<String, String>? metadata) async {
+    var result = await methodChannel
+        .invokeMethod('startTrip', <String, dynamic>{'metadata': metadata});
+    return result;
+  }
+
+  @override
+  Future<bool> setLiveLocationTag(String? tag) async {
+    var result = await methodChannel
+        .invokeMethod('setLiveLocationTag', <String, dynamic>{'tag': tag});
+    return result;
   }
 }

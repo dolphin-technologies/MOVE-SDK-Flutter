@@ -526,6 +526,16 @@ public class MoveSdkPlugin: NSObject {
 	/// - Parameters:
 	///   - call: The `FlutterMethodCall` to parse arguments from.
 	///   - result: A Flutter result callback.
+	private func setLiveLocationTag(_ call: FlutterMethodCall, _ result: @escaping FlutterResult) {
+		let tag: String? = call[.tag]
+		let success = sdk.setLiveLocationTag(tag)
+		result(success)
+	}
+
+	/// Wrapper for SDK Method.
+	/// - Parameters:
+	///   - call: The `FlutterMethodCall` to parse arguments from.
+	///   - result: A Flutter result callback.
 	private func setAssistanceMetaData(_ call: FlutterMethodCall, _ result: @escaping FlutterResult) {
 		guard let metadata: String = call[.metadata] else {
 			result(MoveSdkError.invalidArguments([.metadata]))
@@ -616,8 +626,18 @@ public class MoveSdkPlugin: NSObject {
 	///   - call: The `FlutterMethodCall` to parse arguments from.
 	///   - result: A Flutter result callback.
 	private func startAutomaticDetection(_ call: FlutterMethodCall, _ result: @escaping FlutterResult) {
-		sdk.startAutomaticDetection()
-		result(nil)
+		let success = sdk.startAutomaticDetection()
+		result(success)
+	}
+
+	/// Wrapper for SDK Method.
+	/// - Parameters:
+	///   - call: The `FlutterMethodCall` to parse arguments from.
+	///   - result: A Flutter result callback.
+	private func startTrip(_ call: FlutterMethodCall, _ result: @escaping FlutterResult) {
+		let metadata: [String: String] = call[.metadata] ?? [:]
+		let success = sdk.startTrip(metadata: metadata)
+		result(success)
 	}
 
 	/// Wrapper for SDK Method.
@@ -625,8 +645,8 @@ public class MoveSdkPlugin: NSObject {
 	///   - call: The `FlutterMethodCall` to parse arguments from.
 	///   - result: A Flutter result callback.
 	private func stopAutomaticDetection(_ call: FlutterMethodCall, _ result: @escaping FlutterResult) {
-		sdk.stopAutomaticDetection()
-		result(nil)
+		let success = sdk.stopAutomaticDetection()
+		result(success)
 	}
 
 	/// Wrapper for SDK Method.
@@ -828,7 +848,9 @@ extension MoveSdkPlugin: FlutterPlugin {
 		case .registerDevices: registerDevices(call, result)
 		case .resolveError: resolveError(call, result)
 		case .setAssistanceMetaData: setAssistanceMetaData(call, result)
+		case .setLiveLocationTag: setLiveLocationTag(call, result)
 		case .setup: setup(call, result)
+		case .startTrip: startTrip(call, result)
 		case .startAutomaticDetection: startAutomaticDetection(call, result)
 		case .stopAutomaticDetection: stopAutomaticDetection(call, result)
 		case .shutdown: shutdown(call, result)

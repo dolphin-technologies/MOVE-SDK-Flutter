@@ -4,7 +4,7 @@
 #
 Pod::Spec.new do |s|
   s.name             = 'movesdk'
-  s.version          = '2.6.7'
+  s.version          = '2.8.0'
   s.summary          = 'Dolphin MOVE SDK'
   s.description      = 'Wrapper for the Dolphin MoveSDk'
   s.homepage         = 'https://movesdk.com/'
@@ -14,9 +14,9 @@ Pod::Spec.new do |s|
   s.source_files = 'Classes/**/*'
 
   s.dependency 'Flutter'
-  s.dependency 'DolphinMoveSDK', '2.6.7.275'
+  s.dependency 'DolphinMoveSDK', '2.8.0.290'
 
-  s.platform = :ios, '11.0'
+  s.platform = :ios, '12.0'
 
   # Flutter.framework does not contain a i386 slice.
   s.pod_target_xcconfig = { 'DEFINES_MODULE' => 'YES', 'EXCLUDED_ARCHS[sdk=iphonesimulator*]' => 'i386' }

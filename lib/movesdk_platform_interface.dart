@@ -62,7 +62,6 @@ abstract class MovesdkPlatform extends PlatformInterface {
   ///   user's auth param will fail with `MoveAuthError.authInvalid`.
   /// [moveAuth] must contain new valid authentication data.
   /// Returns an errror if failed.
-  @Deprecated("Shutdown SDK instead.")
   Future<MoveAuthError?> updateAuth(MoveAuth moveAuth) {
     throw UnimplementedError('platformVersion() has not been implemented.');
   }
@@ -84,7 +83,7 @@ abstract class MovesdkPlatform extends PlatformInterface {
   /// Starting the service will set the SDK to running state.
   /// Precondition:
   /// - SDK State to be `.ready`.
-  Future<void> startAutomaticDetection() {
+  Future<bool> startAutomaticDetection() {
     throw UnimplementedError(
         'startAutomaticDetection() has not been implemented.');
   }
@@ -93,7 +92,7 @@ abstract class MovesdkPlatform extends PlatformInterface {
   /// Stoping the service will set the SDK State back to ready.
   /// Precondition:
   /// - SDK State to be `.running`.
-  Future<void> stopAutomaticDetection() {
+  Future<bool> stopAutomaticDetection() {
     throw UnimplementedError(
         'stopAutomaticDetection() has not been implemented.');
   }
@@ -365,5 +364,17 @@ abstract class MovesdkPlatform extends PlatformInterface {
   Future<void> walkingLocationNotification(MoveNotification notification) {
     throw UnimplementedError(
         'walkingLocationNotification() has not been implemented.');
+  }
+
+  /// Start manual trip
+  Future<bool> startTrip(Map<String, String>? metadata) {
+    throw UnimplementedError(
+        'startTrip(Map<String, String> metadata) has not been implemented.');
+  }
+
+  @override
+  Future<bool> setLiveLocationTag(String? tag) async {
+    throw UnimplementedError(
+        'setLiveLocationTag(String? tag) has not been implemented.');
   }
 }

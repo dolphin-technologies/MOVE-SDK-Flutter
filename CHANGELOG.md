@@ -1,4 +1,12 @@
-## 2.6.5
+## 2.8.0
+- Added set live location tag.
+- Bugfixes & Improvements
+
+## 2.7.0
+- Added manual startTrip API.
+- Bugfixes & Improvements
+
+## 2.6.7
 - Bugfixes & Improvements
 - Code documentation.
 - Deprecated auth state expired and updateAuth API. 
