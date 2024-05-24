@@ -83,4 +83,6 @@ internal interface MoveSdkFlutter {
     fun tripNotification()
     /// Creates the walking notification.
     fun walkingLocationNotification()
+    fun startTrip()
+    fun setLiveLocationTag()
 }

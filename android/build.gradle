@@ -46,6 +46,6 @@ android {
     }
 
     dependencies {
-        api "io.dolphin.move:move-sdk:2.6.7.78"
+        api "io.dolphin.move:move-sdk:2.8.0.85"
     }
 }

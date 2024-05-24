@@ -87,7 +87,7 @@ class MoveSdk {
   /// Starting the service will set the SDK to running state.
   /// Precondition:
   /// - SDK State to be `.ready`.
-  Future<void> startAutomaticDetection() {
+  Future<bool> startAutomaticDetection() {
     return MovesdkPlatform.instance.startAutomaticDetection();
   }
 
@@ -95,7 +95,7 @@ class MoveSdk {
   /// Stoping the service will set the SDK State back to ready.
   /// Precondition:
   /// - SDK State to be `.running`.
-  Future<void> stopAutomaticDetection() {
+  Future<bool> stopAutomaticDetection() {
     return MovesdkPlatform.instance.stopAutomaticDetection();
   }
 
@@ -354,5 +354,15 @@ class MoveSdk {
   /// Setup walking location notification
   Future<void> walkingLocationNotification(MoveNotification notification) {
     return MovesdkPlatform.instance.walkingLocationNotification(notification);
+  }
+
+  /// Start manual trip
+  Future<bool> startTrip(Map<String, String>? metadata) {
+    return MovesdkPlatform.instance.startTrip(metadata);
+  }
+
+  @override
+  Future<bool> setLiveLocationTag(String? tag) async {
+    return MovesdkPlatform.instance.setLiveLocationTag(tag);
   }
 }

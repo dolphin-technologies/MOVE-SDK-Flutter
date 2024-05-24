@@ -26,8 +26,14 @@ import io.flutter.plugin.common.EventChannel
 import io.flutter.plugin.common.MethodCall
 import io.flutter.plugin.common.MethodChannel
 import io.flutter.plugin.common.MethodChannel.MethodCallHandler
+import kotlinx.coroutines.CoroutineScope
+import kotlinx.coroutines.Dispatchers
+import kotlinx.coroutines.launch
+import kotlinx.coroutines.withContext
 import java.nio.ByteBuffer
-import java.util.*
+import java.util.Date
+import java.util.Locale
+import java.util.UUID
 
 /** MoveSdkPlugin */
 class MoveSdkPlugin : FlutterPlugin, MethodCallHandler {
@@ -48,6 +54,9 @@ class MoveSdkPlugin : FlutterPlugin, MethodCallHandler {
     private lateinit var tripStartChannel: EventChannel
     private var context: Context? = null // Instance variable for context
 
+    private val mainScope = CoroutineScope(Dispatchers.Main)
+
+
     /// Plugin registration.
     /// - Parameters:
     ///   - flutterPluginBinding: Flutter plugin binding.
@@ -62,7 +71,7 @@ class MoveSdkPlugin : FlutterPlugin, MethodCallHandler {
          */
         sdkStateChannel =
             EventChannel(flutterPluginBinding.binaryMessenger, "movesdk-sdkState").also {
-                it.setStreamHandler(SdkStateStreamHandler())
+                it.setStreamHandler(SdkStateStreamHandler(mainScope))
             }
         tripStateChannel =
             EventChannel(flutterPluginBinding.binaryMessenger, "movesdk-tripState").also {
@@ -70,7 +79,7 @@ class MoveSdkPlugin : FlutterPlugin, MethodCallHandler {
             }
         authStateChannel =
             EventChannel(flutterPluginBinding.binaryMessenger, "movesdk-authState").also {
-                it.setStreamHandler(AuthStateStreamHandler())
+                it.setStreamHandler(AuthStateStreamHandler(mainScope))
             }
         serviceErrorChannel =
             EventChannel(flutterPluginBinding.binaryMessenger, "movesdk-serviceError").also {
@@ -128,7 +137,11 @@ class MoveSdkPlugin : FlutterPlugin, MethodCallHandler {
 }
 
 /// SDK state handler.
-class SdkStateStreamHandler : EventChannel.StreamHandler {
+class SdkStateStreamHandler(
+    private val coroutineScope: CoroutineScope,
+) : EventChannel.StreamHandler {
+
+    private val ioContext = Dispatchers.IO
 
     /// Handler for UI thread.
     private val uiThreadHandler: Handler = Handler(Looper.getMainLooper())
@@ -139,14 +152,21 @@ class SdkStateStreamHandler : EventChannel.StreamHandler {
     ///   - events: an EventChannel.EventSink for emitting events to the Flutter receiver.
     override fun onListen(arguments: Any?, events: EventChannel.EventSink?) {
         // trigger immediately time with current state
-        events?.success(MoveSdk.get()?.getSdkState()?.name)
-        MoveSdk.get()?.sdkStateListener(object : MoveSdk.StateListener {
-            override fun onStateChanged(sdk: MoveSdk, state: MoveSdkState) {
-                uiThreadHandler.post {
-                    events?.success(state.name)
-                }
+        coroutineScope.launch {
+            val state = withContext(ioContext) {
+                MoveSdk.get()?.getSdkState()?.name ?: MoveSdkState.Uninitialised.name
             }
-        })
+            events?.success(state)
+            MoveSdk.get()?.sdkStateListener(
+                object : MoveSdk.StateListener {
+                    override fun onStateChanged(sdk: MoveSdk, state: MoveSdkState) {
+                        uiThreadHandler.post {
+                            events?.success(state.name)
+                        }
+                    }
+                }
+            )
+        }
     }
 
     /// Cancel listening for SDK state.
@@ -184,7 +204,11 @@ class TripStateStreamHandler : EventChannel.StreamHandler {
 }
 
 /// Auth state handler.
-class AuthStateStreamHandler : EventChannel.StreamHandler {
+class AuthStateStreamHandler(
+    private val coroutineScope: CoroutineScope,
+) : EventChannel.StreamHandler {
+
+    private val ioContext = Dispatchers.IO
     private val uiThreadHandler: Handler = Handler(Looper.getMainLooper())
 
     /// Listen for auth state.
@@ -193,7 +217,12 @@ class AuthStateStreamHandler : EventChannel.StreamHandler {
     ///   - events: an EventChannel.EventSink for emitting events to the Flutter receiver.
     override fun onListen(arguments: Any?, events: EventChannel.EventSink?) {
         // trigger immediately time with current state
-        events?.success(MoveSdk.get()?.getAuthState()?.name)
+        coroutineScope.launch {
+            val authState = withContext(ioContext) {
+                MoveSdk.get()?.getAuthState()?.name ?: MoveAuthState.UNKNOWN.name
+            }
+            events?.success(authState)
+        }
         MoveSdk.get()?.authStateUpdateListener(object : MoveSdk.AuthStateUpdateListener {
             override fun onAuthStateUpdate(state: MoveAuthState) {
                 uiThreadHandler.post {

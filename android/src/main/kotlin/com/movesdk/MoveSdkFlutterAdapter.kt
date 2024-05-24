@@ -13,6 +13,7 @@ import io.dolphin.move.GeocodeResult
 import io.dolphin.move.MoveAssistanceCallStatus
 import io.dolphin.move.MoveAuth
 import io.dolphin.move.MoveAuthError
+import io.dolphin.move.MoveAuthState
 import io.dolphin.move.MoveConfig
 import io.dolphin.move.MoveDetectionService
 import io.dolphin.move.MoveDevice
@@ -20,6 +21,7 @@ import io.dolphin.move.MoveGeocodeError
 import io.dolphin.move.MoveNotification
 import io.dolphin.move.MoveOptions
 import io.dolphin.move.MoveSdk
+import io.dolphin.move.MoveSdkState
 import io.dolphin.move.MoveServiceFailure
 import io.dolphin.move.MoveServiceWarning
 import io.dolphin.move.MoveShutdownResult
@@ -128,14 +130,20 @@ internal class MoveSdkFlutterAdapter(
 
     /// Start the MOVE SDK trip detection.
     override fun startAutomaticDetection() {
-        MoveSdk.get()?.startAutomaticDetection()
-        result.success(null)
+        if (MoveSdk.get()?.startAutomaticDetection() == true) {
+            result.success(true)
+        } else {
+            result.success(false)
+        }
     }
 
     /// Stop the MOVE SDK trip detection.
     override fun stopAutomaticDetection() {
-        MoveSdk.get()?.stopAutomaticDetection()
-        result.success(null)
+        if (MoveSdk.get()?.stopAutomaticDetection() == true) {
+            result.success(true)
+        } else {
+            result.success(false)
+        }
     }
 
     /// Trigger the MOVE SDK trip detection.
@@ -182,8 +190,12 @@ internal class MoveSdkFlutterAdapter(
 
     /// Get the MOVE SDK state.
     override fun getSdkState() {
-        val sdkState = MoveSdk.get()?.getSdkState()?.name
-        result.success(sdkState)
+        mainScope.launch {
+            val sdkState = withContext(ioContext) {
+                MoveSdk.get()?.getSdkState()?.name ?: MoveSdkState.Uninitialised.name
+            }
+            result.success(sdkState)
+        }
     }
 
     /// Get the MOVE SDK trip state.
@@ -194,8 +206,12 @@ internal class MoveSdkFlutterAdapter(
 
     /// Get the MOVE SDK authentication state.
     override fun getAuthState() {
-        val authState = MoveSdk.get()?.getAuthState()?.name
-        result.success(authState)
+        mainScope.launch {
+            val authState = withContext(ioContext) {
+                MoveSdk.get()?.getAuthState()?.name ?: MoveAuthState.UNKNOWN.name
+            }
+            result.success(authState)
+        }
     }
 
     /// Get the status of the device.
@@ -360,7 +376,6 @@ internal class MoveSdkFlutterAdapter(
 
     /// Register BT devices for scanning.
     override fun registerDevices() {
-        result.success(null)
         mainScope.launch {
             val registerResult = withContext(ioContext) {
                 val devices = call.argument<Map<String, String>>("devices")?.map {
@@ -428,6 +443,24 @@ internal class MoveSdkFlutterAdapter(
     override fun walkingLocationNotification() {
         val notification = createChannelGetNotification() ?: return
         MoveSdk.get()?.walkingLocationNotification(notification)
+    }
+
+    override fun startTrip() {
+        val devices = call.argument<Map<String, String>>("metadata")
+        if (MoveSdk.get()?.startTrip(devices) == true) {
+            result.success(true)
+        } else {
+            result.success(false)
+        }
+    }
+
+    override fun setLiveLocationTag() {
+        val tag = call.argument<String>("tag")
+        if (MoveSdk.get()?.setLiveLocationTag(tag) == true) {
+            result.success(true)
+        } else {
+            result.success(false)
+        }
     }
 
     /// Get the MOVE SDK config.
