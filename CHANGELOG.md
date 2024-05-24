@@ -1,7 +1,3 @@
-## 2.8.0
-- Added set live location tag.
-- Bugfixes & Improvements
-
 ## 2.7.0
 - Added manual startTrip API.
 - Bugfixes & Improvements
