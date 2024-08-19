@@ -7,12 +7,14 @@ import android.content.Context
 import android.os.Handler
 import android.os.Looper
 import com.google.gson.Gson
+import io.dolphin.move.AuthSetupStatus
 import io.dolphin.move.DeviceDiscovery
 import io.dolphin.move.DrivingService
 import io.dolphin.move.GeocodeResult
 import io.dolphin.move.MoveAssistanceCallStatus
 import io.dolphin.move.MoveAuth
 import io.dolphin.move.MoveAuthError
+import io.dolphin.move.MoveAuthResult
 import io.dolphin.move.MoveAuthState
 import io.dolphin.move.MoveConfig
 import io.dolphin.move.MoveDetectionService
@@ -89,6 +91,38 @@ internal class MoveSdkFlutterAdapter(
         val moveOptions = extractMoveOptions(call)
         MoveSdk.setup(auth = moveAuth, moveConfig, options = moveOptions)
         result.success("setup")
+    }
+
+    /// Setup the MOVE SDK with authentication code.
+    override fun setupWithCode() {
+        val authCode = call.argument<String>("authCode") ?: ""
+        val moveConfig = extractMoveConfig(call)
+        val moveOptions = extractMoveOptions(call)
+        MoveSdk.setup(
+            authCode = authCode,
+            config = moveConfig,
+            start = true,
+            options = moveOptions,
+            callback = object : MoveSdk.MoveAuthCallback {
+                override fun onResult(authResult: MoveAuthResult) {
+                    uiThreadHandler.post {
+                        when (authResult.status) {
+                            AuthSetupStatus.SUCCESS -> result.success("success")
+                            AuthSetupStatus.INVALID_CODE -> result.error(
+                                "invalidCode",
+                                authResult.description,
+                                null
+                            )
+                            AuthSetupStatus.NETWORK_ERROR -> result.error(
+                                "networkError",
+                                authResult.description,
+                                null
+                            )
+                        }
+                    }
+                }
+            }
+        )
     }
 
     /// Update the MOVE SDK config.

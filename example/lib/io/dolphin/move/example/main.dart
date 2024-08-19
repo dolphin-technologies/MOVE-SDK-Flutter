@@ -2,10 +2,10 @@ import 'dart:io';
 
 import 'package:flutter/foundation.dart';
 import 'package:flutter/material.dart';
+import 'package:movesdk/io/dolphin/move/move_auth_result.dart';
 import 'package:provider/provider.dart';
 
 import 'package:flutter/services.dart';
-import 'package:movesdk/io/dolphin/move/move_auth.dart';
 import 'package:movesdk/io/dolphin/move/move_auth_state.dart';
 import 'package:movesdk/io/dolphin/move/move_detection_service.dart';
 import 'package:movesdk/io/dolphin/move/move_service_warning.dart';
@@ -111,22 +111,62 @@ class AppModel extends ChangeNotifier {
     _moveSdkPlugin.resolveError();
   }
 
-  toggleAutomaticDetection(bool value) async {
+  showAlert(BuildContext context, String title, String msg) async {
+    AlertDialog alert = AlertDialog(
+      title: Text(title),
+      content: Text(msg),
+      actions: [
+        TextButton(
+          onPressed: () {
+            Navigator.of(context, rootNavigator: true).pop(); // dismiss dialog
+          },
+          child: const Text("Close"),
+        ),
+      ],
+      contentTextStyle: const TextStyle(color: Colors.black),
+      titleTextStyle: const TextStyle(color: Colors.black),
+    );
+    showDialog(
+      context: context,
+      builder: (BuildContext context) {
+        return alert;
+      },
+    );
+  }
+
+  toggleAutomaticDetection(BuildContext context, bool value) async {
     if (value) {
       if (userID == null) {
         var userID =
             "${DateTime.now().toUtc().millisecondsSinceEpoch}".substring(0, 10);
         this.userID = userID;
+      }
 
-        MoveAuth moveAuth = await AuthClient.registerUser(userID);
+      var state = await _moveSdkPlugin.getState();
+      if (state == MoveState.unknown) {
+        try {
+          String authCode = await AuthClient.registerAuthCode(userID!);
 
-        var moveConfig = MoveConfig(MoveDetectionService.values);
+          var moveConfig = MoveConfig(MoveDetectionService.values);
 
-        _moveSdkPlugin.setup(moveAuth, moveConfig);
-
-        config?.userId = userID;
-        var sharedPreferences = await SharedPreferences.getInstance();
-        config?.save(sharedPreferences);
+          var status = await _moveSdkPlugin.setupWithCode(authCode, moveConfig);
+          if (status.status == AuthSetupStatus.success) {
+            config?.userId = userID;
+            var sharedPreferences = await SharedPreferences.getInstance();
+            config?.save(sharedPreferences);
+          } else {
+            if (context.mounted) {
+              showAlert(
+                  context, "Error", "${status.status} : ${status.description}");
+            }
+            return;
+          }
+        } catch (error) {
+          if (context.mounted) {
+            showAlert(context, "Error", error.toString());
+          }
+          return;
+        }
       }
 
       _moveSdkPlugin.startAutomaticDetection();
@@ -347,7 +387,8 @@ class _MoveStateHeader extends State<MoveStateHeader> {
                             value: switchState,
                             activeColor: Colors.green,
                             onChanged: (bool value) {
-                              appModel?.toggleAutomaticDetection(value);
+                              appModel?.toggleAutomaticDetection(
+                                  context, value);
                             },
                           )
                         ])),

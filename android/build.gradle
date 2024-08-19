@@ -41,11 +41,11 @@ android {
     }
 
     defaultConfig {
-        minSdkVersion 26
+        minSdkVersion 28
         compileSdkVersion 34
     }
 
     dependencies {
-        api "io.dolphin.move:move-sdk:2.8.0.85"
+        api "io.dolphin.move:move-sdk:2.9.0.86"
     }
 }

@@ -38,6 +38,8 @@ internal enum MoveSdkMethod: String {
 	case setLiveLocationTag
 	/// `setup(auth:config:options:)`.
 	case setup
+	/// `setup(authCode:config:options:)`.
+	case setupWithCode
 	/// `shutdown(force:)`.
 	case shutdown
 	/// `startAutomaticDetection()`.
@@ -77,6 +79,8 @@ internal enum MoveSdkArgument: String {
 	case refreshToken
 	/// User ID.
 	case userId
+	/// Auth code.
+	case authCode
 
 	// geocode
 	/// Coordinate latitude.

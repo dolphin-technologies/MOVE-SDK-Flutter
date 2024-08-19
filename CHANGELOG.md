@@ -1,3 +1,6 @@
+## 2.9.0
+- Added setup with auth code.
+
 ## 2.8.0
 - Added set live location tag.
 - Bugfixes & Improvements

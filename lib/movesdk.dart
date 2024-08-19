@@ -2,6 +2,7 @@ import 'package:movesdk/io/dolphin/move/move_assistance_call_status.dart';
 import 'package:movesdk/io/dolphin/move/move_auth.dart';
 import 'package:movesdk/io/dolphin/move/move_auth_error.dart';
 import 'package:movesdk/io/dolphin/move/move_auth_state.dart';
+import 'package:movesdk/io/dolphin/move/move_auth_result.dart';
 import 'package:movesdk/io/dolphin/move/move_detection_service.dart';
 import 'package:movesdk/io/dolphin/move/move_device.dart';
 import 'package:movesdk/io/dolphin/move/move_geocode_result.dart';
@@ -55,12 +56,25 @@ class MoveSdk {
   }
 
   /// The SDK will setup and authenticate a user.
-  /// [moveAuth] contains authentication data and tokens prepared by the app backend..
+  /// [moveAuth] contains authentication data and tokens prepared by the app backend.
   /// [moveConfig] indicates the configuration of the services which will be running.
+  /// [options] (optional) contains additional options for the MOVE SDK.
   /// Services in [moveConfig] must be enabled in the MOVE dashboard.
   Future<void> setup(MoveAuth auth, MoveConfig moveConfig,
       {MoveOptions? options}) {
     return MovesdkPlatform.instance.setup(auth, moveConfig, options);
+  }
+
+  /// The SDK will setup and authenticate a user.
+  /// [authCode] contains the authentication string which was fetched from the backend.
+  /// [moveConfig] indicates the configuration of the services which will be running.
+  /// [options] (optional) contains additional options for the MOVE SDK.
+  /// Services in [moveConfig] must be enabled in the MOVE dashboard.
+  /// Returns the success or failure of the setup.
+  Future<MoveAuthResult> setupWithCode(String authCode, MoveConfig moveConfig,
+      {MoveOptions? options}) {
+    return MovesdkPlatform.instance
+        .setupWithCode(authCode, moveConfig, options);
   }
 
   /// Get a unique Device Identifier to distinguish the device.

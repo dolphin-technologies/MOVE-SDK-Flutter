@@ -4,8 +4,6 @@ import 'package:shared_preferences/shared_preferences.dart';
 class MoveAppConfiguration {
   String? projectId;
   String? userId;
-  String? accessToken;
-  String? refreshToken;
 
   bool? allowMockLocations;
   bool? keepActive;
@@ -14,10 +12,7 @@ class MoveAppConfiguration {
   List<MoveDetectionService>? moveDetectionServices;
 
   MoveAppConfiguration({
-    this.projectId,
     this.userId,
-    this.accessToken,
-    this.refreshToken,
     this.moveDetectionServices,
     // android
     this.allowMockLocations,
@@ -26,10 +21,7 @@ class MoveAppConfiguration {
   });
 
   MoveAppConfiguration.load(SharedPreferences prefs) {
-    projectId = prefs.getString("projectId");
     userId = prefs.getString("userId");
-    accessToken = prefs.getString("accessToken");
-    refreshToken = prefs.getString("refreshToken");
     allowMockLocations = prefs.getBool("allowMockLocations");
     keepActive = prefs.getBool("keepActive");
     keepInForeground = prefs.getBool("keepInForeground");
@@ -49,10 +41,7 @@ class MoveAppConfiguration {
   }
 
   void save(SharedPreferences prefs) {
-    prefs.setString("projectId", projectId ?? "");
     prefs.setString("userId", userId ?? "");
-    prefs.setString("accessToken", accessToken ?? "");
-    prefs.setString("refreshToken", refreshToken ?? "");
     prefs.setBool("allowMockLocations", allowMockLocations == true);
     prefs.setBool("keepActive", keepActive == true);
     prefs.setBool("keepInForeground", keepInForeground == true);
