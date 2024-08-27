@@ -134,6 +134,50 @@ public class MoveSdkPlugin: NSObject {
 		}
 	}
 
+	/// Extract setup options from dictionary
+	/// - Parameter options: Options dictionary.
+	/// - Returns: `MoveOptions` object.
+	private func convert(options: [String: Any]?) -> MoveOptions {
+		let moveOptions = MoveOptions()
+
+		guard let options else {
+			return moveOptions
+		}
+
+		if let value = options["motionPermissionMandatory"] as? Bool {
+			moveOptions.motionPermissionMandatory = value
+		}
+
+		if let value = options["backgroundLocationPermissionMandatory"] as? Bool {
+			moveOptions.backgroundLocationPermissionMandatory = value
+		}
+
+		if let value = options["useBackendConfig"] as? Bool {
+			moveOptions.useBackendConfig = value
+		}
+
+		if let deviceDiscovery = options["deviceDiscovery"] as? [String: Any] {
+
+			if let value = deviceDiscovery["stopScanOnFirstDiscovered"] as? Bool {
+				moveOptions.deviceDiscovery.stopScanOnFirstDiscovered = value
+			}
+
+			if let value = deviceDiscovery["interval"] as? Int {
+				moveOptions.deviceDiscovery.interval = Double(value)
+			}
+
+			if let value = deviceDiscovery["duration"] as? Int {
+				moveOptions.deviceDiscovery.duration = Double(value)
+			}
+
+			if let value = deviceDiscovery["startDelay"] as? Int {
+				moveOptions.deviceDiscovery.startDelay = Double(value)
+			}
+		}
+
+		return moveOptions
+	}
+
 	/// Convert a list of config strings to a `MoveConfig` object.
 	/// - Parameters:
 	///   - config: A list of config services.
@@ -562,45 +606,43 @@ public class MoveSdkPlugin: NSObject {
 			return
 		}
 
-		let moveOptions = MoveOptions()
-		if let options: [String: Any] = call[.options] {
-			if let value = options["motionPermissionMandatory"] as? Bool {
-				moveOptions.motionPermissionMandatory = value
-			}
-
-			if let value = options["backgroundLocationPermissionMandatory"] as? Bool {
-				moveOptions.backgroundLocationPermissionMandatory = value
-			}
-			
-			if let value = options["useBackendConfig"] as? Bool {
-				moveOptions.useBackendConfig = value
-			}
-
-			if let deviceDiscovery = options["deviceDiscovery"] as? [String: Any] {
-
-				if let value = deviceDiscovery["stopScanOnFirstDiscovered"] as? Bool {
-					moveOptions.deviceDiscovery.stopScanOnFirstDiscovered = value
-				}
-
-				if let value = deviceDiscovery["interval"] as? Int {
-					moveOptions.deviceDiscovery.interval = Double(value)
-				}
-
-				if let value = deviceDiscovery["duration"] as? Int {
-					moveOptions.deviceDiscovery.duration = Double(value)
-				}
-
-				if let value = deviceDiscovery["startDelay"] as? Int {
-					moveOptions.deviceDiscovery.startDelay = Double(value)
-				}
-			}
-		}
+		let options: [String: Any]? = call[.options]
+		let moveOptions = convert(options: options)
 
 		let auth = MoveAuth(userToken: accessToken, refreshToken: refreshToken, userID: userId, projectID: projectId)
 
 		let moveConfig = convert(config: config)
 
 		sdk.setup(auth: auth, config: moveConfig, options: moveOptions)
+	}
+
+	/// Wrapper for SDK Method.
+	/// - Parameters:
+	///   - call: The `FlutterMethodCall` to parse arguments from.
+	///   - result: A Flutter result callback.
+	private func setupWithCode(_ call: FlutterMethodCall, _ result: @escaping FlutterResult) {
+		guard
+			let authCode: String = call[.authCode],
+			let config: [String] = call[.config]
+		else {
+			result(MoveSdkError.invalidArguments([.refreshToken, .userId, .accessToken, .projectId]))
+			return
+		}
+
+		let options: [String: Any]? = call[.options]
+		let moveOptions = convert(options: options)
+		let moveConfig = convert(config: config)
+
+		sdk.setup(authCode: authCode, config: moveConfig, options: moveOptions) { success in
+			switch success {
+			case .success:
+				result(true)
+			case .networkError:
+				result(MoveSdkError.networkError)
+			case let .invalidCode(msg):
+				result(MoveSdkError.invalidCode(msg))
+			}
+		}
 	}
 
 	/// Wrapper for SDK Method.
@@ -850,6 +892,7 @@ extension MoveSdkPlugin: FlutterPlugin {
 		case .setAssistanceMetaData: setAssistanceMetaData(call, result)
 		case .setLiveLocationTag: setLiveLocationTag(call, result)
 		case .setup: setup(call, result)
+		case .setupWithCode: setupWithCode(call, result)
 		case .startTrip: startTrip(call, result)
 		case .startAutomaticDetection: startAutomaticDetection(call, result)
 		case .stopAutomaticDetection: stopAutomaticDetection(call, result)

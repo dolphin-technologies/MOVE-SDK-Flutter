@@ -13,6 +13,8 @@ internal interface MoveSdkFlutter {
     fun notifications()
     /// Setup the MOVE SDK.
     fun setup()
+    /// Setup the MOVE SDK with authentication.
+    fun setupWithCode()
     /// Update the MOVE SDK config.
     fun updateConfig()
     @Deprecated("Update auth is obsolete.")

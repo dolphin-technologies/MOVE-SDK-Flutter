@@ -3,6 +3,7 @@ import 'package:flutter/services.dart';
 import 'package:movesdk/io/dolphin/move/move_assistance_call_status.dart';
 import 'package:movesdk/io/dolphin/move/move_auth.dart';
 import 'package:movesdk/io/dolphin/move/move_auth_error.dart';
+import 'package:movesdk/io/dolphin/move/move_auth_result.dart';
 import 'package:movesdk/io/dolphin/move/move_auth_state.dart';
 import 'package:movesdk/io/dolphin/move/move_device.dart';
 import 'package:movesdk/io/dolphin/move/move_geocode_result.dart';
@@ -215,6 +216,42 @@ class MethodChannelMoveSdk extends MovesdkPlatform {
         },
       },
     );
+  }
+
+  @override
+  Future<MoveAuthResult> setupWithCode(
+      String authCode, MoveConfig moveConfig, MoveOptions? options) async {
+    try {
+      await methodChannel.invokeMethod(
+        'setupWithCode',
+        <String, dynamic>{
+          'authCode': authCode,
+          'config': moveConfig.buildConfigParameter(),
+          'options': <String, dynamic>{
+            'motionPermissionMandatory': options?.motionPermissionMandatory,
+            'backgroundLocationPermissionMandatory':
+                options?.backgroundLocationPermissionMandatory,
+            'deviceDiscovery': <String, dynamic>{
+              'startDelay': options?.deviceDiscovery?.startDelay,
+              'duration': options?.deviceDiscovery?.duration,
+              'interval': options?.deviceDiscovery?.interval,
+              'stopScanOnFirstDiscovered':
+                  options?.deviceDiscovery?.stopScanOnFirstDiscovered,
+            },
+            'useBackendConfig': options?.useBackendConfig,
+          },
+        },
+      );
+    } on PlatformException catch (e) {
+      switch (e.code) {
+        case "networkError":
+          return MoveAuthResult(AuthSetupStatus.networkError, e.details ?? "");
+        case "invalidCode":
+          return MoveAuthResult(AuthSetupStatus.invalidCode, e.details ?? "");
+      }
+    }
+
+    return MoveAuthResult(AuthSetupStatus.success, "");
   }
 
   @override

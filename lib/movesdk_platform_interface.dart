@@ -2,6 +2,7 @@ import 'package:movesdk/io/dolphin/move/move_assistance_call_status.dart';
 import 'package:movesdk/io/dolphin/move/move_auth.dart';
 import 'package:movesdk/io/dolphin/move/move_auth_error.dart';
 import 'package:movesdk/io/dolphin/move/move_auth_state.dart';
+import 'package:movesdk/io/dolphin/move/move_auth_result.dart';
 import 'package:movesdk/io/dolphin/move/move_device.dart';
 import 'package:movesdk/io/dolphin/move/move_geocode_result.dart';
 import 'package:movesdk/io/dolphin/move/move_notification.dart';
@@ -77,6 +78,14 @@ abstract class MovesdkPlatform extends PlatformInterface {
   /// Services in [moveConfig] must be enabled in the MOVE dashboard.
   Future<void> setup(
       MoveAuth moveAuth, MoveConfig moveConfig, MoveOptions? options) {
+    throw UnimplementedError('setup has not been implemented.');
+  }
+
+  /// The SDK will setup and authenticate a user.
+  /// [authCode] Auth code to setup with..
+  /// Services in [moveConfig] must be enabled in the MOVE dashboard.
+  Future<MoveAuthResult> setupWithCode(
+      String authCode, MoveConfig moveConfig, MoveOptions? options) {
     throw UnimplementedError('setup has not been implemented.');
   }
 

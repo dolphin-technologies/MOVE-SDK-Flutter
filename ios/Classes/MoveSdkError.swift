@@ -29,6 +29,13 @@ internal struct MoveSdkError: Error {
 	/// - Returns: Returns an invalid argument flutter errror object.
 	static func invalidArguments(_ args: [MoveSdkArgument]) -> FlutterError { FlutterError(code: "invalidArguments", message: "Invalid Arguments.", details: "Required: \(args).")
 	}
+	
+	/// Invalid auth code.
+	/// - Parameter msg: Error message.
+	/// - Returns: Returns and invalid auth code error object.
+	static func invalidCode(_ msg: String) -> FlutterError {
+		FlutterError(code: "invalidCode", message: "Invalid Code.", details: "\(msg)")
+	}
 }
 
 /// Wrapped SDK error/warning reason key strings.
