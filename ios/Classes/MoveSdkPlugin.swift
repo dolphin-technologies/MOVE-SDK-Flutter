@@ -110,6 +110,9 @@ public class MoveSdkPlugin: NSObject {
 	/// Device discovery handler.
 	var deviceDiscoveryHandler: MoveSDKStreamHandler?
 
+	/// Device state updated.
+	var deviceStateHandler: MoveSDKStreamHandler?
+
 	/// Configuration update handler.
 	var configUpdateListener: MoveSDKStreamHandler?
 
@@ -294,7 +297,7 @@ public class MoveSdkPlugin: NSObject {
 			do {
 				let data = try encoder.encode(device)
 				let str = String(data: data, encoding: .utf8) ?? ""
-				let info: [String: Any] = ["name":device.name, "data": str]
+				let info: [String: Any] = ["name": device.name, "data": str, "isConnected": device.isConnected]
 				deviceList.append(info)
 			} catch {
 				print(error.localizedDescription)
@@ -459,6 +462,20 @@ public class MoveSdkPlugin: NSObject {
 	private func getDeviceQualifier(_ call: FlutterMethodCall, _ result: @escaping FlutterResult) {
 		let qualifier = sdk.getDeviceQualifier()
 		result("\(qualifier)")
+	}
+
+	/// Wrapper for SDK Method.
+	/// - Parameters:
+	///   - call: The `FlutterMethodCall` to parse arguments from.
+	///   - result: A Flutter result callback.
+	private func getMoveVersion(_ call: FlutterMethodCall, _ result: @escaping FlutterResult) {
+		let bundle = Bundle(for: MoveSDK.self)
+		if let version = bundle.infoDictionary?["CFBundleShortVersionString"],
+		   let build = bundle.infoDictionary?["CFBundleVersion"] as? String {
+			result("\(version).\(build)")
+		} else {
+			result("unknown")
+		}
 	}
 
 	/// Wrapper for SDK Method.
@@ -805,6 +822,8 @@ extension MoveSdkPlugin: FlutterPlugin {
 
 		instance.deviceDiscoveryHandler = MoveSDKStreamHandler(instance, channel: .deviceDiscovery, registrar: registrar) { sink in }
 
+		instance.deviceStateHandler = MoveSDKStreamHandler(instance, channel: .deviceState, registrar: registrar) { sink in }
+
 		instance.configUpdateListener = MoveSDKStreamHandler(instance, channel: .configChange, registrar: registrar) { sink in }
 
 		// Device Scanning
@@ -858,6 +877,11 @@ extension MoveSdkPlugin: FlutterPlugin {
 			self.deviceDiscoveryHandler?.sink?(data)
 		}
 
+		sdk.setDeviceStateListener { results in
+			let data = MoveSdkPlugin.convert(devices: results)
+			self.deviceStateHandler?.sink?(data)
+		}
+
 		sdk.setRemoteConfigChangeListener { result in
 			let data = MoveSdkPlugin.convert(config: result)
 			self.configUpdateListener?.sink?(data)
@@ -881,9 +905,10 @@ extension MoveSdkPlugin: FlutterPlugin {
 		case .getAuthState: getAuthState(call, result)
 		case .getDeviceQualifier: getDeviceQualifier(call, result)
 		case .getErrors: getServiceErrors(call, result)
-		case .getWarnings: getServiceWarnings(call, result)
+		case .getMoveVersion: getMoveVersion(call, result)
 		case .getRegisteredDevices: getRegisteredDevices(call, result)
 		case .getState: getState(call, result)
+		case .getWarnings: getServiceWarnings(call, result)
 		case .getTripState: getTripState(call, result)
 		case .ignoreCurrentTrip: ignoreCurrentTrip(call, result)
 		case .initiateAssistanceCall: initiateAssistanceCall(call, result)
@@ -931,6 +956,8 @@ class MoveSDKStreamHandler: NSObject, FlutterStreamHandler {
 		case serviceWarning
 		/// Device discovery channel.
 		case deviceDiscovery
+		/// Device state channel.
+		case deviceState
 		/// Configuration change channel.
 		case configChange
 	}

@@ -359,6 +359,12 @@ abstract class MovesdkPlatform extends PlatformInterface {
         'setDeviceDiscoveryListener() has not been implemented.');
   }
 
+  /// Device state fired on device connection change.
+  Stream<List<MoveDevice>> setDeviceStateListener() async* {
+    throw UnimplementedError(
+        'setDeviceStateListener() has not been implemented.');
+  }
+
   /// Setup notification for Move SDK recognition
   Future<void> recognitionNotification(MoveNotification notification) {
     throw UnimplementedError(

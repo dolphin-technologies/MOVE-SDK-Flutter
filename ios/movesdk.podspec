@@ -14,7 +14,7 @@ Pod::Spec.new do |s|
   s.source_files = 'Classes/**/*'
 
   s.dependency 'Flutter'
-  s.dependency 'DolphinMoveSDK', '2.9.0.294'
+  s.dependency 'DolphinMoveSDK', '2.10.0.297'
 
   s.platform = :ios, '12.0'
 

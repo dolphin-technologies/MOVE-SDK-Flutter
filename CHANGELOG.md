@@ -1,3 +1,6 @@
+## 2.10.0
+- Added set device state listener.
+
 ## 2.9.0
 - Added setup with auth code.
 
