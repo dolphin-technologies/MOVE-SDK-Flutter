@@ -25,10 +25,10 @@ dependencies:
     # the parent directory to use the current plugin's version.
     path: ../
 
-  permission_handler: 10.2.0
-  shared_preferences: 2.1.0
-  http: 0.13.5
-  provider: ^5.0.0
+  permission_handler: ^11.0.1
+  shared_preferences: ^2.2.2
+  http: ^1.1.0
+  provider: ^6.1.2
   # geolocator: ^9.0.2
 
 dev_dependencies:
@@ -40,7 +40,7 @@ dev_dependencies:
   # activated in the `analysis_options.yaml` file located at the root of your
   # package. See that file for information about deactivating specific lint
   # rules and activating additional ones.
-  flutter_lints: ^2.0.0
+  flutter_lints: ^4.0.0
 
 # For information on the generic Dart part of this file, see the
 # following page: https://dart.dev/tools/pub/pubspec
@@ -66,3 +66,10 @@ flutter:
 
   fonts:
   - family: HelveticaNeue
+    fonts:
+      - asset: fonts/HelveticaNeueLTPro-Roman.otf
+      - asset: fonts/HelveticaNeueLTPro-Bd.otf
+        weight: 700
+      - asset: fonts/HelveticaNeueLTPro-Blk.otf
+        weight: 900
+

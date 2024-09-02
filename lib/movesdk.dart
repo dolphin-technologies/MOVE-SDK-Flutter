@@ -355,6 +355,11 @@ class MoveSdk {
     yield* MovesdkPlatform.instance.setDeviceDiscoveryListener();
   }
 
+  /// Device state fired on device connection change.
+  Stream<List<MoveDevice>> setDeviceStateListener() async* {
+    yield* MovesdkPlatform.instance.setDeviceStateListener();
+  }
+
   /// Setup notification for Move SDK recognition
   Future<void> recognitionNotification(MoveNotification notification) {
     return MovesdkPlatform.instance.recognitionNotification(notification);

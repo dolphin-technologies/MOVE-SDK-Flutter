@@ -577,6 +577,10 @@ class _MovePermissionWidget extends State<MovePermissionWidget> {
           permissionStatusText = "limited";
           statusColor = Colors.yellow;
           break;
+        case PermissionStatus.provisional:
+          permissionStatusText = "provisional";
+          statusColor = Colors.yellow;
+          break;
         case PermissionStatus.permanentlyDenied:
           permissionStatusText = "permanentlyDenied";
           statusColor = Colors.red;
@@ -588,7 +592,6 @@ class _MovePermissionWidget extends State<MovePermissionWidget> {
   @override
   Widget build(BuildContext context) {
     return Container(
-      height: 135.0,
       width: double.infinity,
       decoration: const BoxDecoration(
           color: Color(0xFFF3F3F3),
@@ -601,7 +604,7 @@ class _MovePermissionWidget extends State<MovePermissionWidget> {
               Text(widget.title,
                   style: Theme.of(context).textTheme.headlineSmall),
               const Spacer(),
-              ElevatedButton(
+              MaterialButton(
                 onPressed: () async {
                   var appModel = Provider.of<AppModel>(context, listen: false);
                   PermissionStatus status = await widget.permission.request();
@@ -612,9 +615,7 @@ class _MovePermissionWidget extends State<MovePermissionWidget> {
                     appModel.resolveError();
                   }
                 },
-                style: ElevatedButton.styleFrom(
-                  backgroundColor: statusColor,
-                ),
+                color: statusColor,
                 child: Text(permissionStatusText),
               )
             ],

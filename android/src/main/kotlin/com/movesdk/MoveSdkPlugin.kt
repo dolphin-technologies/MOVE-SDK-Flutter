@@ -52,6 +52,7 @@ class MoveSdkPlugin : FlutterPlugin, MethodCallHandler {
     private lateinit var deviceScanChannel: EventChannel
     private lateinit var configChangeChannel: EventChannel
     private lateinit var tripStartChannel: EventChannel
+    private lateinit var deviceStateChannel: EventChannel
     private var context: Context? = null // Instance variable for context
 
     private val mainScope = CoroutineScope(Dispatchers.Main)
@@ -108,6 +109,10 @@ class MoveSdkPlugin : FlutterPlugin, MethodCallHandler {
         tripStartChannel =
             EventChannel(flutterPluginBinding.binaryMessenger, "movesdk-tripStart").also {
                 it.setStreamHandler(TripStartStreamHandler())
+            }
+        deviceStateChannel =
+            EventChannel(flutterPluginBinding.binaryMessenger, "movesdk-deviceState").also {
+                it.setStreamHandler(DeviceStateStreamHandler())
             }
     }
 
@@ -586,6 +591,33 @@ class TripStartStreamHandler() : EventChannel.StreamHandler {
     /// Cancel listening for trip start.
     /// - Parameters:
     ///   - arguments: stream configuration arguments, possibly null.
+    override fun onCancel(arguments: Any?) {
+    }
+}
+
+// Move device state listener
+class DeviceStateStreamHandler() : EventChannel.StreamHandler {
+    private val uiThreadHandler: Handler = Handler(Looper.getMainLooper())
+
+    override fun onListen(arguments: Any?, events: EventChannel.EventSink?) {
+        MoveSdk.get()?.setDeviceStateListener(
+            object : MoveSdk.MoveDeviceStateListener {
+                override fun onStateChanged(device: MoveDevice) {
+                    uiThreadHandler.post {
+                        events?.success(
+                            listOf(
+                                mapOf(
+                                    "name" to device.name,
+                                    "data" to device.toJsonString(),
+                                )
+                            )
+                        )
+                    }
+                }
+            }
+        )
+    }
+
     override fun onCancel(arguments: Any?) {
     }
 }

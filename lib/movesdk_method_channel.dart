@@ -34,6 +34,7 @@ class MethodChannelMoveSdk extends MovesdkPlatform {
   final serviceWarningChannel = const EventChannel('movesdk-serviceWarning');
   final deviceDiscoveryChannel = const EventChannel('movesdk-deviceDiscovery');
   final deviceScannerChannel = const EventChannel('movesdk-deviceScanner');
+  final deviceStateChannel = const EventChannel('movesdk-deviceState');
   final configChangeChannel = const EventChannel('movesdk-configChange');
 
   MethodChannelMoveSdk() {
@@ -473,6 +474,16 @@ class MethodChannelMoveSdk extends MovesdkPlatform {
         .receiveBroadcastStream()
         .asyncMap<List<MoveScanResult>>((results) {
       var moveScanResults = MoveScanResult.fromNative(results);
+      return moveScanResults;
+    });
+  }
+
+  @override
+  Stream<List<MoveDevice>> setDeviceStateListener() async* {
+    yield* deviceStateChannel
+        .receiveBroadcastStream()
+        .asyncMap<List<MoveDevice>>((results) {
+      var moveScanResults = MoveDevice.fromNative(results);
       return moveScanResults;
     });
   }

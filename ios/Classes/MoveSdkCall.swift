@@ -12,6 +12,8 @@ internal enum MoveSdkMethod: String {
 	case getAuthState
 	/// `getDeviceQualifier()`.
 	case getDeviceQualifier
+	/// `getMoveVersion()`.
+	case getMoveVersion
 	/// `getRegisteredDevices()`.
 	case getRegisteredDevices
 	/// `getSDKState()`.

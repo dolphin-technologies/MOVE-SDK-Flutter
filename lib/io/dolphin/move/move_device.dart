@@ -15,15 +15,19 @@ class MoveDevice {
   /// Raw device data.
   String data;
 
-  MoveDevice(this.name, this.data);
+  /// Is device paired.
+  bool isConnected;
+
+  MoveDevice(this.name, this.data, this.isConnected);
 
   static List<MoveDevice> fromNative(devices) {
     List<MoveDevice> deviceList = [];
     for (var device in devices) {
       String name = device["name"];
       String data = device["data"];
+      bool isConnected = device["isConnected"];
 
-      deviceList.add(MoveDevice(name, data));
+      deviceList.add(MoveDevice(name, data, isConnected));
     }
     return deviceList;
   }
