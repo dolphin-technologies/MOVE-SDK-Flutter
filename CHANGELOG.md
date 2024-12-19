@@ -1,3 +1,7 @@
+## 2.10.1
+- iOS: Fixed a bug prompting user motion permissions.
+- Android: Bugfixes & Improvements
+
 ## 2.10.0
 - Added set device state listener.
 
