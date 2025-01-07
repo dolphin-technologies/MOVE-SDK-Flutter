@@ -4,7 +4,7 @@
 #
 Pod::Spec.new do |s|
   s.name             = 'movesdk'
-  s.version          = '2.9.0'
+  s.version          = '2.10.1'
   s.summary          = 'Dolphin MOVE SDK'
   s.description      = 'Wrapper for the Dolphin MoveSDk'
   s.homepage         = 'https://movesdk.com/'
@@ -14,7 +14,7 @@ Pod::Spec.new do |s|
   s.source_files = 'Classes/**/*'
 
   s.dependency 'Flutter'
-  s.dependency 'DolphinMoveSDK', '2.10.0.297'
+  s.dependency 'DolphinMoveSDK', '2.10.1.300'
 
   s.platform = :ios, '12.0'
 

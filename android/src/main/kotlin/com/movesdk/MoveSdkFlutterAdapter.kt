@@ -464,19 +464,7 @@ internal class MoveSdkFlutterAdapter(
     /// Creates the recognition notification.
     override fun recognitionNotification() {
         val notification = createChannelGetNotification() ?: return
-        MoveSdk.get()?.recognitionNotification(notification)
-    }
-
-    /// Creates the trip notification.
-    override fun tripNotification() {
-        val notification = createChannelGetNotification() ?: return
-        MoveSdk.get()?.tripNotification(notification)
-    }
-
-    /// Creates the walking notification.
-    override fun walkingLocationNotification() {
-        val notification = createChannelGetNotification() ?: return
-        MoveSdk.get()?.walkingLocationNotification(notification)
+        MoveSdk.get()?.setNotificationText(notification)
     }
 
     override fun startTrip() {
@@ -592,29 +580,13 @@ internal class MoveSdkFlutterAdapter(
     /// Create a notification channel and get the notification.
     /// - Returns: [MoveNotification].
     private fun createChannelGetNotification(): MoveNotification? {
-        return call.argument<Map<String, String>>("notification")?.let {
-            val channelId = it["channelId"].orEmpty()
-            val channelName = it["channelName"].orEmpty()
-            val channelDescription = it["channelDescription"].orEmpty()
-            val contentTitle = it["contentTitle"].orEmpty()
-            val contentText = it["contentText"].orEmpty()
-            val imageName = it["imageName"].orEmpty()
-            val iconId = context.resources.getIdentifier(imageName, "drawable", context.packageName)
-
-            val importance = NotificationManager.IMPORTANCE_DEFAULT
-            val channel = NotificationChannel(channelId, channelName, importance)
-            channel.description = channelDescription
-            val notificationManager =
-                context.getSystemService(Application.NOTIFICATION_SERVICE) as NotificationManager
-            notificationManager.createNotificationChannel(channel)
-
-            MoveNotification(
-                channelId = channelId,
-                drawableId = iconId,
-                contentTitle = contentTitle,
-                contentText = contentText,
-                showWhen = true,
-            )
-        }
+        return MoveNotification(
+            recognitionTitle = "Recognition Title",
+            recognitionText = "Recognition Text",
+            drivingTitle = "Driving Title",
+            drivingText = "Driving Text",
+            walkingTitle = "Walking Title",
+            walkingText = "Walking Text",
+        )
     }
 }

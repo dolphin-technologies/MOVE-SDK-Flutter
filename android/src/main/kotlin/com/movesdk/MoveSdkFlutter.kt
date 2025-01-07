@@ -81,10 +81,7 @@ internal interface MoveSdkFlutter {
     fun getRegisteredDevices()
     /// Creates the recognition notification.
     fun recognitionNotification()
-    /// Creates the trip notification.
-    fun tripNotification()
-    /// Creates the walking notification.
-    fun walkingLocationNotification()
+    /// Creates the notifications.
     fun startTrip()
     fun setLiveLocationTag()
 }
