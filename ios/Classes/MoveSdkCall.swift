@@ -107,7 +107,10 @@ internal enum MoveSdkArgument: String {
 	case uuid
 	/// Filter.
 	case filter
-	/// Paired audio output devices.
+
+	/// Connected audio output devices.
+	case connected
+	/// Paired audio output devices. iOS can't distinguish between connected/paired.
 	case paired
 	/// iBeacon devices.
 	case beacon

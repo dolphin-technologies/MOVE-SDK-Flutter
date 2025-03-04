@@ -116,6 +116,9 @@ public class MoveSdkPlugin: NSObject {
 	/// Configuration update handler.
 	var configUpdateListener: MoveSDKStreamHandler?
 
+	/// SDK health handler.
+	var healthListener: MoveSDKStreamHandler?
+
 	/// Device scanner handler.
 	///
 	/// Device scanning needs to be triggered manually.
@@ -126,6 +129,12 @@ public class MoveSdkPlugin: NSObject {
 
 	/// Flutter method channel.
 	var channel: FlutterMethodChannel? = nil
+
+	/// Current SDK health.
+	var health: [MoveHealthItem] = []
+
+	/// Current SDK configuration.
+	var config: MoveConfig? = nil
 
 	/// Invoke a dart method block.
 	/// - Parameters:
@@ -278,6 +287,13 @@ public class MoveSdkPlugin: NSObject {
 			services += Config.convert(service: service, base: true).map { $0.rawValue }
 		}
 		return services
+	}
+	
+	/// Convert a `[MoveHealthItem]` to a list of flutter argument strings.
+	/// - Parameter health: Health returned from listener.
+	/// - Returns: A list of dictionaries for health reason/description.
+	static internal func convert(health: [MoveHealthItem]) -> [[String: String]] {
+		health.map { ["reason": $0.reason.rawValue, "description": $0.description] }
 	}
 
 	/// Convert device objects to flutter argument dictionaries.
@@ -781,7 +797,13 @@ public class MoveSdkPlugin: NSObject {
 		}
 
 		let moveConfig = convert(config: config)
-		sdk.update(config: moveConfig)
+
+		if let options: [String: Any]? = call[.options] {
+			let moveOptions = convert(options: options)
+			sdk.update(config: moveConfig, options: moveOptions)
+		} else {
+			sdk.update(config: moveConfig)
+		}
 		result(nil)
 	}
 
@@ -824,7 +846,15 @@ extension MoveSdkPlugin: FlutterPlugin {
 
 		instance.deviceStateHandler = MoveSDKStreamHandler(instance, channel: .deviceState, registrar: registrar) { sink in }
 
-		instance.configUpdateListener = MoveSDKStreamHandler(instance, channel: .configChange, registrar: registrar) { sink in }
+		instance.configUpdateListener = MoveSDKStreamHandler(instance, channel: .configChange, registrar: registrar) { sink in
+			if let config = instance.config {
+				sink(MoveSdkPlugin.convert(config: config))
+			}
+		}
+
+		instance.healthListener = MoveSDKStreamHandler(instance, channel: .sdkHealth, registrar: registrar) { sink in
+			sink(MoveSdkPlugin.convert(health: instance.health))
+		}
 
 		// Device Scanning
 		instance.deviceSannerHandler = MoveSDKDeviceScanner(instance, registrar: registrar)
@@ -832,6 +862,12 @@ extension MoveSdkPlugin: FlutterPlugin {
 
 	public func application(_ application: UIApplication, didFinishLaunchingWithOptions launchOptions: [AnyHashable : Any] = [:]) -> Bool {
 		let launchOptions = launchOptions as? [UIApplication.LaunchOptionsKey: Any]
+
+		sdk.setHealthScoreListener { result in
+			let data = MoveSdkPlugin.convert(health: result)
+			self.healthListener?.sink?(data)
+			self.health = result
+		}
 
 		sdk.setSDKStateListener { state in
 			self.callDart(method: .onStateChange, state.rawValue)
@@ -885,6 +921,7 @@ extension MoveSdkPlugin: FlutterPlugin {
 		sdk.setRemoteConfigChangeListener { result in
 			let data = MoveSdkPlugin.convert(config: result)
 			self.configUpdateListener?.sink?(data)
+			self.config = result
 		}
 
 		sdk.initialize(launchOptions: launchOptions)
@@ -960,6 +997,8 @@ class MoveSDKStreamHandler: NSObject, FlutterStreamHandler {
 		case deviceState
 		/// Configuration change channel.
 		case configChange
+		/// SDK Health channel.
+		case sdkHealth
 	}
 
 	/// A reference to the MoveSDK flutter plugin.

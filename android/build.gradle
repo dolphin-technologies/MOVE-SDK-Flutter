@@ -1,18 +1,10 @@
+plugins {
+    id "com.android.library"
+    id "kotlin-android"
+}
+
 group 'com.movesdk.movesdk'
 version '1.0-SNAPSHOT'
-
-buildscript {
-    ext.kotlin_version = '1.7.10'
-    repositories {
-        google()
-        mavenCentral()
-    }
-
-    dependencies {
-        classpath 'com.android.tools.build:gradle:8.3.2'
-        classpath "org.jetbrains.kotlin:kotlin-gradle-plugin:$kotlin_version"
-    }
-}
 
 allprojects {
     repositories {
@@ -21,9 +13,6 @@ allprojects {
         maven { url "https://dolphin.jfrog.io/artifactory/move-sdk-libs-release" }
     }
 }
-
-apply plugin: 'com.android.library'
-apply plugin: 'kotlin-android'
 
 android {
     namespace 'com.movesdk.movesdk'
@@ -47,6 +36,6 @@ android {
     }
 
     dependencies {
-        api "io.dolphin.move:move-sdk:2.10.1.88"
+        api "io.dolphin.move:move-sdk:2.11.0.90"
     }
 }

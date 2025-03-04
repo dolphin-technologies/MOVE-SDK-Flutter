@@ -5,6 +5,7 @@ import 'package:movesdk/io/dolphin/move/move_auth_state.dart';
 import 'package:movesdk/io/dolphin/move/move_auth_result.dart';
 import 'package:movesdk/io/dolphin/move/move_device.dart';
 import 'package:movesdk/io/dolphin/move/move_geocode_result.dart';
+import 'package:movesdk/io/dolphin/move/move_health_item.dart';
 import 'package:movesdk/io/dolphin/move/move_notification.dart';
 import 'package:movesdk/io/dolphin/move/move_scan_result.dart';
 import 'package:movesdk/io/dolphin/move/move_service_warning.dart';
@@ -62,7 +63,7 @@ abstract class MovesdkPlatform extends PlatformInterface {
   /// - Only the user's token is expected to update. Changing any other
   ///   user's auth param will fail with `MoveAuthError.authInvalid`.
   /// [moveAuth] must contain new valid authentication data.
-  /// Returns an errror if failed.
+  /// Returns an error if failed.
   @Deprecated("Shutdown SDK instead.")
   Future<MoveAuthError?> updateAuth(MoveAuth moveAuth) {
     throw UnimplementedError('platformVersion() has not been implemented.');
@@ -189,7 +190,8 @@ abstract class MovesdkPlatform extends PlatformInterface {
 
   /// The SDK will attempt to change the client [config],
   /// will call warning/error listener respectively.
-  Future<void> updateConfig(MoveConfig config) {
+  /// New [options] will be set if provided.
+  Future<void> updateConfig(MoveConfig config, {MoveOptions? options}) async {
     throw UnimplementedError(
         'updateConfiguration(config) has not been implemented.');
   }
@@ -274,6 +276,12 @@ abstract class MovesdkPlatform extends PlatformInterface {
     throw UnimplementedError('setLogListener() has not been implemented.');
   }
 
+  /// Set a block to be invoked every time SDKHealthListener changes.
+  /// Returns log string. Invoked every time log event occurs.
+  Stream<List<MoveHealthItem>> setHealthListener() async* {
+    throw UnimplementedError('setHealthListener() has not been implemented.');
+  }
+
   /// Set a block to be invoked every time SDK state changes.
   /// Important:
   /// - Set this State listener before `initializing` the SDK to
@@ -333,7 +341,8 @@ abstract class MovesdkPlatform extends PlatformInterface {
       {List<MoveDeviceFilter> filter = const [MoveDeviceFilter.paired],
       String? uuid,
       int? manufacturerId}) async* {
-    throw UnimplementedError('setDeviceScanner() has not been implemented.');
+    throw UnimplementedError(
+        'startScanningDevices() has not been implemented.');
   }
 
   /// Get a list of devices registered with the sdk to be scanned for during trip.

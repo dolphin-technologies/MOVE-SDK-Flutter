@@ -241,23 +241,19 @@ class _MyAppState extends State<MyApp> {
                                 Text("Errors",
                                     style:
                                         Theme.of(context).textTheme.titleSmall),
-                                ...(app.errors ?? [])
-                                    .map((e) => Text(
-                                        "${e.service.name} - ${e.reasons.map((e) => e.name)}",
-                                        style: const TextStyle(
-                                            color: Colors.red,
-                                            fontWeight: FontWeight.bold)))
-                                    .toList(),
+                                ...(app.errors ?? []).map((e) => Text(
+                                    "${e.service.name} - ${e.reasons.map((e) => e.name)}",
+                                    style: const TextStyle(
+                                        color: Colors.red,
+                                        fontWeight: FontWeight.bold))),
                                 Text("Warnings",
                                     style:
                                         Theme.of(context).textTheme.titleSmall),
-                                ...(app.warnings ?? [])
-                                    .map((e) => Text(
-                                        "${e.service?.name ?? ""} - ${e.reasons.map((e) => e.name)}",
-                                        style: const TextStyle(
-                                            color: Colors.amber,
-                                            fontWeight: FontWeight.bold)))
-                                    .toList(),
+                                ...(app.warnings ?? []).map((e) => Text(
+                                    "${e.service?.name ?? ""} - ${e.reasons.map((e) => e.name)}",
+                                    style: const TextStyle(
+                                        color: Colors.amber,
+                                        fontWeight: FontWeight.bold))),
                               ].withSpaceBetween(height: 5.0)),
                         ),
                         const MovePermissionsWidget(),

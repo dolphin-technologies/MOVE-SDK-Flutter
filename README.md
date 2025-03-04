@@ -33,9 +33,10 @@ class MainApplication : Application() {
 
 ### iOS
 
-Inititalization happens automatically in appDidFinishLaunching.
+Initialization happens automatically in appDidFinishLaunching.
 
 ## Support
+
 Contact info@dolph.in
  
 ## License

@@ -7,6 +7,7 @@ import 'package:movesdk/io/dolphin/move/move_auth_result.dart';
 import 'package:movesdk/io/dolphin/move/move_auth_state.dart';
 import 'package:movesdk/io/dolphin/move/move_device.dart';
 import 'package:movesdk/io/dolphin/move/move_geocode_result.dart';
+import 'package:movesdk/io/dolphin/move/move_health_item.dart';
 import 'package:movesdk/io/dolphin/move/move_options.dart';
 import 'package:movesdk/io/dolphin/move/move_scan_result.dart';
 import 'package:movesdk/io/dolphin/move/move_service_warning.dart';
@@ -36,6 +37,7 @@ class MethodChannelMoveSdk extends MovesdkPlatform {
   final deviceScannerChannel = const EventChannel('movesdk-deviceScanner');
   final deviceStateChannel = const EventChannel('movesdk-deviceState');
   final configChangeChannel = const EventChannel('movesdk-configChange');
+  final healthChannel = const EventChannel('movesdk-sdkHealth');
 
   MethodChannelMoveSdk() {
     methodChannel.setMethodCallHandler(callbackHandler);
@@ -123,6 +125,16 @@ class MethodChannelMoveSdk extends MovesdkPlatform {
   Stream<String> setLogListener() async* {
     yield* logChannel.receiveBroadcastStream().asyncMap<String>((messageInfo) {
       return "${messageInfo[0]} [${messageInfo[1]}]";
+    });
+  }
+
+  @override
+  Stream<List<MoveHealthItem>> setHealthListener() async* {
+    yield* healthChannel
+        .receiveBroadcastStream()
+        .asyncMap<List<MoveHealthItem>>((item) {
+      var result = MoveHealthItem.fromNative(item);
+      return result;
     });
   }
 
@@ -228,19 +240,7 @@ class MethodChannelMoveSdk extends MovesdkPlatform {
         <String, dynamic>{
           'authCode': authCode,
           'config': moveConfig.buildConfigParameter(),
-          'options': <String, dynamic>{
-            'motionPermissionMandatory': options?.motionPermissionMandatory,
-            'backgroundLocationPermissionMandatory':
-                options?.backgroundLocationPermissionMandatory,
-            'deviceDiscovery': <String, dynamic>{
-              'startDelay': options?.deviceDiscovery?.startDelay,
-              'duration': options?.deviceDiscovery?.duration,
-              'interval': options?.deviceDiscovery?.interval,
-              'stopScanOnFirstDiscovered':
-                  options?.deviceDiscovery?.stopScanOnFirstDiscovered,
-            },
-            'useBackendConfig': options?.useBackendConfig,
-          },
+          'options': options?.toNative()
         },
       );
     } on PlatformException catch (e) {
@@ -256,11 +256,12 @@ class MethodChannelMoveSdk extends MovesdkPlatform {
   }
 
   @override
-  Future<void> updateConfig(MoveConfig config) async {
+  Future<void> updateConfig(MoveConfig config, {MoveOptions? options}) async {
     await methodChannel.invokeMethod(
       'updateConfig',
       <String, dynamic>{
         'config': config.buildConfigParameter(),
+        'options': options?.toNative()
       },
     );
   }

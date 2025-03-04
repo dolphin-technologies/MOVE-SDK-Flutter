@@ -19,4 +19,20 @@ class MoveOptions {
       this.backgroundLocationPermissionMandatory,
       this.deviceDiscovery,
       this.useBackendConfig});
+
+  /// Conversion to pass to native code.
+  dynamic toNative() {
+    return <String, dynamic>{
+      'motionPermissionMandatory': motionPermissionMandatory,
+      'backgroundLocationPermissionMandatory':
+          backgroundLocationPermissionMandatory,
+      'deviceDiscovery': <String, dynamic>{
+        'startDelay': deviceDiscovery?.startDelay,
+        'duration': deviceDiscovery?.duration,
+        'interval': deviceDiscovery?.interval,
+        'stopScanOnFirstDiscovered': deviceDiscovery?.stopScanOnFirstDiscovered,
+      },
+      'useBackendConfig': useBackendConfig,
+    };
+  }
 }
