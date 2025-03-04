@@ -6,6 +6,7 @@ import 'package:movesdk/io/dolphin/move/move_auth_result.dart';
 import 'package:movesdk/io/dolphin/move/move_detection_service.dart';
 import 'package:movesdk/io/dolphin/move/move_device.dart';
 import 'package:movesdk/io/dolphin/move/move_geocode_result.dart';
+import 'package:movesdk/io/dolphin/move/move_health_item.dart';
 import 'package:movesdk/io/dolphin/move/move_scan_result.dart';
 import 'package:movesdk/io/dolphin/move/move_service_warning.dart';
 import 'package:movesdk/io/dolphin/move/move_shutdown_result.dart';
@@ -16,7 +17,7 @@ import 'io/dolphin/move/move_notification.dart';
 import 'io/dolphin/move/move_options.dart';
 import 'movesdk_platform_interface.dart';
 
-/// A list of services passed in `setup(auth, config)` or `updateConfig(config)`.
+/// A list of services passed in `setup(auth, config)` or `updateConfig(config, options?)`.
 class MoveConfig {
   List<MoveDetectionService> moveDetectionServices;
 
@@ -184,8 +185,9 @@ class MoveSdk {
 
   /// The SDK will attempt to change the client [config],
   /// will call warning/error listener respectively.
-  Future<void> updateConfig(MoveConfig config) {
-    return MovesdkPlatform.instance.updateConfig(config);
+  /// New [options] will be set if provided.
+  Future<void> updateConfig(MoveConfig config, {MoveOptions? options}) async {
+    return MovesdkPlatform.instance.updateConfig(config, options: options);
   }
 
   /// Inititate an Assistance Call to emergency services.
@@ -283,6 +285,12 @@ class MoveSdk {
   /// Returns log string. Invoked every time log event occurs.
   Stream<String> setLogListener() async* {
     yield* MovesdkPlatform.instance.setLogListener();
+  }
+
+  /// Set callback to be invoked every time a new SDK health event occurs.
+  /// Returns a list of MoveHealthItems. Invoked every time log event occurs.
+  Stream<List<MoveHealthItem>> setHealthListener() async* {
+    yield* MovesdkPlatform.instance.setHealthListener();
   }
 
   /// Set a block to be invoked every time SDK trip state changes.

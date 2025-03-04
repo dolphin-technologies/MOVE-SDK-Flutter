@@ -3,6 +3,9 @@ enum MoveDeviceFilter {
   /// iBeacon devices, requires uuid and or manufacurer id.
   beacon,
 
+  /// Connected bluetooth device.
+  connected,
+
   /// Paired bluetooth device.
   paired,
 }
@@ -20,12 +23,19 @@ class MoveDevice {
 
   MoveDevice(this.name, this.data, this.isConnected);
 
+  /// Convert [devices] from native code.
   static List<MoveDevice> fromNative(devices) {
     List<MoveDevice> deviceList = [];
     for (var device in devices) {
       String name = device["name"];
       String data = device["data"];
-      bool isConnected = device["isConnected"];
+      bool isString = device["isConnected"] is String;
+      bool isConnected = false;
+      if (isString) {
+        isConnected = device["isConnected"] == "true";
+      } else {
+        isConnected = device["isConnected"];
+      }
 
       deviceList.add(MoveDevice(name, data, isConnected));
     }

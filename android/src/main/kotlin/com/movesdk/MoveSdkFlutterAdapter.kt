@@ -200,9 +200,13 @@ internal class MoveSdkFlutterAdapter(
 
     /// Initiate an assistance call.
     override fun initiateAssistanceCall() {
+        var hasResponded = false
         MoveSdk.get()?.initiateAssistanceCall(object : MoveSdk.AssistanceStateListener {
             override fun onAssistanceStateChanged(assistanceState: MoveAssistanceCallStatus) {
                 uiThreadHandler.post {
+                    if (hasResponded) return@post
+                    hasResponded = true
+
                     when (assistanceState) {
                         MoveAssistanceCallStatus.SUCCESS -> result.success("success")
                         MoveAssistanceCallStatus.INITIALIZATION_ERROR -> result.error(

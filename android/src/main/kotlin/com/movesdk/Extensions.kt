@@ -58,6 +58,7 @@ fun List<MoveDevice>.toMoveDeviceObjectList(): List<Map<String, String>> {
         mapOf(
             "name" to device.name,
             "data" to device.toJsonString(),
+            "isConnected" to device.isConnected.toString(),
         )
     }
 }

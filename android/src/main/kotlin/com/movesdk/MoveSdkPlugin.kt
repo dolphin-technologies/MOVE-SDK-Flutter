@@ -15,6 +15,8 @@ import androidx.core.content.ContextCompat
 import io.dolphin.move.MoveAuthState
 import io.dolphin.move.MoveConfig
 import io.dolphin.move.MoveDevice
+import io.dolphin.move.MoveHealthScore
+import io.dolphin.move.MoveHealthListeners
 import io.dolphin.move.MoveScanResult
 import io.dolphin.move.MoveSdk
 import io.dolphin.move.MoveSdkState
@@ -53,6 +55,7 @@ class MoveSdkPlugin : FlutterPlugin, MethodCallHandler {
     private lateinit var configChangeChannel: EventChannel
     private lateinit var tripStartChannel: EventChannel
     private lateinit var deviceStateChannel: EventChannel
+    private lateinit var healthListenerChannel: EventChannel
     private var context: Context? = null // Instance variable for context
 
     private val mainScope = CoroutineScope(Dispatchers.Main)
@@ -113,6 +116,10 @@ class MoveSdkPlugin : FlutterPlugin, MethodCallHandler {
         deviceStateChannel =
             EventChannel(flutterPluginBinding.binaryMessenger, "movesdk-deviceState").also {
                 it.setStreamHandler(DeviceStateStreamHandler())
+            }
+        healthListenerChannel =
+            EventChannel(flutterPluginBinding.binaryMessenger, "movesdk-sdkHealth").also {
+                it.setStreamHandler(HealthListenerStreamHandler())
             }
     }
 
@@ -609,6 +616,7 @@ class DeviceStateStreamHandler() : EventChannel.StreamHandler {
                                 mapOf(
                                     "name" to device.name,
                                     "data" to device.toJsonString(),
+                                    "isConnected" to device.isConnected,
                                 )
                             )
                         )
@@ -618,6 +626,35 @@ class DeviceStateStreamHandler() : EventChannel.StreamHandler {
         )
     }
 
+    override fun onCancel(arguments: Any?) {
+    }
+}
+
+class HealthListenerStreamHandler() : EventChannel.StreamHandler {
+    private val uiThreadHandler: Handler = Handler(Looper.getMainLooper())
+
+    override fun onListen(arguments: Any?, events: EventChannel.EventSink?) {
+        MoveSdk.get()?.setMoveHealthScoreListener(
+            object : MoveSdk.MoveHealthScoreListener {
+                override fun onMoveHealthScoreChanged(result: MoveHealthScore) {
+                    val reasonName: String = result.reason.firstOrNull()?.name ?: ""
+                    var description = "Battery: ${result.battery}, Mobile Conn.: ${result.mobileConnection}"
+                    uiThreadHandler.post {
+                        events?.success(
+                            listOf(
+                                mapOf(
+                                    "reason" to reasonName,
+                                    "description" to description,
+                                )
+                            )
+                        )
+                    }
+                }
+            }
+        )
+    }
+
+    /// Cancel listening for health listener changes.
     override fun onCancel(arguments: Any?) {
     }
 }

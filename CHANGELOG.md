@@ -1,3 +1,7 @@
+## 2.11.0
+- Added updateConfig with options API.
+- Added health listener.
+
 ## 2.10.1
 - iOS: Fixed a bug prompting user motion permissions.
 - Android: Bugfixes & Improvements

@@ -98,7 +98,7 @@ extension MoveSDKDeviceScanner: FlutterStreamHandler {
 
 		devices = []
 
-		if filters.contains(.paired) {
+		if filters.contains(.paired) || filters.contains(.connected) {
 			self.scanAudioPorts()
 
 			let timer = Timer(timeInterval: 5.0, repeats: true) { _ in
