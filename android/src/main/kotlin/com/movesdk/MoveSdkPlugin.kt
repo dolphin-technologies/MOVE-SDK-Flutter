@@ -424,6 +424,9 @@ class DeviceScanningStreamHandler(
         if (filters.contains(MoveDeviceFilter.PAIRED.filter)) {
             proceedWithPairedDevices()
         }
+        if (filters.contains(MoveDeviceFilter.CONNECTED.filter)) {
+            proceedWithConnectedDevices()
+        }
         if (filters.contains(MoveDeviceFilter.BEACON.filter)) {
             proceedWithBleDevices()
         }
@@ -478,6 +481,36 @@ class DeviceScanningStreamHandler(
         discoveredDevices.addAll(bondedDevices)
         uiThreadHandler.post {
             events?.success(bondedDevices.toMoveDeviceObjectList())
+        }
+    }
+
+    private fun proceedWithConnectedDevices() {
+        val hasFeature =
+            context.packageManager.hasSystemFeature(PackageManager.FEATURE_BLUETOOTH_LE)
+        if (!hasFeature) {
+            events?.error(ERROR_SCAN_DEVICES, "Missing FEATURE_BLUETOOTH_LE", null)
+            return
+        }
+        val bluetoothManager: BluetoothManager? =
+            context.getSystemService(BluetoothManager::class.java)
+        if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.S) {
+            if (!isPermissionGranted(Manifest.permission.BLUETOOTH_CONNECT)) {
+                events?.error(ERROR_SCAN_DEVICES, "Missing BLUETOOTH_CONNECT permission", null)
+                return
+            }
+        }
+        val bondedDevices = bluetoothManager?.adapter?.bondedDevices
+            ?.mapNotNull { MoveSdk.get()?.convertToMoveDevice(it) }.orEmpty()
+        val connectedDevices = mutableSetOf<MoveDevice>()
+        bondedDevices.forEach { device ->
+            if (device.isConnected) {
+                if (!connectedDevices.contains(device)) {
+                    connectedDevices.add(device)
+                }
+            }
+        }
+        uiThreadHandler.post {
+            events?.success(connectedDevices.toList().toMoveDeviceObjectList())
         }
     }
 
@@ -549,6 +582,7 @@ class DeviceScanningStreamHandler(
     ///   - filter: Filter name.
     enum class MoveDeviceFilter(val filter: String) {
         BEACON("beacon"),
+        CONNECTED("connected"),
         PAIRED("paired");
     }
 }

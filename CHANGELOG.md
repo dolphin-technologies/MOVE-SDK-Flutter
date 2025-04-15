@@ -1,3 +1,7 @@
+## 2.12.0
+- Changed the way data is transmitted to our systems, which reduces memory consumption in some situations.
+- Enable Swift package manager.
+
 ## 2.11.0
 - Added updateConfig with options API.
 - Added health listener.
