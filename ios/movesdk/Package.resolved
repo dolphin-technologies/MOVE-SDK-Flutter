@@ -1,0 +1,14 @@
+{
+  "pins" : [
+    {
+      "identity" : "move-ios-packages",
+      "kind" : "remoteSourceControl",
+      "location" : "https://github.com/dolphin-technologies/MOVE-iOS-Packages",
+      "state" : {
+        "revision" : "d9f3d900918690f91e04bf36f73f9a37405c10df",
+        "version" : "2.12.0"
+      }
+    }
+  ],
+  "version" : 2
+}
