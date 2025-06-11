@@ -31,10 +31,11 @@ android {
     compileOptions {
         sourceCompatibility JavaVersion.VERSION_17
         targetCompatibility JavaVersion.VERSION_17
+        coreLibraryDesugaringEnabled true
     }
 
     dependencies {
-        api "io.dolphin.move:move-sdk:2.11.0.90"
+        api "io.dolphin.move:move-sdk:2.13.0.94"
     }
 
     kotlinOptions {
@@ -77,4 +78,5 @@ flutter {
 }
 
 dependencies {
+    coreLibraryDesugaring 'com.android.tools:desugar_jdk_libs:2.1.4'
 }

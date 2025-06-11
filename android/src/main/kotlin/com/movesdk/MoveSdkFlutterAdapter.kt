@@ -101,7 +101,7 @@ internal class MoveSdkFlutterAdapter(
         MoveSdk.setup(
             authCode = authCode,
             config = moveConfig,
-            start = true,
+            start = false,
             options = moveOptions,
             callback = object : MoveSdk.MoveAuthCallback {
                 override fun onResult(authResult: MoveAuthResult) {
