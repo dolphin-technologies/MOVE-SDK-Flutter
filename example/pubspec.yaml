@@ -63,13 +63,3 @@ flutter:
 
   # For details regarding adding assets from package dependencies, see
   # https://flutter.dev/assets-and-images/#from-packages
-
-  fonts:
-  - family: HelveticaNeue
-    fonts:
-      - asset: fonts/HelveticaNeueLTPro-Roman.otf
-      - asset: fonts/HelveticaNeueLTPro-Bd.otf
-        weight: 700
-      - asset: fonts/HelveticaNeueLTPro-Blk.otf
-        weight: 900
-

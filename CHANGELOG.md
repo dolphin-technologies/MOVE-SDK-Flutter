@@ -1,3 +1,6 @@
+## 2.13.0
+- Added persistence for device registration. 
+
 ## 2.12.0
 - Changed the way data is transmitted to our systems, which reduces memory consumption in some situations.
 - Enable Swift package manager.
