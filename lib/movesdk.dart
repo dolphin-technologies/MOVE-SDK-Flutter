@@ -391,4 +391,8 @@ class MoveSdk {
   Future<bool> setLiveLocationTag(String? tag) async {
     return MovesdkPlatform.instance.setLiveLocationTag(tag);
   }
+
+  Future<bool> requestHealthPermissions() async {
+    return MovesdkPlatform.instance.requestHealthPermissions();
+  }
 }

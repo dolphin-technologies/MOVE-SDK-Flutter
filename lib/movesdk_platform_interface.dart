@@ -401,4 +401,9 @@ abstract class MovesdkPlatform extends PlatformInterface {
     throw UnimplementedError(
         'setLiveLocationTag(String? tag) has not been implemented.');
   }
+
+  Future<bool> requestHealthPermissions() async {
+    throw UnimplementedError(
+        'requestHealthPermissions() has not been implemented.');
+  }
 }
