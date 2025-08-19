@@ -1,8 +1,5 @@
 package com.movesdk
 
-import android.app.Application
-import android.app.NotificationChannel
-import android.app.NotificationManager
 import android.content.Context
 import android.os.Handler
 import android.os.Looper
@@ -24,7 +21,6 @@ import io.dolphin.move.MoveNotification
 import io.dolphin.move.MoveOptions
 import io.dolphin.move.MoveSdk
 import io.dolphin.move.MoveSdkState
-import io.dolphin.move.MoveServiceFailure
 import io.dolphin.move.MoveServiceWarning
 import io.dolphin.move.MoveShutdownResult
 import io.dolphin.move.WalkingService
@@ -50,8 +46,10 @@ internal class MoveSdkFlutterAdapter(
 ) : MoveSdkFlutter {
     /// This handler is used to post the result back to the main thread.
     private val uiThreadHandler: Handler = Handler(Looper.getMainLooper())
+
     /// This scope is used to launch coroutines on the main thread.
     private val mainScope = CoroutineScope(Dispatchers.Main)
+
     /// This scope is used to launch coroutines on the IO thread.
     private val ioContext = Dispatchers.IO
 
@@ -64,9 +62,13 @@ internal class MoveSdkFlutterAdapter(
 
     /// Get the errors.
     override fun getErrors() {
-        val serviceErrors: List<MoveServiceFailure>? = MoveSdk.get()?.getServiceErrors()
-        val errors: List<Map<String, Any>> = serviceErrors?.toErrorObject() ?: emptyList()
-        result.success(errors)
+        mainScope.launch {
+            val serviceErrors = withContext(ioContext) {
+                MoveSdk.get()?.getServiceErrors()
+            }
+            val errors: List<Map<String, Any>> = serviceErrors?.toErrorObject() ?: emptyList()
+            result.success(errors)
+        }
     }
 
     /// Allow mock locations.
@@ -113,6 +115,7 @@ internal class MoveSdkFlutterAdapter(
                                 authResult.description,
                                 null
                             )
+
                             AuthSetupStatus.NETWORK_ERROR -> result.error(
                                 "networkError",
                                 authResult.description,
@@ -489,6 +492,11 @@ internal class MoveSdkFlutterAdapter(
         }
     }
 
+    override fun requestHealthPermissions() {
+        // Stub. Handled in MoveSdkPlugin.
+        result.success(true)
+    }
+
     /// Get the MOVE SDK config.
     /// - Parameters:
     ///   - call: [MethodCall].
@@ -530,6 +538,8 @@ internal class MoveSdkFlutterAdapter(
                 timelineDetectionServicesToUse.add(MoveDetectionService.PointsOfInterest)
             } else if (service.equals(MoveDetectionService.Walking().name(), true)) {
                 timelineDetectionServicesToUse.add(MoveDetectionService.Walking(walkingServicesToUse))
+            } else if (service.equals(MoveDetectionService.Health.name(), true)) {
+                timelineDetectionServicesToUse.add(MoveDetectionService.Health)
             }
         }
         return MoveConfig(timelineDetectionServicesToUse)

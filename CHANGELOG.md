@@ -1,3 +1,7 @@
+## 2.14.0
+- Added health stepcounting service.
+- Stability improvements.
+
 ## 2.13.0
 - Added persistence for device registration. 
 

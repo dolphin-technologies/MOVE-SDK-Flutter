@@ -25,7 +25,7 @@ if (flutterVersionName == null) {
 android {
     namespace 'io.dolphin.move.flutter'
 
-    compileSdkVersion 34
+    compileSdk 36
     ndkVersion '25.1.8937393'
 
     compileOptions {
@@ -35,7 +35,7 @@ android {
     }
 
     dependencies {
-        api "io.dolphin.move:move-sdk:2.13.0.94"
+        api "io.dolphin.move:move-sdk:2.14.0.95"
     }
 
     kotlinOptions {

@@ -128,6 +128,8 @@ enum MoveError {
   bluetoothScanPermissionMissing,
   googlePlayLocationAccuracyMissing,
   gyroscopeMissing,
+  healthConnectReadStepsPermissionMissing,
+  healthConnectBackgroundReadStepsPermissionMissing,
   internetPermissionMissing,
   locationPermissionMissing,
   motionPermissionMissing,

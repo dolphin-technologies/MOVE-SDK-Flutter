@@ -5,18 +5,25 @@ import android.annotation.SuppressLint
 import android.bluetooth.BluetoothManager
 import android.bluetooth.le.ScanCallback
 import android.bluetooth.le.ScanResult
+import android.content.ActivityNotFoundException
 import android.content.Context
 import android.content.pm.PackageManager
 import android.os.Build
 import android.os.Handler
 import android.os.Looper
+import android.util.Log
+import androidx.activity.ComponentActivity
+import androidx.activity.result.ActivityResultLauncher
 import androidx.annotation.NonNull
 import androidx.core.content.ContextCompat
+import androidx.health.connect.client.PermissionController
+import androidx.health.connect.client.permission.HealthPermission
+import androidx.health.connect.client.permission.HealthPermission.Companion.PERMISSION_READ_HEALTH_DATA_IN_BACKGROUND
+import androidx.health.connect.client.records.StepsRecord
 import io.dolphin.move.MoveAuthState
 import io.dolphin.move.MoveConfig
 import io.dolphin.move.MoveDevice
 import io.dolphin.move.MoveHealthScore
-import io.dolphin.move.MoveHealthListeners
 import io.dolphin.move.MoveScanResult
 import io.dolphin.move.MoveSdk
 import io.dolphin.move.MoveSdkState
@@ -24,6 +31,8 @@ import io.dolphin.move.MoveServiceFailure
 import io.dolphin.move.MoveServiceWarning
 import io.dolphin.move.MoveTripState
 import io.flutter.embedding.engine.plugins.FlutterPlugin
+import io.flutter.embedding.engine.plugins.activity.ActivityAware
+import io.flutter.embedding.engine.plugins.activity.ActivityPluginBinding
 import io.flutter.plugin.common.EventChannel
 import io.flutter.plugin.common.MethodCall
 import io.flutter.plugin.common.MethodChannel
@@ -38,7 +47,12 @@ import java.util.Locale
 import java.util.UUID
 
 /** MoveSdkPlugin */
-class MoveSdkPlugin : FlutterPlugin, MethodCallHandler {
+class MoveSdkPlugin : FlutterPlugin, MethodCallHandler, ActivityAware {
+
+    companion object {
+        private const val TAG = "MoveSdkPlugin"
+    }
+
     /// The MethodChannel that will the communication between Flutter and native Android
     ///
     /// This local reference serves to register the plugin with the Flutter Engine and unregister it
@@ -60,6 +74,20 @@ class MoveSdkPlugin : FlutterPlugin, MethodCallHandler {
 
     private val mainScope = CoroutineScope(Dispatchers.Main)
 
+    private val allHealthPermissions =
+        setOf(
+            HealthPermission.getReadPermission(StepsRecord::class),
+            PERMISSION_READ_HEALTH_DATA_IN_BACKGROUND,
+        )
+    private val android14Permissions =
+        setOf(
+            HealthPermission.getReadPermission(StepsRecord::class),
+        )
+    val requestPermissionActivityContract =
+        PermissionController.createRequestPermissionResultContract()
+
+    var requestPermissions: ActivityResultLauncher<Set<String>>? = null
+    var healthPermissionsResult: MethodChannel.Result? = null
 
     /// Plugin registration.
     /// - Parameters:
@@ -129,13 +157,27 @@ class MoveSdkPlugin : FlutterPlugin, MethodCallHandler {
     ///   - result: A [MethodChannel.Result] used for submitting the result of the call.
     override fun onMethodCall(call: MethodCall, result: MethodChannel.Result) {
         context?.let {
-            val flutterAdapter = MoveSdkFlutterAdapter(it, call, result)
-            val method = flutterAdapter::class.java.methods
-                .find { method -> method.name == call.method }
-            if (method != null) {
-                method.invoke(flutterAdapter)
+            if (call.method == "requestHealthPermissions") {
+                try {
+                    healthPermissionsResult = result
+                    requestPermissions?.launch(allHealthPermissions)
+                    Log.i(TAG, "requestHealthPermissions: $requestPermissions")
+                } catch (e: ActivityNotFoundException) {
+                    Log.i(TAG, "Activity Not Found: $e")
+                    result.error("", e.message, null)
+                } catch (e: Exception) {
+                    Log.i(TAG, "Exception requesting permissions for Health Connect: $e")
+                    result.error("", e.message, null)
+                }
             } else {
-                result.notImplemented()
+                val flutterAdapter = MoveSdkFlutterAdapter(it, call, result)
+                val method = flutterAdapter::class.java.methods
+                    .find { method -> method.name == call.method }
+                if (method != null) {
+                    method.invoke(flutterAdapter)
+                } else {
+                    result.notImplemented()
+                }
             }
         }
     }
@@ -145,6 +187,39 @@ class MoveSdkPlugin : FlutterPlugin, MethodCallHandler {
     ///   - binding: Flutter plugin binding.
     override fun onDetachedFromEngine(@NonNull binding: FlutterPlugin.FlutterPluginBinding) {
         channel.setMethodCallHandler(null)
+    }
+
+    override fun onAttachedToActivity(binding: ActivityPluginBinding) {
+        Log.i(TAG, "Attached To Activity")
+        requestPermissions = (binding.activity as? ComponentActivity)?.registerForActivityResult(
+            requestPermissionActivityContract
+        ) { granted ->
+            val permissions = if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.UPSIDE_DOWN_CAKE) {
+                android14Permissions
+            } else {
+                allHealthPermissions
+            }
+            if (granted.containsAll(permissions)) {
+                Log.i(TAG, "Health connect permission has been granted")
+                MoveSdk.get()?.resolveError()
+                healthPermissionsResult?.success(true)
+            } else {
+                Log.i(TAG, "Health connect permission NOT granted")
+                healthPermissionsResult?.error("", "Health connect permission NOT granted", null)
+            }
+        }
+    }
+
+    override fun onDetachedFromActivityForConfigChanges() {
+        Log.i(TAG, "Detached From Activity For Config Changes")
+    }
+
+    override fun onReattachedToActivityForConfigChanges(binding: ActivityPluginBinding) {
+        Log.i(TAG, "Reattached To Activity For Config Changes")
+    }
+
+    override fun onDetachedFromActivity() {
+        Log.i(TAG, "Detached From Activity")
     }
 }
 
@@ -672,7 +747,8 @@ class HealthListenerStreamHandler() : EventChannel.StreamHandler {
             object : MoveSdk.MoveHealthScoreListener {
                 override fun onMoveHealthScoreChanged(result: MoveHealthScore) {
                     val reasonName: String = result.reason.firstOrNull()?.name ?: ""
-                    var description = "Battery: ${result.battery}, Mobile Conn.: ${result.mobileConnection}"
+                    var description =
+                        "Battery: ${result.battery}, Mobile Conn.: ${result.mobileConnection}"
                     uiThreadHandler.post {
                         events?.success(
                             listOf(

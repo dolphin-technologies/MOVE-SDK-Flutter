@@ -553,4 +553,10 @@ class MethodChannelMoveSdk extends MovesdkPlatform {
         .invokeMethod('setLiveLocationTag', <String, dynamic>{'tag': tag});
     return result;
   }
+
+  @override
+  Future<bool> requestHealthPermissions() async {
+    var result = await methodChannel.invokeMethod('requestHealthPermissions');
+    return result;
+  }
 }

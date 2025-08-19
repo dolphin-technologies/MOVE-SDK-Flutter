@@ -22,6 +22,9 @@ enum MoveDetectionService {
   /// Bluetooth Device Detection based on bluetooth scanning requires [driving].
   deviceDiscovery,
 
+  /// User health service, i.e: 'steps',
+  health,
+
   /// Places service, (pending documentation).
   places,
 

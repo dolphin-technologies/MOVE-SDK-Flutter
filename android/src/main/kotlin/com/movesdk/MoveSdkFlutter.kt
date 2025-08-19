@@ -84,4 +84,5 @@ internal interface MoveSdkFlutter {
     /// Creates the notifications.
     fun startTrip()
     fun setLiveLocationTag()
+    fun requestHealthPermissions()
 }

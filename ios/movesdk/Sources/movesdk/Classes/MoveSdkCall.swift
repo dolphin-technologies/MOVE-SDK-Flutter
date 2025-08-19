@@ -34,6 +34,8 @@ internal enum MoveSdkMethod: String {
 	case registerDevices
 	/// `resolveError`.
 	case resolveError
+	/// `requestHealthPermissions`.
+	case requestHealthPermissions
 	/// `setAssistanceMetaData(:)`.
 	case setAssistanceMetaData
 	/// `setLiveLocationTag(:)`

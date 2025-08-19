@@ -1,4 +1,5 @@
 import Flutter
+import HealthKit
 import UIKit
 import DolphinMoveSDK
 
@@ -26,6 +27,8 @@ public class MoveSdkPlugin: NSObject {
 		case drivingBehaviour
 		/// Driving device detection subservice.
 		case deviceDiscovery
+		/// User health service.
+		case health
 		/// Places service.
 		case places
 		/// Geofencing service.
@@ -80,6 +83,8 @@ public class MoveSdkPlugin: NSObject {
 				return [.automaticImpactDetection]
 			case .assistanceCall:
 				return [.assistanceCall]
+			case .health:
+				return [.health]
 			@unknown default:
 				return []
 			}
@@ -135,6 +140,9 @@ public class MoveSdkPlugin: NSObject {
 
 	/// Current SDK configuration.
 	var config: MoveConfig? = nil
+
+	/// Healthstore to get permissions from.
+	lazy var healthStore = HKHealthStore()
 
 	/// Invoke a dart method block.
 	/// - Parameters:
@@ -228,6 +236,8 @@ public class MoveSdkPlugin: NSObject {
 				detectionServices.append(.driving(drivingServices))
 			case .distractionFreeDriving, .drivingBehaviour, .deviceDiscovery:
 				break
+			case .health:
+				detectionServices.append(.health)
 			case .places:
 				detectionServices.append(.places)
 			case .pointsOfInterest:
@@ -603,6 +613,22 @@ public class MoveSdkPlugin: NSObject {
 	/// - Parameters:
 	///   - call: The `FlutterMethodCall` to parse arguments from.
 	///   - result: A Flutter result callback.
+	private func requestHealthPermissions(_ call: FlutterMethodCall, _ result: @escaping FlutterResult) {
+		let stepCountSampleType = HKObjectType.quantityType(forIdentifier: .stepCount)!
+
+		healthStore.requestAuthorization(toShare: [], read:  [stepCountSampleType]) { (success, error) in
+			if let error {
+				result(MoveSdkError.otherError(error.localizedDescription))
+			} else if success {
+				result(true)
+			}
+		}
+	}
+
+	/// Wrapper for SDK Method.
+	/// - Parameters:
+	///   - call: The `FlutterMethodCall` to parse arguments from.
+	///   - result: A Flutter result callback.
 	private func setLiveLocationTag(_ call: FlutterMethodCall, _ result: @escaping FlutterResult) {
 		let tag: String? = call[.tag]
 		let success = sdk.setLiveLocationTag(tag)
@@ -951,6 +977,7 @@ extension MoveSdkPlugin: FlutterPlugin {
 		case .initiateAssistanceCall: initiateAssistanceCall(call, result)
 		case .registerDevices: registerDevices(call, result)
 		case .resolveError: resolveError(call, result)
+		case .requestHealthPermissions: requestHealthPermissions(call, result)
 		case .setAssistanceMetaData: setAssistanceMetaData(call, result)
 		case .setLiveLocationTag: setLiveLocationTag(call, result)
 		case .setup: setup(call, result)
