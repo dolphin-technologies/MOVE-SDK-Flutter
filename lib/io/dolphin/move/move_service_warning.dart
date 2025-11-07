@@ -26,10 +26,16 @@ class MoveServiceWarning {
           .firstWhereOrNull(
               (element) => element.name.toLowerCase() == service.toLowerCase());
 
-      List<MoveWarning> targetReasons = reasons
-          .map((e) => MoveWarning.values.firstWhere(
-              (element) => element.name.toLowerCase() == e.toLowerCase()))
-          .toList();
+      List<MoveWarning> targetReasons = [];
+      Iterable mapped = reasons.map((e) {
+        MoveWarning? value = MoveWarning.values.firstWhereOrNull(
+          (element) => element.name.toLowerCase() == e.toLowerCase(),
+        );
+        return value;
+      });
+      Iterable<MoveWarning> filtered = mapped.whereType<MoveWarning>();
+      List<MoveWarning> resultList = filtered.toList();
+      targetReasons = resultList;
 
       moveWarnings.add(MoveServiceWarning(
         service: targetService,

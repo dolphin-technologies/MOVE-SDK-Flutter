@@ -147,7 +147,14 @@ class AppModel extends ChangeNotifier {
         try {
           String authCode = await AuthClient.registerAuthCode(userID!);
 
-          var moveConfig = MoveConfig(MoveDetectionService.values);
+          var moveConfig = MoveConfig([
+            MoveDetectionService.driving,
+            MoveDetectionService.drivingBehaviour,
+            MoveDetectionService.distractionFreeDriving,
+            MoveDetectionService.cycling,
+            MoveDetectionService.publicTransport,
+            MoveDetectionService.pointsOfInterest
+          ]);
 
           var status = await _moveSdkPlugin.setupWithCode(authCode, moveConfig);
           if (status.status == AuthSetupStatus.success) {

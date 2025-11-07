@@ -1,3 +1,6 @@
+## 2.14.1
+- Stability improvements.
+
 ## 2.14.0
 - Added health stepcounting service.
 - Stability improvements.
