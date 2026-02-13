@@ -54,6 +54,5 @@ app.*.symbols
 # Obfuscation related
 app.*.map.json
 *.lock
-Package.resolved
 .build
 .swiftpm
