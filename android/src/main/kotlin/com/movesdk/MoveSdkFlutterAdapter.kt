@@ -264,7 +264,9 @@ internal class MoveSdkFlutterAdapter(
 
     /// Get the MOVE SDK configuration.
     override fun getMoveConfig() {
-        result.success(MoveSdk.get()?.getMoveConfig())
+        val moveConfig = MoveSdk.get()?.getMoveConfig()
+        val serviceNames = moveConfig?.toMoveConfigList() ?: emptyList<String>()
+        result.success(serviceNames)
     }
 
     /// Delete all local data.
