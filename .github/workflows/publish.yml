@@ -21,7 +21,7 @@ jobs:
       - uses: flutter-actions/setup-flutter@main
         with:
           channel: stable
-          version: 3.24.1
+          version: 3.38.8
       # Minimal package setup and dry run checks.
       - name: Install dependencies
         run: dart pub get
