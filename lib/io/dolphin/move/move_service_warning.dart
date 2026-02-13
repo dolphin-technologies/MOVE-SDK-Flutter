@@ -19,10 +19,10 @@ class MoveServiceWarning {
       String service = warning["service"];
       List reasons = warning["reasons"];
 
-      MoveDetectionService? targetService = MoveDetectionService.values
-          .firstWhereOrNull(
-            (element) => element.name.toLowerCase() == service.toLowerCase(),
-          );
+      MoveDetectionService? targetService =
+          MoveDetectionService.values.firstWhereOrNull(
+        (element) => element.name.toLowerCase() == service.toLowerCase(),
+      );
 
       List<MoveWarning> targetReasons = [];
       Iterable mapped = reasons.map((e) {
@@ -62,10 +62,10 @@ class MoveServiceError {
       String service = warning["service"];
       List reasons = warning["reasons"];
 
-      MoveDetectionService? targetService = MoveDetectionService.values
-          .firstWhereOrNull(
-            (element) => element.name.toLowerCase() == service.toLowerCase(),
-          );
+      MoveDetectionService? targetService =
+          MoveDetectionService.values.firstWhereOrNull(
+        (element) => element.name.toLowerCase() == service.toLowerCase(),
+      );
 
       if (targetService != null) {
         List<MoveError> targetReasons = reasons
