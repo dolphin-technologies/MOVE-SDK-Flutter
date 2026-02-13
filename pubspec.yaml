@@ -1,10 +1,10 @@
 name: movesdk
 description: Plugin for Dolphin Technologies MOVE SDK for iOS and Android.
-version: 2.14.1
+version: 2.16.0
 homepage: https://movesdk.com/
 
 environment:
-  sdk: '>=2.17.3 <4.0.0'
+  sdk: '>=3.10.0 <4.0.0'
   flutter: ">=2.5.0"
 
 dependencies:
