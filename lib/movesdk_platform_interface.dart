@@ -78,7 +78,10 @@ abstract class MovesdkPlatform extends PlatformInterface {
   /// [moveConfig] indicates the configuration of the services which will be running.
   /// Services in [moveConfig] must be enabled in the MOVE dashboard.
   Future<void> setup(
-      MoveAuth moveAuth, MoveConfig moveConfig, MoveOptions? options) {
+    MoveAuth moveAuth,
+    MoveConfig moveConfig,
+    MoveOptions? options,
+  ) {
     throw UnimplementedError('setup has not been implemented.');
   }
 
@@ -86,7 +89,10 @@ abstract class MovesdkPlatform extends PlatformInterface {
   /// [authCode] Auth code to setup with..
   /// Services in [moveConfig] must be enabled in the MOVE dashboard.
   Future<MoveAuthResult> setupWithCode(
-      String authCode, MoveConfig moveConfig, MoveOptions? options) {
+    String authCode,
+    MoveConfig moveConfig,
+    MoveOptions? options,
+  ) {
     throw UnimplementedError('setup has not been implemented.');
   }
 
@@ -96,7 +102,8 @@ abstract class MovesdkPlatform extends PlatformInterface {
   /// - SDK State to be `.ready`.
   Future<bool> startAutomaticDetection() {
     throw UnimplementedError(
-        'startAutomaticDetection() has not been implemented.');
+      'startAutomaticDetection() has not been implemented.',
+    );
   }
 
   /// Stops the automatic detection service.
@@ -105,7 +112,8 @@ abstract class MovesdkPlatform extends PlatformInterface {
   /// - SDK State to be `.running`.
   Future<bool> stopAutomaticDetection() {
     throw UnimplementedError(
-        'stopAutomaticDetection() has not been implemented.');
+      'stopAutomaticDetection() has not been implemented.',
+    );
   }
 
   /// Shutdown SDK shared instance.
@@ -141,7 +149,8 @@ abstract class MovesdkPlatform extends PlatformInterface {
   /// - SDK State to be `.running`.
   Future<void> forceTripRecognition() {
     throw UnimplementedError(
-        'forceTripRecognition() has not been implemented.');
+      'forceTripRecognition() has not been implemented.',
+    );
   }
 
   /// Ignores the current ongoing trip.
@@ -193,20 +202,28 @@ abstract class MovesdkPlatform extends PlatformInterface {
   /// New [options] will be set if provided.
   Future<void> updateConfig(MoveConfig config, {MoveOptions? options}) async {
     throw UnimplementedError(
-        'updateConfiguration(config) has not been implemented.');
+      'updateConfiguration(config) has not been implemented.',
+    );
+  }
+
+  /// Get the current SDK configuration.
+  Future<MoveConfig> getMoveConfig() async {
+    throw UnimplementedError('getMoveConfig() has not been implemented.');
   }
 
   /// Inititate an Assistance Call to emergency services.
   /// Returns a status wether the call succeeded.
   Future<MoveAssistanceCallStatus> initiateAssistanceCall() {
     throw UnimplementedError(
-        'initiateAssistanceCall() has not been implemented.');
+      'initiateAssistanceCall() has not been implemented.',
+    );
   }
 
   /// Set metadata to be sent with assistance call or impact detection.
   Future<void> setAssistanceMetaData(String? assistanceMetadataValue) {
     throw UnimplementedError(
-        'setAssistanceMetaData() has not been implemented.');
+      'setAssistanceMetaData() has not been implemented.',
+    );
   }
 
   /// Geocode address lookup at coordinates: ([latitude], [longitude])
@@ -267,7 +284,8 @@ abstract class MovesdkPlatform extends PlatformInterface {
   /// Returns stream: latest MoveAuthState. Invoked every time auth state changes.
   Stream<MoveAuthState> setAuthStateListener() async* {
     throw UnimplementedError(
-        'setAuthStateListener() has not been implemented.');
+      'setAuthStateListener() has not been implemented.',
+    );
   }
 
   /// Set callback to be invoked every time a new SDK log event occurs.
@@ -296,14 +314,16 @@ abstract class MovesdkPlatform extends PlatformInterface {
   /// Returns stream: latest SDK trip state. Invoked every time SDK trip state changes.
   Stream<MoveTripState> setTripStateListener() async* {
     throw UnimplementedError(
-        'setTripStateListener() has not been implemented.');
+      'setTripStateListener() has not been implemented.',
+    );
   }
 
   /// Set a block to be invoked when a trip starts.
   /// Returns stream with the trip start date. The listener is sent delayed after confirming a trip is valid, around 30s to 130s.
   Stream<DateTime> setTripStartListener() async* {
     throw UnimplementedError(
-        'setTripStartListener() has not been implemented.');
+      'setTripStartListener() has not been implemented.',
+    );
   }
 
   /// Sets a block to get called when optional permissions for
@@ -312,7 +332,8 @@ abstract class MovesdkPlatform extends PlatformInterface {
   /// or permission errors.
   Stream<List<MoveServiceWarning>> setServiceWarningListener() async* {
     throw UnimplementedError(
-        'setServiceWarningListener() has not been implemented.');
+      'setServiceWarningListener() has not been implemented.',
+    );
   }
 
   /// Set a block to be invoked every time SDK warning status changes.
@@ -325,30 +346,35 @@ abstract class MovesdkPlatform extends PlatformInterface {
   /// or permission errors.
   Stream<List<MoveServiceError>> setServiceErrorListener() async* {
     throw UnimplementedError(
-        'setServiceErrorListener() has not been implemented.');
+      'setServiceErrorListener() has not been implemented.',
+    );
   }
 
   /// Set a listener when the config changed in response to the useBackendConfig option.
   Stream<MoveConfig> setRemoteConfigChangeListener() async* {
     throw UnimplementedError(
-        'setRemoteConfigChangeListener() has not been implemented.');
+      'setRemoteConfigChangeListener() has not been implemented.',
+    );
   }
 
   /// Starts scanning for devices that can be registered with the sdk
   /// Scan can be filtered with [filter], default includes only paired devices
   /// for scanning beacons [uuid] and [manufacturerId] must be specified
-  Stream<List<MoveDevice>> startScanningDevices(
-      {List<MoveDeviceFilter> filter = const [MoveDeviceFilter.paired],
-      String? uuid,
-      int? manufacturerId}) async* {
+  Stream<List<MoveDevice>> startScanningDevices({
+    List<MoveDeviceFilter> filter = const [MoveDeviceFilter.paired],
+    String? uuid,
+    int? manufacturerId,
+  }) async* {
     throw UnimplementedError(
-        'startScanningDevices() has not been implemented.');
+      'startScanningDevices() has not been implemented.',
+    );
   }
 
   /// Get a list of devices registered with the sdk to be scanned for during trip.
   Future<List<MoveDevice>> getRegisteredDevices() async {
     throw UnimplementedError(
-        'getRegisteredDevices() has not been implemented.');
+      'getRegisteredDevices() has not been implemented.',
+    );
   }
 
   /// Register devices with the sdk to be scanned for during trip.
@@ -362,22 +388,29 @@ abstract class MovesdkPlatform extends PlatformInterface {
     throw UnimplementedError('unregisterDevices() has not been implemented.');
   }
 
+  Future<void> registerService(String uuid) async {
+    throw UnimplementedError('registerService() has not been implemented.');
+  }
+
   /// Device listener fired on device scans during trips.
   Stream<List<MoveScanResult>> setDeviceDiscoveryListener() async* {
     throw UnimplementedError(
-        'setDeviceDiscoveryListener() has not been implemented.');
+      'setDeviceDiscoveryListener() has not been implemented.',
+    );
   }
 
   /// Device state fired on device connection change.
   Stream<List<MoveDevice>> setDeviceStateListener() async* {
     throw UnimplementedError(
-        'setDeviceStateListener() has not been implemented.');
+      'setDeviceStateListener() has not been implemented.',
+    );
   }
 
   /// Setup notification for Move SDK recognition
   Future<void> recognitionNotification(MoveNotification notification) {
     throw UnimplementedError(
-        'recognitionNotification() has not been implemented.');
+      'recognitionNotification() has not been implemented.',
+    );
   }
 
   /// Setup trip notification
@@ -388,22 +421,26 @@ abstract class MovesdkPlatform extends PlatformInterface {
   /// Setup walking location notification
   Future<void> walkingLocationNotification(MoveNotification notification) {
     throw UnimplementedError(
-        'walkingLocationNotification() has not been implemented.');
+      'walkingLocationNotification() has not been implemented.',
+    );
   }
 
   /// Start manual trip
   Future<bool> startTrip(Map<String, String>? metadata) {
     throw UnimplementedError(
-        'startTrip(Map<String, String> metadata) has not been implemented.');
+      'startTrip(Map<String, String> metadata) has not been implemented.',
+    );
   }
 
   Future<bool> setLiveLocationTag(String? tag) async {
     throw UnimplementedError(
-        'setLiveLocationTag(String? tag) has not been implemented.');
+      'setLiveLocationTag(String? tag) has not been implemented.',
+    );
   }
 
   Future<bool> requestHealthPermissions() async {
     throw UnimplementedError(
-        'requestHealthPermissions() has not been implemented.');
+      'requestHealthPermissions() has not been implemented.',
+    );
   }
 }

@@ -748,7 +748,7 @@ class HealthListenerStreamHandler() : EventChannel.StreamHandler {
                 override fun onMoveHealthScoreChanged(result: MoveHealthScore) {
                     val reasonName: String = result.reason.firstOrNull()?.name ?: ""
                     var description =
-                        "Battery: ${result.battery}, Mobile Conn.: ${result.mobileConnection}"
+                        "Mobile Conn.: ${result.mobileConnection}"
                     uiThreadHandler.post {
                         events?.success(
                             listOf(

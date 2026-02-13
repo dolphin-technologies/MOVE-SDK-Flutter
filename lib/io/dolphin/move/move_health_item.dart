@@ -10,7 +10,7 @@ enum MoveHealthReason {
   internetUsage,
   memoryUsage,
   newVersion,
-  unimplementedListeners
+  unimplementedListeners,
 }
 
 /// Convert from snake case.
@@ -46,7 +46,8 @@ class MoveHealthItem {
       } else {
         String r = item["reason"];
         MoveHealthReason? reason = MoveHealthReason.values.firstWhereOrNull(
-            (element) => element.name.toLowerCase() == r.toLowerCase());
+          (element) => element.name.toLowerCase() == r.toLowerCase(),
+        );
         if (reason != null) {
           String description = item["description"];
           healthItems.add(MoveHealthItem(reason, description));

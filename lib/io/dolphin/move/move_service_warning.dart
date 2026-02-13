@@ -11,10 +11,7 @@ class MoveServiceWarning {
   /// Reason indicates a missing permission.
   final List<MoveWarning> reasons;
 
-  const MoveServiceWarning({
-    required this.service,
-    required this.reasons,
-  });
+  const MoveServiceWarning({required this.service, required this.reasons});
 
   static List<MoveServiceWarning> fromNative(warnings) {
     List<MoveServiceWarning> moveWarnings = [];
@@ -22,9 +19,10 @@ class MoveServiceWarning {
       String service = warning["service"];
       List reasons = warning["reasons"];
 
-      MoveDetectionService? targetService = MoveDetectionService.values
-          .firstWhereOrNull(
-              (element) => element.name.toLowerCase() == service.toLowerCase());
+      MoveDetectionService? targetService =
+          MoveDetectionService.values.firstWhereOrNull(
+        (element) => element.name.toLowerCase() == service.toLowerCase(),
+      );
 
       List<MoveWarning> targetReasons = [];
       Iterable mapped = reasons.map((e) {
@@ -37,10 +35,9 @@ class MoveServiceWarning {
       List<MoveWarning> resultList = filtered.toList();
       targetReasons = resultList;
 
-      moveWarnings.add(MoveServiceWarning(
-        service: targetService,
-        reasons: targetReasons,
-      ));
+      moveWarnings.add(
+        MoveServiceWarning(service: targetService, reasons: targetReasons),
+      );
     }
     return moveWarnings;
   }
@@ -57,10 +54,7 @@ class MoveServiceError {
   /// Reason indicates a missing permission or `unauthorized`.
   final List<MoveError> reasons;
 
-  const MoveServiceError({
-    required this.service,
-    required this.reasons,
-  });
+  const MoveServiceError({required this.service, required this.reasons});
 
   static List<MoveServiceError> fromNative(errors) {
     List<MoveServiceError> moveWarnings = [];
@@ -68,9 +62,10 @@ class MoveServiceError {
       String service = warning["service"];
       List reasons = warning["reasons"];
 
-      MoveDetectionService? targetService = MoveDetectionService.values
-          .firstWhereOrNull(
-              (element) => element.name.toLowerCase() == service.toLowerCase());
+      MoveDetectionService? targetService =
+          MoveDetectionService.values.firstWhereOrNull(
+        (element) => element.name.toLowerCase() == service.toLowerCase(),
+      );
 
       if (targetService != null) {
         List<MoveError> targetReasons = reasons
@@ -85,10 +80,9 @@ class MoveServiceError {
             })
             .whereNotNullable()
             .toList();
-        moveWarnings.add(MoveServiceError(
-          service: targetService,
-          reasons: targetReasons,
-        ));
+        moveWarnings.add(
+          MoveServiceError(service: targetService, reasons: targetReasons),
+        );
       }
     }
     return moveWarnings;

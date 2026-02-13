@@ -11,6 +11,11 @@ import DolphinMoveSDK
 ///
 public class MoveSdkPlugin: NSObject {
 
+	/// iBeacon service device.
+	private struct DeviceService: Decodable {
+		let uuid: String
+	}
+
 	/// Move configuration keys.
 	internal enum Config: String {
 		/// Assistance call service.
@@ -403,21 +408,25 @@ public class MoveSdkPlugin: NSObject {
 		}
 
 		do {
-			let devices: [MoveDevice] = try deviceMap.map { (name, encoded) in
+			let devices: [MoveDevice] = try deviceMap.compactMap { (name, encoded) in
 				let decoder = JSONDecoder()
 				guard let data = encoded.data(using: .utf8) else {
 					throw MoveSdkError()
 				}
-				let device = try decoder.decode(MoveDevice.self, from: data)
-				/* overwrite device name */
-				device.name = name
-				return device
+				if let device = try? decoder.decode(MoveDevice.self, from: data) {
+					/* overwrite device name */
+					device.name = name
+					return device
+				} else if let info = try? decoder.decode(DeviceService.self, from: data), let uuid = UUID(uuidString: info.uuid) {
+					return MoveDevice(proximityUUID: uuid)
+				} else {
+					return nil
+				}
 			}
 			return (devices, [])
 		} catch {
 			return ([], [.devices])
 		}
-
 	}
 
 	// MARK: Implementation
@@ -488,6 +497,18 @@ public class MoveSdkPlugin: NSObject {
 	private func getDeviceQualifier(_ call: FlutterMethodCall, _ result: @escaping FlutterResult) {
 		let qualifier = sdk.getDeviceQualifier()
 		result("\(qualifier)")
+	}
+
+	/// Wrapper for SDK Method.
+	/// - Parameters:
+	///   - call: The `FlutterMethodCall` to parse arguments from.
+	///   - result: A Flutter result callback.
+	private func getMoveConfig(_ call: FlutterMethodCall, _ result: @escaping FlutterResult) {
+		if let config = sdk.getMoveConfig() {
+			result(MoveSdkPlugin.convert(config: config))
+		} else {
+			result(MoveSdkError.initializationError)
+		}
 	}
 
 	/// Wrapper for SDK Method.
@@ -968,6 +989,7 @@ extension MoveSdkPlugin: FlutterPlugin {
 		case .getAuthState: getAuthState(call, result)
 		case .getDeviceQualifier: getDeviceQualifier(call, result)
 		case .getErrors: getServiceErrors(call, result)
+		case .getMoveConfig: getMoveConfig(call, result)
 		case .getMoveVersion: getMoveVersion(call, result)
 		case .getRegisteredDevices: getRegisteredDevices(call, result)
 		case .getState: getState(call, result)
@@ -976,6 +998,7 @@ extension MoveSdkPlugin: FlutterPlugin {
 		case .ignoreCurrentTrip: ignoreCurrentTrip(call, result)
 		case .initiateAssistanceCall: initiateAssistanceCall(call, result)
 		case .registerDevices: registerDevices(call, result)
+		case .registerService: registerDevices(call, result)
 		case .resolveError: resolveError(call, result)
 		case .requestHealthPermissions: requestHealthPermissions(call, result)
 		case .setAssistanceMetaData: setAssistanceMetaData(call, result)
