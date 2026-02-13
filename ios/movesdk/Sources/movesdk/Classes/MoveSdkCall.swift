@@ -12,6 +12,8 @@ internal enum MoveSdkMethod: String {
 	case getAuthState
 	/// `getDeviceQualifier()`.
 	case getDeviceQualifier
+	/// `getMoveConfig()`.
+	case getMoveConfig
 	/// `getMoveVersion()`.
 	case getMoveVersion
 	/// `getRegisteredDevices()`.
@@ -32,6 +34,8 @@ internal enum MoveSdkMethod: String {
 	case initiateAssistanceCall
 	/// `register(devices:)`.
 	case registerDevices
+	/// `register(devices:)`.
+	case registerService
 	/// `resolveError`.
 	case resolveError
 	/// `requestHealthPermissions`.

@@ -19,8 +19,5 @@ class MoveGeocodeResult {
   /// Lookup could not be completed.
   MoveGeocodeError? error;
 
-  MoveGeocodeResult(
-    this.result,
-    this.error,
-  );
+  MoveGeocodeResult(this.result, this.error);
 }

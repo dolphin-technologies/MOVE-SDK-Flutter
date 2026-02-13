@@ -14,10 +14,5 @@ class MoveAuth {
   /// the auth state listener will be notified with `MoveAuthState.expired`.
   String refreshToken;
 
-  MoveAuth(
-    this.projectId,
-    this.userId,
-    this.accessToken,
-    this.refreshToken,
-  );
+  MoveAuth(this.projectId, this.userId, this.accessToken, this.refreshToken);
 }

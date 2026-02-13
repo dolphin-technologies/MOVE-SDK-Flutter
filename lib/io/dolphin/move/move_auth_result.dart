@@ -17,8 +17,5 @@ class MoveAuthResult {
   /// Status message.
   String description;
 
-  MoveAuthResult(
-    this.status,
-    this.description,
-  );
+  MoveAuthResult(this.status, this.description);
 }

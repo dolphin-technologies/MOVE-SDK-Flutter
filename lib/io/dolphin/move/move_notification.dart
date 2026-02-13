@@ -6,6 +6,12 @@ class MoveNotification {
   String contentText;
   String imageName;
 
-  MoveNotification(this.channelId, this.channelName, this.channelDescription,
-      this.contentTitle, this.contentText, this.imageName);
+  MoveNotification(
+    this.channelId,
+    this.channelName,
+    this.channelDescription,
+    this.contentTitle,
+    this.contentText,
+    this.imageName,
+  );
 }

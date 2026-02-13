@@ -32,8 +32,9 @@ class MoveConfig {
   static MoveConfig fromNative(values) {
     List<MoveDetectionService> services = [];
     for (var str in values) {
-      var service = MoveDetectionService.values
-          .firstWhere((e) => e.toString().split('.').last == str);
+      var service = MoveDetectionService.values.firstWhere(
+        (e) => e.toString().split('.').last == str,
+      );
       services.add(service);
     }
     return MoveConfig(services);
@@ -61,8 +62,11 @@ class MoveSdk {
   /// [moveConfig] indicates the configuration of the services which will be running.
   /// [options] (optional) contains additional options for the MOVE SDK.
   /// Services in [moveConfig] must be enabled in the MOVE dashboard.
-  Future<void> setup(MoveAuth auth, MoveConfig moveConfig,
-      {MoveOptions? options}) {
+  Future<void> setup(
+    MoveAuth auth,
+    MoveConfig moveConfig, {
+    MoveOptions? options,
+  }) {
     return MovesdkPlatform.instance.setup(auth, moveConfig, options);
   }
 
@@ -72,10 +76,16 @@ class MoveSdk {
   /// [options] (optional) contains additional options for the MOVE SDK.
   /// Services in [moveConfig] must be enabled in the MOVE dashboard.
   /// Returns the success or failure of the setup.
-  Future<MoveAuthResult> setupWithCode(String authCode, MoveConfig moveConfig,
-      {MoveOptions? options}) {
-    return MovesdkPlatform.instance
-        .setupWithCode(authCode, moveConfig, options);
+  Future<MoveAuthResult> setupWithCode(
+    String authCode,
+    MoveConfig moveConfig, {
+    MoveOptions? options,
+  }) {
+    return MovesdkPlatform.instance.setupWithCode(
+      authCode,
+      moveConfig,
+      options,
+    );
   }
 
   /// Get a unique Device Identifier to distinguish the device.
@@ -190,6 +200,12 @@ class MoveSdk {
     return MovesdkPlatform.instance.updateConfig(config, options: options);
   }
 
+  /// Get the current SDK configuration.
+  /// Returns a configuration string.
+  Future<MoveConfig> getMoveConfig() async {
+    return MovesdkPlatform.instance.getMoveConfig();
+  }
+
   /// Inititate an Assistance Call to emergency services.
   /// Returns a status wether the call succeeded.
   Future<MoveAssistanceCallStatus> initiateAssistanceCall() {
@@ -198,8 +214,9 @@ class MoveSdk {
 
   /// Set metadata to be sent with assistance call or impact detection.
   Future<void> setAssistanceMetaData(String? assistanceMetadataValue) {
-    return MovesdkPlatform.instance
-        .setAssistanceMetaData(assistanceMetadataValue);
+    return MovesdkPlatform.instance.setAssistanceMetaData(
+      assistanceMetadataValue,
+    );
   }
 
   /// Geocode address lookup at coordinates: ([latitude], [longitude])
@@ -334,12 +351,16 @@ class MoveSdk {
   /// Scan can be filtered with [filter], default includes only paired devices.
   /// For scanning beacons [uuid] and [manufacturerId] must be specified.
   /// Will stop when stream is closed.
-  Stream<List<MoveDevice>> startScanningDevices(
-      {List<MoveDeviceFilter> filter = const [MoveDeviceFilter.paired],
-      String? uuid,
-      int? manufacturerId}) async* {
+  Stream<List<MoveDevice>> startScanningDevices({
+    List<MoveDeviceFilter> filter = const [MoveDeviceFilter.paired],
+    String? uuid,
+    int? manufacturerId,
+  }) async* {
     yield* MovesdkPlatform.instance.startScanningDevices(
-        filter: filter, uuid: uuid, manufacturerId: manufacturerId);
+      filter: filter,
+      uuid: uuid,
+      manufacturerId: manufacturerId,
+    );
   }
 
   /// Get a list of devices registered with the sdk to be scanned for during trip.
@@ -356,6 +377,10 @@ class MoveSdk {
   /// Unregister devices with the sdk to be scanned for during trip
   Future<void> unregisterDevices(List<MoveDevice> devices) {
     return MovesdkPlatform.instance.unregisterDevices(devices);
+  }
+
+  Future<void> registerService(String uuid) {
+    return MovesdkPlatform.instance.registerService(uuid);
   }
 
   /// Device listener fired on device scans during trips.

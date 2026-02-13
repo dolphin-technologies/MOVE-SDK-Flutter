@@ -14,11 +14,12 @@ class MoveOptions {
   /// Configuration of the Device Discovery service
   DeviceDiscoveryOptions? deviceDiscovery;
 
-  MoveOptions(
-      {this.motionPermissionMandatory,
-      this.backgroundLocationPermissionMandatory,
-      this.deviceDiscovery,
-      this.useBackendConfig});
+  MoveOptions({
+    this.motionPermissionMandatory,
+    this.backgroundLocationPermissionMandatory,
+    this.deviceDiscovery,
+    this.useBackendConfig,
+  });
 
   /// Conversion to pass to native code.
   dynamic toNative() {
