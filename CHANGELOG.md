@@ -7,6 +7,10 @@
 - Added getMoveConfig.
 - Stability improvements.
 - Bug fixes.
+- Split iOS HealthKit dependent APIs into separate packages. See documentation if required.
+
+## 2.15.0
+- Skipped version.
 
 ## 2.14.1
 - Stability improvements.
