@@ -236,6 +236,7 @@ class MethodChannelMoveSdk extends MovesdkPlatform {
           'interval': options?.deviceDiscovery?.interval,
           'stopScanOnFirstDiscovered':
               options?.deviceDiscovery?.stopScanOnFirstDiscovered,
+          'ensureSynced': options?.deviceDiscovery?.ensureSynced
         },
         'useBackendConfig': options?.useBackendConfig,
       },
@@ -281,6 +282,10 @@ class MethodChannelMoveSdk extends MovesdkPlatform {
         'force': force,
       });
     } on PlatformException catch (e) {
+      if (e.message?.contains('connection pool has been closed') ?? false) {
+        print('DB closed - ignoring');
+        return MoveShutdownResult.success;
+      }
       switch (e.code) {
         case "uninitialized":
           return MoveShutdownResult.uninitialized;
@@ -446,16 +451,21 @@ class MethodChannelMoveSdk extends MovesdkPlatform {
   }
 
   @override
-  Future<void> registerDevices(List<MoveDevice> devices) async {
-    var deviceMap = {for (var device in devices) device.name: device.data};
-    await methodChannel.invokeMethod('registerDevices', <String, dynamic>{
-      'devices': deviceMap,
-    });
+  Future<bool> registerDevices(List<MoveDevice> devices) async {
+    var deviceMap = {
+      for (var device in devices) device.displayName: device.data,
+    };
+    return await methodChannel.invokeMethod(
+      'registerDevices',
+      <String, dynamic>{'devices': deviceMap},
+    );
   }
 
   @override
   Future<void> unregisterDevices(List<MoveDevice> devices) async {
-    var deviceMap = {for (var device in devices) device.name: device.data};
+    var deviceMap = {
+      for (var device in devices) device.displayName: device.data,
+    };
     await methodChannel.invokeMethod('unregisterDevices', <String, dynamic>{
       'devices': deviceMap,
     });
@@ -543,9 +553,10 @@ class MethodChannelMoveSdk extends MovesdkPlatform {
       "contentText": notification.contentText,
       "imageName": notification.imageName,
     };
-    await methodChannel.invokeMethod('tripNotification', <String, dynamic>{
-      'notification': map,
-    });
+    await methodChannel.invokeMethod(
+      'recognitionNotification',
+      <String, dynamic>{'notification': map},
+    );
   }
 
   @override
@@ -561,7 +572,7 @@ class MethodChannelMoveSdk extends MovesdkPlatform {
       "imageName": notification.imageName,
     };
     await methodChannel.invokeMethod(
-      'walkingLocationNotification',
+      'recognitionNotification',
       <String, dynamic>{'notification': map},
     );
   }
@@ -575,6 +586,9 @@ class MethodChannelMoveSdk extends MovesdkPlatform {
     return result;
   }
 
+  @Deprecated(
+    "Please get in touch with the MOVE SDK team if you want to use this method.",
+  )
   @override
   Future<bool> setLiveLocationTag(String? tag) async {
     var result = await methodChannel.invokeMethod(

@@ -83,6 +83,8 @@ internal interface MoveSdkFlutter {
     fun recognitionNotification()
     /// Creates the notifications.
     fun startTrip()
+
+    @Deprecated("Please get in touch with the MOVE SDK team if you want to use this method.")
     fun setLiveLocationTag()
     fun requestHealthPermissions()
 }

@@ -30,6 +30,7 @@ import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.launch
 import kotlinx.coroutines.withContext
+import java.util.UUID
 
 private val gson = Gson()
 
@@ -136,32 +137,45 @@ internal class MoveSdkFlutterAdapter(
 
     @Deprecated("Update auth is obsolete.")
     override fun updateAuth() {
-        val moveAuth = extractMoveAuth(call)
-        MoveSdk.get()?.updateAuth(moveAuth) { configurationError: MoveAuthError ->
-            uiThreadHandler.post {
-                when (configurationError) {
-                    is MoveAuthError.AuthInvalid -> result.error(
-                        "authInvalid",
-                        null,
-                        null
-                    )
+        try {
+            val moveAuth = extractMoveAuth(call)
+            MoveSdk.get()?.updateAuth(moveAuth) { configurationError: MoveAuthError ->
+                uiThreadHandler.post {
+                    when (configurationError) {
+                        is MoveAuthError.AuthInvalid -> result.error(
+                            "authInvalid",
+                            null,
+                            null
+                        )
 
-                    is MoveAuthError.ServiceUnreachable -> result.error(
-                        "serviceUnreachable",
-                        null,
-                        null
-                    )
+                        is MoveAuthError.ServiceUnreachable -> result.error(
+                            "serviceUnreachable",
+                            null,
+                            null
+                        )
 
-                    is MoveAuthError.Throttle -> result.error(
-                        "throttle",
-                        null,
-                        null
-                    )
+                        is MoveAuthError.Throttle -> result.error(
+                            "throttle",
+                            null,
+                            null
+                        )
 
-                    else -> result.success("success")
+                        else -> result.success("success")
+                    }
                 }
             }
-            result.success("updateAuth")
+        } catch (e: IllegalArgumentException) {
+            result.error(
+                "invalidArguments",
+                e.message,
+                null
+            )
+        } catch (e: Exception) {
+            result.error(
+                "internalError",
+                e.message,
+                null
+            )
         }
     }
 
@@ -420,20 +434,30 @@ internal class MoveSdkFlutterAdapter(
     /// Register BT devices for scanning.
     override fun registerDevices() {
         mainScope.launch {
-            val registerResult = withContext(ioContext) {
-                val devices = call.argument<Map<String, String>>("devices")?.map {
+            var isSuccess = false
+            var failureReason: Throwable? = null
+            withContext(ioContext) {
+                val devices = call.argument<Map<String, String>>("devices")?.mapNotNull {
                     try {
-                        gson.fromJson(it.value, MoveDevice::class.java)
+                        val parsed = gson.fromJson(it.value, MoveDevice::class.java)
+                        val id = parsed.id?.normalizedUuidOrNull() ?: parsed.id
+                        val uuid = parsed.uuid?.normalizedUuidOrNull()
+                        parsed.copy(id = id, uuid = uuid, displayName = it.key)
                     } catch (e: Exception) {
                         null
                     }
                 }?.filterNotNull().orEmpty()
-                MoveSdk.get()?.registerDevices(devices)
+
+                try {
+                    isSuccess = MoveSdk.get()?.registerDevices(devices) ?: false
+                } catch (t: Throwable) {
+                    failureReason = t
+                }
             }
-            if (registerResult == true) {
-                result.success(null)
+            if (isSuccess) {
+                result.success(true)
             } else {
-                result.error("ERROR_REGISTER_DEVICES", null, null)
+                result.error(failureReason?.toString() ?: "ERROR_REGISTER_DEVICES", null, null)
             }
         }
     }
@@ -485,6 +509,8 @@ internal class MoveSdkFlutterAdapter(
         }
     }
 
+
+    @Deprecated("Please get in touch with the MOVE SDK team if you want to use this method.")
     override fun setLiveLocationTag() {
         val tag = call.argument<String>("tag")
         if (MoveSdk.get()?.setLiveLocationTag(tag) == true) {
@@ -552,16 +578,24 @@ internal class MoveSdkFlutterAdapter(
     ///   - call: [MethodCall].
     /// - Returns: [MoveAuth].
     private fun extractMoveAuth(call: MethodCall): MoveAuth {
-        val projectId = call.argument<String>("projectId")
-            ?: throw IllegalArgumentException("projectId must not be null")
+        val projectIdStr = call.argument<String>("projectId")
+            ?.takeIf { it.isNotBlank() }
+            ?: throw IllegalArgumentException("projectId must not be null or empty")
+
         val accessToken = call.argument<String>("accessToken")
-            ?: throw IllegalArgumentException("accessToken must not be null")
+            ?.takeIf { it.isNotBlank() }
+            ?: throw IllegalArgumentException("accessToken must not be null or empty")
+
         val userId = call.argument<String>("userId")
-            ?: throw IllegalArgumentException("userId must not be null")
+            ?.takeIf { it.isNotBlank() }
+            ?: throw IllegalArgumentException("userId must not be null or empty")
+
         val refreshToken = call.argument<String>("refreshToken")
-            ?: throw IllegalArgumentException("refreshToken must not be null")
+            ?.takeIf { it.isNotBlank() }
+            ?: throw IllegalArgumentException("refreshToken must not be null or empty")
+
         return MoveAuth(
-            projectId = projectId.toLong(),
+            projectId = projectIdStr.toLong(),
             userId = userId,
             accessToken = accessToken,
             refreshToken = refreshToken
@@ -583,7 +617,8 @@ internal class MoveSdkFlutterAdapter(
             val duration = (it["duration"] as? Int)?.toLong()
             val interval = (it["interval"] as? Int)?.toLong()
             val stopScanOnFirstDiscovered = it["stopScanOnFirstDiscovered"] as? Boolean
-            DeviceDiscovery(startDelay, duration, interval, stopScanOnFirstDiscovered == true)
+            val ensureSynced = it["ensureSynced"] as? Boolean
+            DeviceDiscovery(startDelay, duration, interval, stopScanOnFirstDiscovered == true, ensureSynced == true)
         }
         return MoveOptions(
             motionPermissionRequired = motionPermissionMandatory == true,
@@ -605,4 +640,10 @@ internal class MoveSdkFlutterAdapter(
             walkingText = "Walking Text",
         )
     }
+}
+
+private fun String.normalizedUuidOrNull(): String? = try {
+  UUID.fromString(this).toString().uppercase()
+} catch (_: IllegalArgumentException) {
+  null
 }

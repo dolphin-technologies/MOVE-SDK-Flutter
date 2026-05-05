@@ -2,6 +2,8 @@ import Flutter
 
 /// MoveSDK wrapper method identifiers.
 internal enum MoveSdkMethod: String {
+	/// `fetchUserConfig()`.
+	case fetchUserConfig
 	/// `finishCurrentTrip()`.
 	case finishCurrentTrip
 	/// `forceTripRecognition()`.
@@ -99,6 +101,8 @@ internal enum MoveSdkArgument: String {
 	// metadata
 	/// Metadata.
 	case metadata
+	/// Assistance metadata
+	case assistanceMetadataValue
 	/// Tag.
 	case tag
 

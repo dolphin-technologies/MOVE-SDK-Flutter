@@ -49,6 +49,8 @@ fun List<MoveScanResult>.toScanResultObjectList(): List<Map<String, Any>> {
             "isDiscovered" to result.isDiscovered,
             "device" to result.device.toJsonString(),
             "name" to result.device.name,
+			"displayName" to result.device.displayName,
+			"state" to result.device.state.toString(),
         )
     }
 }
@@ -57,7 +59,9 @@ fun List<MoveDevice>.toMoveDeviceObjectList(): List<Map<String, String>> {
     return map { device ->
         mapOf(
             "name" to device.name,
+			"displayName" to device.displayName,
             "data" to device.toJsonString(),
+			"state" to device.state.toString(),
             "isConnected" to device.isConnected.toString(),
         )
     }

@@ -379,7 +379,7 @@ abstract class MovesdkPlatform extends PlatformInterface {
 
   /// Register devices with the sdk to be scanned for during trip.
   /// All will be unregistered on shutdown.
-  Future<void> registerDevices(List<MoveDevice> devices) {
+  Future<bool> registerDevices(List<MoveDevice> devices) {
     throw UnimplementedError('registerDevices() has not been implemented.');
   }
 
@@ -432,6 +432,9 @@ abstract class MovesdkPlatform extends PlatformInterface {
     );
   }
 
+  @Deprecated(
+    "Please get in touch with the MOVE SDK team if you want to use this method.",
+  )
   Future<bool> setLiveLocationTag(String? tag) async {
     throw UnimplementedError(
       'setLiveLocationTag(String? tag) has not been implemented.',

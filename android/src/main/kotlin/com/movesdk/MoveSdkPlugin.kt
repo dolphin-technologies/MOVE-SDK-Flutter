@@ -724,7 +724,9 @@ class DeviceStateStreamHandler() : EventChannel.StreamHandler {
                             listOf(
                                 mapOf(
                                     "name" to device.name,
+                                    "displayName" to device.displayName,
                                     "data" to device.toJsonString(),
+                                    "state" to device.state.toString(),
                                     "isConnected" to device.isConnected,
                                 )
                             )
