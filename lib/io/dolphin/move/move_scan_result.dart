@@ -11,9 +11,14 @@ class MoveScanResult {
     for (var result in results) {
       String name = result["name"];
       String data = result["device"];
+      String displayName = result["displayName"] ?? "";
+      MoveDeviceState state = result["state"];
       bool isDiscovered = result["isDiscovered"];
       moveResults.add(
-        MoveScanResult(isDiscovered, MoveDevice(name, data, true)),
+        MoveScanResult(
+          isDiscovered,
+          MoveDevice(name, data, true, displayName, state),
+        ),
       );
     }
     return moveResults;

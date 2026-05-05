@@ -370,7 +370,7 @@ class MoveSdk {
 
   /// Register devices with the sdk to be scanned for during trip.
   /// All will be unregistered on shutdown.
-  Future<void> registerDevices(List<MoveDevice> devices) {
+  Future<bool> registerDevices(List<MoveDevice> devices) {
     return MovesdkPlatform.instance.registerDevices(devices);
   }
 
@@ -413,6 +413,13 @@ class MoveSdk {
     return MovesdkPlatform.instance.startTrip(metadata);
   }
 
+  Future<void> fetchUserConfig() {
+    return MovesdkPlatform.instance.fetchUserConfig();
+  }
+
+  @Deprecated(
+    "Please get in touch with the MOVE SDK team if you want to use this method.",
+  )
   Future<bool> setLiveLocationTag(String? tag) async {
     return MovesdkPlatform.instance.setLiveLocationTag(tag);
   }

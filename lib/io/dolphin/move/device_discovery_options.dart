@@ -12,10 +12,14 @@ class DeviceDiscoveryOptions {
   /// Allows you to stop the scan after any registered device is found.
   bool? stopScanOnFirstDiscovered;
 
-  DeviceDiscoveryOptions({
-    this.startDelay,
-    this.duration,
-    this.interval,
-    this.stopScanOnFirstDiscovered,
-  });
+  /// If set to true devices which fail synchronisation with the backend
+  /// will automatically be unregistered.
+  bool? ensureSynced;
+
+  DeviceDiscoveryOptions(
+      {this.startDelay,
+      this.duration,
+      this.interval,
+      this.stopScanOnFirstDiscovered,
+      this.ensureSynced});
 }

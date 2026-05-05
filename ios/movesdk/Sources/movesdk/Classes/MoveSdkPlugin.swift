@@ -187,6 +187,10 @@ public class MoveSdkPlugin: NSObject {
 				moveOptions.deviceDiscovery.stopScanOnFirstDiscovered = value
 			}
 
+			if let value = deviceDiscovery["ensureSynced"] as? Bool {
+				moveOptions.deviceDiscovery.ensureSynced = value
+			}
+
 			if let value = deviceDiscovery["interval"] as? Int {
 				moveOptions.deviceDiscovery.interval = Double(value)
 			}
@@ -279,7 +283,7 @@ public class MoveSdkPlugin: NSObject {
 			do {
 				let data = try encoder.encode(result.device)
 				let str = String(data: data, encoding: .utf8) ?? ""
-				let info: [String: Any] = ["name": result.device.name, "device": str, "isDiscovered": result.isDiscovered]
+				let info: [String: Any] = ["name": result.device.name, "device": str, "isDiscovered": result.isDiscovered, "displayName": result.device.displayName, "state": result.device.state.rawValue, "isConnected": result.device.isConnected]
 				deviceList.append(info)
 			} catch {
 				print(error.localizedDescription)
@@ -328,7 +332,7 @@ public class MoveSdkPlugin: NSObject {
 			do {
 				let data = try encoder.encode(device)
 				let str = String(data: data, encoding: .utf8) ?? ""
-				let info: [String: Any] = ["name": device.name, "data": str, "isConnected": device.isConnected]
+				let info: [String: Any] = ["name": device.name, "data": str, "isConnected": device.isConnected, "displayName": device.displayName, "state": device.state.rawValue]
 				deviceList.append(info)
 			} catch {
 				print(error.localizedDescription)
@@ -408,17 +412,19 @@ public class MoveSdkPlugin: NSObject {
 		}
 
 		do {
-			let devices: [MoveDevice] = try deviceMap.compactMap { (name, encoded) in
+			let devices: [MoveDevice] = try deviceMap.compactMap { (displayName, encoded) in
 				let decoder = JSONDecoder()
 				guard let data = encoded.data(using: .utf8) else {
 					throw MoveSdkError()
 				}
 				if let device = try? decoder.decode(MoveDevice.self, from: data) {
 					/* overwrite device name */
-					device.name = name
+					device.displayName = displayName
 					return device
 				} else if let info = try? decoder.decode(DeviceService.self, from: data), let uuid = UUID(uuidString: info.uuid) {
-					return MoveDevice(proximityUUID: uuid)
+					let device = MoveDevice(proximityUUID: uuid)
+					device.displayName = displayName
+					return device
 				} else {
 					return nil
 				}
@@ -435,8 +441,8 @@ public class MoveSdkPlugin: NSObject {
 	/// - Parameters:
 	///   - call: The `FlutterMethodCall` to parse arguments from.
 	///   - result: A Flutter result callback.
-	private func forceTripRecognition(_ call: FlutterMethodCall, _ result: @escaping FlutterResult) {
-		sdk.forceTripRecognition()
+	private func fetchUserConfig(_ call: FlutterMethodCall, _ result: @escaping FlutterResult) {
+		sdk.fetchUserConfig()
 		result(nil)
 	}
 
@@ -446,6 +452,15 @@ public class MoveSdkPlugin: NSObject {
 	///   - result: A Flutter result callback.
 	private func finishCurrentTrip(_ call: FlutterMethodCall, _ result: @escaping FlutterResult) {
 		sdk.finishCurrentTrip()
+		result(nil)
+	}
+
+	/// Wrapper for SDK Method.
+	/// - Parameters:
+	///   - call: The `FlutterMethodCall` to parse arguments from.
+	///   - result: A Flutter result callback.
+	private func forceTripRecognition(_ call: FlutterMethodCall, _ result: @escaping FlutterResult) {
+		sdk.forceTripRecognition()
 		result(nil)
 	}
 
@@ -614,8 +629,12 @@ public class MoveSdkPlugin: NSObject {
 		let (devices, arguments) = getDevices(call)
 
 		if !devices.isEmpty {
-			sdk.register(devices: devices)
-			result(nil)
+			do {
+				try sdk.register(devices: devices)
+				result(true)
+			} catch {
+				result(MoveSdkError.otherError(error.localizedDescription))
+			}
 		}
 
 		return result(MoveSdkError.invalidArguments(arguments))
@@ -661,12 +680,9 @@ public class MoveSdkPlugin: NSObject {
 	///   - call: The `FlutterMethodCall` to parse arguments from.
 	///   - result: A Flutter result callback.
 	private func setAssistanceMetaData(_ call: FlutterMethodCall, _ result: @escaping FlutterResult) {
-		guard let metadata: String = call[.metadata] else {
-			result(MoveSdkError.invalidArguments([.metadata]))
-			return
-		}
-
+		let metadata: String = call[.assistanceMetadataValue] ?? ""
 		sdk.setAssistanceMetaData(metadata)
+		result(nil)
 	}
 
 	/// Wrapper for SDK Method.
@@ -694,6 +710,7 @@ public class MoveSdkPlugin: NSObject {
 		let moveConfig = convert(config: config)
 
 		sdk.setup(auth: auth, config: moveConfig, options: moveOptions)
+		result(nil)
 	}
 
 	/// Wrapper for SDK Method.
@@ -982,6 +999,7 @@ extension MoveSdkPlugin: FlutterPlugin {
 		}
 
 		switch method {
+		case .fetchUserConfig: fetchUserConfig(call, result)
 		case .finishCurrentTrip: finishCurrentTrip(call, result)
 		case .forceTripRecognition: forceTripRecognition(call, result)
 		case .geocode: geocode(call, result)
