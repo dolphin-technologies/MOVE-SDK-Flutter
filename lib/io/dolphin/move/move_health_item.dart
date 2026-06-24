@@ -35,7 +35,7 @@ class MoveHealthItem {
   MoveHealthItem(this.reason, this.description);
 
   /// Convert SDK health [items] from native dict.
-  static List<MoveHealthItem> fromNative(items) {
+  static List<MoveHealthItem> fromNative(List<dynamic> items) {
     List<MoveHealthItem> healthItems = [];
     for (var item in items) {
       if (Platform.isAndroid) {

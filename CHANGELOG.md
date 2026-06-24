@@ -1,3 +1,6 @@
+## 2.17.1
+- Added optional base URL to configure MOVE SDK init. See README.md to use.
+
 ## 2.17.0
 - Added custom MoveDevice display name.
 - Added MoveDeviceState. Ensure synchronized option.

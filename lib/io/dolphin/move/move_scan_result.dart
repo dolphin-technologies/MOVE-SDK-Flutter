@@ -6,7 +6,7 @@ class MoveScanResult {
 
   MoveScanResult(this.isDiscovered, this.device);
 
-  static List<MoveScanResult> fromNative(results) {
+  static List<MoveScanResult> fromNative(List<dynamic> results) {
     List<MoveScanResult> moveResults = [];
     for (var result in results) {
       String name = result["name"];

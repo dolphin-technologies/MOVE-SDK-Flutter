@@ -16,10 +16,11 @@ class DeviceDiscoveryOptions {
   /// will automatically be unregistered.
   bool? ensureSynced;
 
-  DeviceDiscoveryOptions(
-      {this.startDelay,
-      this.duration,
-      this.interval,
-      this.stopScanOnFirstDiscovered,
-      this.ensureSynced});
+  DeviceDiscoveryOptions({
+    this.startDelay,
+    this.duration,
+    this.interval,
+    this.stopScanOnFirstDiscovered,
+    this.ensureSynced,
+  });
 }
