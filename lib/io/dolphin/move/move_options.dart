@@ -32,7 +32,7 @@ class MoveOptions {
         'duration': deviceDiscovery?.duration,
         'interval': deviceDiscovery?.interval,
         'stopScanOnFirstDiscovered': deviceDiscovery?.stopScanOnFirstDiscovered,
-        'ensureSynced': deviceDiscovery?.ensureSynced
+        'ensureSynced': deviceDiscovery?.ensureSynced,
       },
       'useBackendConfig': useBackendConfig,
     };

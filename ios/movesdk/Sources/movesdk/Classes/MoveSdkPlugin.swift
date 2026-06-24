@@ -988,7 +988,13 @@ extension MoveSdkPlugin: FlutterPlugin {
 			self.config = result
 		}
 
-		sdk.initialize(launchOptions: launchOptions)
+		var options: MoveInitOptions? = nil
+		if let urlString = Bundle.main.object(forInfoDictionaryKey: "MoveSDKBaseURL") as? String,
+		   let url = URL(string: urlString) {
+			options = MoveInitOptions(baseURL: url)
+		}
+
+		sdk.initialize(launchOptions: launchOptions, options: options)
 		return true
 	}
 

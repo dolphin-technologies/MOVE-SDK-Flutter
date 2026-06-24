@@ -30,10 +30,35 @@ class MainApplication : Application() {
     ...
 }
 ```
+To customize the MOVE SDK init options, add the following code:
+```
+import io.dolphin.move.MoveSdk
+
+class MainApplication : Application() {
+    override fun onCreate() {
+        super.onCreate()
+        val options = MoveInitOptions(baseUrl = URL("https://your.custom.url"))
+        val sdk = MoveSdk.init(this, initOptions = options)
+        ...
+    }
+    
+    ...
+}
+```
+
 
 ### iOS
 
 Initialization happens automatically in appDidFinishLaunching.
+
+To customize the MOVE SDK init options, add the following key to your app's `Info.plist`:
+
+```
+<key>MoveSDKBaseURL</key>
+<string>https://my-region.movesdk.com</string>
+```
+
+When present, `MoveSDKBaseURL` is passed as the `baseURL` of `MoveInitOptions` during initialization. Omit the key to use the SDK default.
 
 ## Support
 

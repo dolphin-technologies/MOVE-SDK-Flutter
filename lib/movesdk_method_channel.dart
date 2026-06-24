@@ -236,7 +236,7 @@ class MethodChannelMoveSdk extends MovesdkPlatform {
           'interval': options?.deviceDiscovery?.interval,
           'stopScanOnFirstDiscovered':
               options?.deviceDiscovery?.stopScanOnFirstDiscovered,
-          'ensureSynced': options?.deviceDiscovery?.ensureSynced
+          'ensureSynced': options?.deviceDiscovery?.ensureSynced,
         },
         'useBackendConfig': options?.useBackendConfig,
       },

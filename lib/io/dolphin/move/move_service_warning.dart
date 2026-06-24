@@ -13,7 +13,7 @@ class MoveServiceWarning {
 
   const MoveServiceWarning({required this.service, required this.reasons});
 
-  static List<MoveServiceWarning> fromNative(warnings) {
+  static List<MoveServiceWarning> fromNative(List<dynamic> warnings) {
     List<MoveServiceWarning> moveWarnings = [];
     for (var warning in warnings) {
       String service = warning["service"];
@@ -56,7 +56,7 @@ class MoveServiceError {
 
   const MoveServiceError({required this.service, required this.reasons});
 
-  static List<MoveServiceError> fromNative(errors) {
+  static List<MoveServiceError> fromNative(List<dynamic> errors) {
     List<MoveServiceError> moveWarnings = [];
     for (var warning in errors) {
       String service = warning["service"];

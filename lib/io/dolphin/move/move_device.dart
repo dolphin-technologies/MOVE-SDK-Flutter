@@ -44,7 +44,7 @@ class MoveDevice {
   );
 
   /// Convert [devices] from native code.
-  static List<MoveDevice> fromNative(devices) {
+  static List<MoveDevice> fromNative(List<dynamic> devices) {
     List<MoveDevice> deviceList = [];
     for (var device in devices) {
       String name = device["name"];
