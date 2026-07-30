@@ -13,7 +13,7 @@ jobs:
     runs-on: ubuntu-latest
     steps:
       # Checkout repository
-      - uses: actions/checkout@v3
+      - uses: actions/checkout@v5
       # Setup Dart SDK with JWT token
       - uses: dart-lang/setup-dart@main
         with:
