@@ -74,7 +74,9 @@ class MethodChannelMoveSdk extends MovesdkPlatform {
 
   @override
   Future<MoveConfig> getMoveConfig() async {
-    final result = await methodChannel.invokeMethod<Object>('getMoveConfig');
+    final result = await methodChannel.invokeListMethod<dynamic>(
+      'getMoveConfig',
+    );
     return MoveConfig.fromNative(result ?? []);
   }
 
@@ -276,10 +278,12 @@ class MethodChannelMoveSdk extends MovesdkPlatform {
   }
 
   @override
-  Future<MoveShutdownResult> shutdown({bool force = true}) async {
+  Future<MoveShutdownResult> shutdown(
+      {bool force = true, int? timeoutSeconds}) async {
     try {
       await methodChannel.invokeMethod('shutdown', <String, dynamic>{
         'force': force,
+        'timeoutSeconds': timeoutSeconds,
       });
     } on PlatformException catch (e) {
       if (e.message?.contains('connection pool has been closed') ?? false) {

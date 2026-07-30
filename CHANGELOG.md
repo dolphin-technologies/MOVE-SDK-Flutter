@@ -1,5 +1,12 @@
+## 2.18.0
+- Added optional `timeoutSeconds` parameter to `shutdown(...)`, use with `force: false`.
+- Updated Android MOVE SDK to 2.18.0.104.
+- Android builds now require AGP 8.9.1, Gradle 8.11.1 and Kotlin 2.0.21 or higher.
+
 ## 2.17.1
-- Added optional base URL to configure MOVE SDK init. See README.md to use.
+- Updated iOS MOVE SDK to 2.17.1.
+- Added optional `MoveSDKBaseURL` Info.plist key to configure the iOS MOVE SDK init options base URL.
+- Updated Android MOVE SDK to 2.17.3.102
 
 ## 2.17.0
 - Added custom MoveDevice display name.

@@ -122,8 +122,10 @@ abstract class MovesdkPlatform extends PlatformInterface {
   /// After that is executed, the SDK State.uninitialized is triggered.
   /// The [force] parameter (default: `true`) will discard pending data to be uploaded.
   /// With [force] = true shudown will always succseed.
-  /// Returns when shutdown completed or failed.
-  Future<MoveShutdownResult> shutdown({bool force = true}) {
+  /// The [timeoutSeconds] parameter (in seconds) bounds how long the SDK tries to
+  /// send pending data before shutting down. Use with [force] = `false`.
+  Future<MoveShutdownResult> shutdown(
+      {bool force = true, int? timeoutSeconds}) {
     throw UnimplementedError('shutdown() has not been implemented.');
   }
 

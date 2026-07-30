@@ -12,7 +12,7 @@ class MoveScanResult {
       String name = result["name"];
       String data = result["device"];
       String displayName = result["displayName"] ?? "";
-      MoveDeviceState state = result["state"];
+      MoveDeviceState state = MoveDevice.parseState(result["state"]);
       bool isDiscovered = result["isDiscovered"];
       moveResults.add(
         MoveScanResult(

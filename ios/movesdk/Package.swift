@@ -12,7 +12,7 @@ let package = Package(
         .library(name: "movesdk", targets: ["movesdk"])
     ],
     dependencies: [
-		.package(url: "https://github.com/dolphin-technologies/MOVE-iOS-Packages", from: "2.17.1")
+		.package(url: "https://github.com/dolphin-technologies/MOVE-iOS-Packages", from: "2.18.0")
 	],
     targets: [
         .target(

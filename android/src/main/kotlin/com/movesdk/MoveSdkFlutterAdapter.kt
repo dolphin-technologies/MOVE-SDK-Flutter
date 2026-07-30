@@ -292,7 +292,9 @@ internal class MoveSdkFlutterAdapter(
     /// Shutdown the MOVE SDK.
     override fun shutdown() {
         val force = call.argument<Boolean>("force") == true
-        MoveSdk.get()?.shutdown(force) { shutdownResult ->
+        // Dart sends null when no timeout was passed; the native SDK expects 0 for the legacy force behavior.
+        val timeoutSeconds = call.argument<Int>("timeoutSeconds") ?: 0
+        MoveSdk.get()?.shutdown(force, timeoutSeconds) { shutdownResult ->
             uiThreadHandler.post {
                 when (shutdownResult) {
                     MoveShutdownResult.SUCCESS -> result.success("success")

@@ -748,7 +748,8 @@ public class MoveSdkPlugin: NSObject {
 	///   - result: A Flutter result callback.
 	private func shutdown(_ call: FlutterMethodCall, _ result: @escaping FlutterResult) {
 		let force: Bool = call[.force] ?? true
-		sdk.shutDown(force: force) { error in
+		let timeout: Int = call[.timeout] ?? 0
+		sdk.shutDown(force: force, timeout: TimeInterval(timeout)) { error in
 			switch error {
 			case .success:
 				result(nil)

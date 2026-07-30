@@ -109,6 +109,8 @@ internal enum MoveSdkArgument: String {
 	// shutdown
 	/// Shutdown force.
 	case force
+	/// Shutdown timeout. Wire key is `timeoutSeconds` (Flutter API contract); kept as `timeout` internally.
+	case timeout = "timeoutSeconds"
 
 	// scanner
 	/// Devices.
