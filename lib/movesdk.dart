@@ -29,7 +29,7 @@ class MoveConfig {
         .toList();
   }
 
-  static MoveConfig fromNative(values) {
+  static MoveConfig fromNative(List<dynamic> values) {
     List<MoveDetectionService> services = [];
     for (var str in values) {
       var service = MoveDetectionService.values.firstWhere(
@@ -130,9 +130,12 @@ class MoveSdk {
   /// After that is executed, the SDK State.uninitialized is triggered.
   /// The [force] parameter (default: `true`) will discard pending data to be uploaded.
   /// With [force] = true shudown will always succseed.
-  /// Returns when shutdown completed or failed.
-  Future<MoveShutdownResult> shutdown({bool force = true}) {
-    return MovesdkPlatform.instance.shutdown(force: force);
+  /// The [timeoutSeconds] parameter (in seconds) bounds how long the SDK tries to
+  /// send pending data before shutting down. Use with [force] = `false`.
+  Future<MoveShutdownResult> shutdown(
+      {bool force = true, int? timeoutSeconds}) {
+    return MovesdkPlatform.instance
+        .shutdown(force: force, timeoutSeconds: timeoutSeconds);
   }
 
   /// Deletes all the collected user SDK data stored on the device.

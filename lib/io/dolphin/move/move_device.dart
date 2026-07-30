@@ -43,6 +43,18 @@ class MoveDevice {
     this.state,
   );
 
+  /// Convert a native device state [value] to [MoveDeviceState].
+  static MoveDeviceState parseState(dynamic value) {
+    if (value is! String) {
+      return MoveDeviceState.notSynchronized;
+    }
+    var normalized = value.toUpperCase().replaceAll("_", "");
+    return MoveDeviceState.values.firstWhere(
+      (e) => e.name.toUpperCase() == normalized,
+      orElse: () => MoveDeviceState.notSynchronized,
+    );
+  }
+
   /// Convert [devices] from native code.
   static List<MoveDevice> fromNative(List<dynamic> devices) {
     List<MoveDevice> deviceList = [];
@@ -50,12 +62,7 @@ class MoveDevice {
       String name = device["name"];
       String displayName = device["displayName"] ?? "";
       String data = device["data"];
-      MoveDeviceState state = MoveDeviceState.values.firstWhere(
-        (e) =>
-            e.name.toUpperCase() ==
-            (device["state"] as String).toUpperCase().replaceAll("_", ""),
-        orElse: () => MoveDeviceState.notSynchronized,
-      );
+      MoveDeviceState state = parseState(device["state"]);
       bool isString = device["isConnected"] is String;
       bool isConnected = false;
       if (isString) {
