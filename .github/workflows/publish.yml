@@ -17,11 +17,11 @@ jobs:
       # Setup Dart SDK with JWT token
       - uses: dart-lang/setup-dart@main
         with:
-          sdk: 3.11.0
+          sdk: stable
       - uses: flutter-actions/setup-flutter@main
         with:
           channel: stable
-          version: 3.38.8
+          version: latest
       # Minimal package setup and dry run checks.
       - name: Install dependencies
         run: dart pub get
