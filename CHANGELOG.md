@@ -1,3 +1,6 @@
+## 2.18.1
+- Updated Android MOVE SDK to 2.18.2.106. Catch PackageManager Exception.
+
 ## 2.18.0
 - Added optional `timeoutSeconds` parameter to `shutdown(...)`, use with `force: false`.
 - Updated Android MOVE SDK to 2.18.0.104.
