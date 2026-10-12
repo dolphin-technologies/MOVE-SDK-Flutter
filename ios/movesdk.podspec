@@ -4,7 +4,7 @@
 #
 Pod::Spec.new do |s|
   s.name             = 'movesdk'
-  s.version          = '2.17.1'
+  s.version          = '2.18.2'
   s.summary          = 'Dolphin MOVE SDK'
   s.description      = 'Wrapper for the Dolphin MoveSDk'
   s.homepage         = 'https://movesdk.com/'
@@ -15,7 +15,7 @@ Pod::Spec.new do |s|
   s.resource_bundles = {'movesdk_privacy' => ['movesdk/Sources/movesdk/PrivacyInfo.xcprivacy']}
 
   s.dependency 'Flutter'
-  s.dependency 'DolphinMoveSDK', '2.18.0.364'
+  s.dependency 'DolphinMoveSDK', '2.18.0.346'
 
   s.platform = :ios, '13.0'
 

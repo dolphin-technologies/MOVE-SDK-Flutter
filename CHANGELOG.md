@@ -1,3 +1,6 @@
+## 2.18.2
+- Fix ios Podspec.
+
 ## 2.18.1
 - Updated Android MOVE SDK to 2.18.2.106. Catch PackageManager Exception.
 
