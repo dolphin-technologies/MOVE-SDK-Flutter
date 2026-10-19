@@ -32,12 +32,17 @@ class MainApplication : Application() {
 ```
 To customize the MOVE SDK init options, add the following code:
 ```
+import io.dolphin.move.MoveInitOptions
 import io.dolphin.move.MoveSdk
+import java.net.URL
 
 class MainApplication : Application() {
     override fun onCreate() {
         super.onCreate()
-        val options = MoveInitOptions(baseUrl = URL("https://your.custom.url"))
+        val options = MoveInitOptions(
+            baseUrl = URL("https://your.custom.url"),
+            maxQueueSizeMB = 100,
+        )
         val sdk = MoveSdk.init(this, initOptions = options)
         ...
     }
@@ -45,6 +50,7 @@ class MainApplication : Application() {
     ...
 }
 ```
+`maxQueueSizeMB` limits the size of the local offline queue in MB. 0 or unset means unlimited (default).
 
 
 ### iOS
@@ -56,6 +62,9 @@ To customize the MOVE SDK init options, add the following key to your app's `Inf
 ```
 <key>MoveSDKBaseURL</key>
 <string>https://my-region.movesdk.com</string>
+
+<key>MoveSdkMaxQueueSizeMB</key>
+<integer>100</integer>
 ```
 
 When present, `MoveSDKBaseURL` is passed as the `baseURL` of `MoveInitOptions` during initialization. Omit the key to use the SDK default.

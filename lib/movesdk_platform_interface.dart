@@ -69,10 +69,6 @@ abstract class MovesdkPlatform extends PlatformInterface {
     throw UnimplementedError('platformVersion() has not been implemented.');
   }
 
-  Future<void> init() {
-    throw UnimplementedError('setup has not been implemented.');
-  }
-
   /// The SDK will setup and authenticate a user.
   /// [moveAuth] contains authentication data and tokens prepared by the app backend..
   /// [moveConfig] indicates the configuration of the services which will be running.
@@ -124,8 +120,10 @@ abstract class MovesdkPlatform extends PlatformInterface {
   /// With [force] = true shudown will always succseed.
   /// The [timeoutSeconds] parameter (in seconds) bounds how long the SDK tries to
   /// send pending data before shutting down. Use with [force] = `false`.
-  Future<MoveShutdownResult> shutdown(
-      {bool force = true, int? timeoutSeconds}) {
+  Future<MoveShutdownResult> shutdown({
+    bool force = true,
+    int? timeoutSeconds,
+  }) {
     throw UnimplementedError('shutdown() has not been implemented.');
   }
 

@@ -990,10 +990,10 @@ extension MoveSdkPlugin: FlutterPlugin {
 		}
 
 		var options: MoveInitOptions? = nil
-		if let urlString = Bundle.main.object(forInfoDictionaryKey: "MoveSDKBaseURL") as? String,
-		   let url = URL(string: urlString) {
-			options = MoveInitOptions(baseURL: url)
-		}
+		let maxQueueSizeMB = Bundle.main.object(forInfoDictionaryKey: "MoveSdkMaxQueueSizeMB") as? Int
+		let url: URL? = (Bundle.main.object(forInfoDictionaryKey: "MoveSDKBaseURL") as? String).flatMap { URL(string: $0) }
+
+		options = MoveInitOptions(baseURL: url, maxQueueSizeMB: maxQueueSizeMB ?? 0)
 
 		sdk.initialize(launchOptions: launchOptions, options: options)
 		return true

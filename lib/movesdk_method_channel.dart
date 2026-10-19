@@ -60,11 +60,6 @@ class MethodChannelMoveSdk extends MovesdkPlatform {
   }
 
   @override
-  Future<void> init() async {
-    await methodChannel.invokeMethod('init');
-  }
-
-  @override
   Future<bool> synchronizeUserData() async {
     final result = await methodChannel.invokeMethod<bool>(
       'synchronizeUserData',
@@ -144,9 +139,9 @@ class MethodChannelMoveSdk extends MovesdkPlatform {
     yield* healthChannel
         .receiveBroadcastStream()
         .asyncMap<List<MoveHealthItem>>((item) {
-      var result = MoveHealthItem.fromNative(item);
-      return result;
-    });
+          var result = MoveHealthItem.fromNative(item);
+          return result;
+        });
   }
 
   @override
@@ -175,9 +170,9 @@ class MethodChannelMoveSdk extends MovesdkPlatform {
     yield* serviceWarningChannel
         .receiveBroadcastStream()
         .asyncMap<List<MoveServiceWarning>>((warnings) {
-      var result = MoveServiceWarning.fromNative(warnings);
-      return result;
-    });
+          var result = MoveServiceWarning.fromNative(warnings);
+          return result;
+        });
   }
 
   @override
@@ -187,14 +182,16 @@ class MethodChannelMoveSdk extends MovesdkPlatform {
     int? manufacturerId,
   }) async* {
     var filters = filter.map((e) => e.name).toList();
-    yield* deviceScannerChannel.receiveBroadcastStream(<String, dynamic>{
-      'filter': filters,
-      'uuid': uuid,
-      'manufacturerId': manufacturerId,
-    }).asyncMap<List<MoveDevice>>((devices) {
-      var result = MoveDevice.fromNative(devices);
-      return result;
-    });
+    yield* deviceScannerChannel
+        .receiveBroadcastStream(<String, dynamic>{
+          'filter': filters,
+          'uuid': uuid,
+          'manufacturerId': manufacturerId,
+        })
+        .asyncMap<List<MoveDevice>>((devices) {
+          var result = MoveDevice.fromNative(devices);
+          return result;
+        });
   }
 
   @override
@@ -202,9 +199,9 @@ class MethodChannelMoveSdk extends MovesdkPlatform {
     yield* serviceErrorChannel
         .receiveBroadcastStream()
         .asyncMap<List<MoveServiceError>>((warnings) {
-      var result = MoveServiceError.fromNative(warnings);
-      return result;
-    });
+          var result = MoveServiceError.fromNative(warnings);
+          return result;
+        });
   }
 
   @override
@@ -278,8 +275,10 @@ class MethodChannelMoveSdk extends MovesdkPlatform {
   }
 
   @override
-  Future<MoveShutdownResult> shutdown(
-      {bool force = true, int? timeoutSeconds}) async {
+  Future<MoveShutdownResult> shutdown({
+    bool force = true,
+    int? timeoutSeconds,
+  }) async {
     try {
       await methodChannel.invokeMethod('shutdown', <String, dynamic>{
         'force': force,
@@ -495,7 +494,8 @@ class MethodChannelMoveSdk extends MovesdkPlatform {
 
   @override
   Future<List<MoveDevice>> getRegisteredDevices() async {
-    List<dynamic> devices = await methodChannel.invokeMethod<List<dynamic>>(
+    List<dynamic> devices =
+        await methodChannel.invokeMethod<List<dynamic>>(
           'getRegisteredDevices',
         ) ??
         [];
@@ -508,9 +508,9 @@ class MethodChannelMoveSdk extends MovesdkPlatform {
     yield* deviceDiscoveryChannel
         .receiveBroadcastStream()
         .asyncMap<List<MoveScanResult>>((results) {
-      var moveScanResults = MoveScanResult.fromNative(results);
-      return moveScanResults;
-    });
+          var moveScanResults = MoveScanResult.fromNative(results);
+          return moveScanResults;
+        });
   }
 
   @override
@@ -518,9 +518,9 @@ class MethodChannelMoveSdk extends MovesdkPlatform {
     yield* deviceStateChannel
         .receiveBroadcastStream()
         .asyncMap<List<MoveDevice>>((results) {
-      var moveScanResults = MoveDevice.fromNative(results);
-      return moveScanResults;
-    });
+          var moveScanResults = MoveDevice.fromNative(results);
+          return moveScanResults;
+        });
   }
 
   Future<dynamic> callbackHandler(MethodCall methodCall) async {

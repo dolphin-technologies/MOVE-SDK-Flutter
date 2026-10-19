@@ -108,6 +108,8 @@ internal enum MoveSdkReason: String {
 	case overlayPermissionMissing
 	/// Service is disabled on Move dashboard.
 	case unauthorized
+	/// Missing Dependency.
+	case missingDependency
 
 	/// Translates a `MovePermission` into a permission key.
 	/// - Parameters:
@@ -131,6 +133,8 @@ internal enum MoveSdkReason: String {
 			self = .bluetoothTurnedOff
 		case .bluetoothScan:
 			self = .bluetoothPermissionMissing
+		case .health:
+			self = .missingDependency
 		@unknown default:
 			return nil
 		}

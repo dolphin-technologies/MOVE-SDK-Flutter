@@ -5,6 +5,8 @@ enum MoveDetectionService {
 
   /// Enables the automatic impact detection service, it will activate during a
   /// trip or if no trip detection is configured it will be constantly active.
+  /// From 2.19.0: works reliably even without [driving] configured - trip
+  /// recognition runs internally for accuracy, but no trip data is sent.
   automaticImpactDetection,
 
   /// Cycling trip detection. Activates at lower speeds.
