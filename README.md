@@ -56,6 +56,9 @@ To customize the MOVE SDK init options, add the following key to your app's `Inf
 ```
 <key>MoveSDKBaseURL</key>
 <string>https://my-region.movesdk.com</string>
+
+<key>MoveSdkMaxQueueSizeMB</key>
+<integer>100</integer>
 ```
 
 When present, `MoveSDKBaseURL` is passed as the `baseURL` of `MoveInitOptions` during initialization. Omit the key to use the SDK default.
