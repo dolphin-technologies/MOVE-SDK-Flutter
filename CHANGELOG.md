@@ -1,3 +1,6 @@
+## 2.19.0
+- Added optional `maxQueueSizeMB` init parameter. Limits the local offline queue size in MB; the native SDK enforces its own minimum. 0/unset = unlimited (default).
+
 ## 2.18.2
 - Fix ios Podspec.
 

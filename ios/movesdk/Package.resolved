@@ -5,8 +5,8 @@
       "kind" : "remoteSourceControl",
       "location" : "https://github.com/dolphin-technologies/MOVE-iOS-Packages",
       "state" : {
-        "revision" : "18ccc1f25bb0933186bcfaedd6acf628f1348cd1",
-        "version" : "2.18.0"
+        "revision" : "1d373cce938931e141badaf60422cae5d52aa5c4",
+        "version" : "2.19.0"
       }
     }
   ],

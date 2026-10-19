@@ -53,10 +53,6 @@ class MoveSdk {
     return MovesdkPlatform.instance.getMoveVersion();
   }
 
-  Future<void> init() {
-    return MovesdkPlatform.instance.init();
-  }
-
   /// The SDK will setup and authenticate a user.
   /// [moveAuth] contains authentication data and tokens prepared by the app backend.
   /// [moveConfig] indicates the configuration of the services which will be running.
@@ -132,10 +128,14 @@ class MoveSdk {
   /// With [force] = true shudown will always succseed.
   /// The [timeoutSeconds] parameter (in seconds) bounds how long the SDK tries to
   /// send pending data before shutting down. Use with [force] = `false`.
-  Future<MoveShutdownResult> shutdown(
-      {bool force = true, int? timeoutSeconds}) {
-    return MovesdkPlatform.instance
-        .shutdown(force: force, timeoutSeconds: timeoutSeconds);
+  Future<MoveShutdownResult> shutdown({
+    bool force = true,
+    int? timeoutSeconds,
+  }) {
+    return MovesdkPlatform.instance.shutdown(
+      force: force,
+      timeoutSeconds: timeoutSeconds,
+    );
   }
 
   /// Deletes all the collected user SDK data stored on the device.
